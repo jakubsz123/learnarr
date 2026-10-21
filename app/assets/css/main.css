@@ -378,3 +378,10 @@ p {
 .table tr:last-child td {
   border-bottom: 0;
 }
+
+.stack-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 500;
+}
