@@ -1,18 +1,5 @@
 <template>
   <div class="page">
-    <div v-if="recent.length" class="section">
-      <h2 class="section-title">Continue</h2>
-      <div class="strip">
-        <NuxtLink v-for="r in recent" :key="r.subtitleId" :to="`/media/${r.serverItemId}`" class="recent">
-          <PosterImage :id="r.serverItemId" :alt="r.title" :width="160" />
-          <span class="recent-title">{{ r.showTitle ?? r.title }}</span>
-          <span class="hint"
-            >{{ episodeLabel(r) }} · {{ r.cards }} {{ r.cards === 1 ? "card" : "cards" }}</span
-          >
-        </NuxtLink>
-      </div>
-    </div>
-
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
     <template v-else-if="libraries.length">
@@ -82,17 +69,6 @@ interface Item {
   year?: number;
   hasPoster: boolean;
 }
-interface Recent {
-  subtitleId: number;
-  serverItemId: string;
-  kind: "movie" | "episode";
-  title: string;
-  showTitle: string | null;
-  seasonNumber: number | null;
-  episodeNumber: number | null;
-  cards: number;
-}
-
 const PAGE = 60;
 const { me } = useMe();
 const route = useRoute();
@@ -105,12 +81,6 @@ const items = ref<Item[]>([]);
 const total = ref(0);
 const loading = ref(true);
 const error = ref("");
-const recent = ref<Recent[]>([]);
-
-function episodeLabel(r: Recent) {
-  if (r.kind === "movie") return r.title;
-  return `S${r.seasonNumber ?? "?"} E${r.episodeNumber ?? "?"}`;
-}
 
 async function loadItems(reset: boolean) {
   if (!libraryId.value) return;
@@ -141,9 +111,6 @@ watch(search, () => {
 });
 
 onMounted(async () => {
-  $fetch<{ items: Recent[] }>("/api/recent")
-    .then((r) => (recent.value = r.items))
-    .catch(() => {});
   try {
     const data = await $fetch<{ libraries: Library[] }>("/api/library");
     libraries.value = data.libraries;
@@ -215,8 +182,7 @@ onMounted(async () => {
   }
 }
 
-.tile,
-.recent {
+.tile {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -224,21 +190,11 @@ onMounted(async () => {
   min-width: 0;
 }
 
-.tile-title,
-.recent-title {
+.tile-title {
   font-size: 14px;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.strip {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 120px;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 4px;
 }
 </style>

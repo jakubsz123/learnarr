@@ -11,6 +11,7 @@ import { languageName } from "#shared/languages";
 import { frequencyRanks } from "./frequency";
 import type { Lemmas, ModelStatus } from "./lemmas";
 import { UDPIPE_BIN } from "./lemmas/models";
+import { VERSION } from "#shared/version";
 
 export type CheckState = "ok" | "warning" | "error";
 
@@ -129,7 +130,7 @@ export async function systemStatus(
     checks: [media, ai, opensubtitles, engineCheck(lemmas)],
     languages: await languages(db, lemmas),
     about: {
-      version: process.env.npm_package_version ?? "0.1.0",
+      version: VERSION,
       node: process.version,
       platform: `${process.platform}/${process.arch}`,
       dataDir: DATA_DIR,

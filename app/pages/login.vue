@@ -41,7 +41,7 @@ async function signIn() {
   const redirect =
     typeof route.query.redirect === "string" && route.query.redirect.startsWith("/")
       ? route.query.redirect
-      : "/library";
+      : "/";
   await navigateTo(redirect);
 }
 </script>

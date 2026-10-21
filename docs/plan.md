@@ -15,7 +15,7 @@ Ships as one Docker image with a `/config` volume and runs with no environment v
 
 - Lemmatisation with UDPipe and a "% you know" score per episode. Models download on demand.
 - Frequency lists.
-- Polish translation.
+- A Today page, show and episode browsing, a transcript you can tap words in, and undo in study.
 
 ## Later, maybe
 

@@ -20,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const { me } = useMe();
   if (!me.value) me.value = await requestFetch<Me>("/api/me").catch(() => null);
 
-  if (to.path === "/login") return me.value ? navigateTo("/library") : undefined;
+  if (to.path === "/login") return me.value ? navigateTo("/") : undefined;
   if (!me.value) return navigateTo({ path: "/login", query: { redirect: to.fullPath } });
-  if ((to.path === "/setup" || to.meta.admin) && !me.value.isAdmin) return navigateTo("/library");
+  if ((to.path === "/setup" || to.meta.admin) && !me.value.isAdmin) return navigateTo("/");
 });

@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 const ICONS: Record<string, string[]> = {
+  home: ["M4 11 12 4l8 7", "M6 10v10h12V10", "M10 20v-6h4v6"],
   library: ["M3 4h7v7H3z", "M14 4h7v7h-7z", "M3 15h7v6H3z", "M14 15h7v6h-7z"],
   study: ["M13 2 4 14h7l-1 8 9-12h-7z"],
   cards: ["M4 7h13v13H4z", "M8 3h12v12"],
@@ -41,6 +42,8 @@ const ICONS: Record<string, string[]> = {
   play: ["M7 4l13 8-13 8z"],
   refresh: ["M20 11a8 8 0 1 0-2.3 5.7", "M20 4v7h-7"],
   plus: ["M12 5v14M5 12h14"],
+  undo: ["M9 14 4 9l5-5", "M4 9h11a5 5 0 0 1 0 10h-3"],
+  edit: ["M4 20h4L19 9l-4-4L4 16z", "M13 7l4 4"],
   anki: ["M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"],
   film: ["M4 4h16v16H4z", "M8 4v16M16 4v16M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4"],
 };

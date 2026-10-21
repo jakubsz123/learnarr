@@ -182,6 +182,8 @@ export const reviews = sqliteTable(
     /** The card was new when reviewed; counts against the daily new-card limit. */
     wasNew: integer("was_new", { mode: "boolean" }).notNull().default(false),
     intervalDays: real("interval_days").notNull(),
+    /** The card's schedule before this review, so the review can be undone. */
+    previous: text("previous", { mode: "json" }).$type<CardSchedule>(),
     reviewedAt: integer("reviewed_at", { mode: "timestamp_ms" }).notNull(),
   },
   (t) => [index("reviews_user_time_idx").on(t.userId, t.reviewedAt)],
@@ -237,6 +239,11 @@ export const subtitleLemmas = sqliteTable("subtitle_lemmas", {
 });
 
 export type LemmaToken = [cue: number, start: number, end: number, lemma: string | null, upos: string];
+
+export type CardSchedule = Pick<
+  typeof cards.$inferSelect,
+  "state" | "step" | "intervalDays" | "ease" | "reps" | "lapses"
+> & { due: number };
 
 /** Background work (picking words) the browser polls for. */
 export const jobs = sqliteTable(

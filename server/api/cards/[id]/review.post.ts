@@ -29,6 +29,15 @@ export default defineEventHandler(async (event) => {
         rating,
         intervalDays: next.intervalDays,
         wasNew: card.state === "new",
+        previous: {
+          state: card.state,
+          step: card.step,
+          due: card.due.getTime(),
+          intervalDays: card.intervalDays,
+          ease: card.ease,
+          reps: card.reps,
+          lapses: card.lapses,
+        },
         reviewedAt: new Date(now),
       })
       .run();

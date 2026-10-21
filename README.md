@@ -7,7 +7,7 @@ Learnarr reads its subtitles, asks the AI provider you choose for the words wort
 turns them into flashcards built around the real lines you heard. Study in the app or send the
 cards to Anki.
 
-> **Status:** v0.1, early. The core loop works; expect rough edges.
+> **Status:** v0.2, early. Expect rough edges.
 
 ## Run it
 
@@ -21,12 +21,19 @@ Jellyfin and your AI provider, and asks which language you're learning. Everythi
 in `./config`; back that folder up. No environment variables are needed. If you put Learnarr behind
 an HTTPS reverse proxy, set `PUBLIC_URL` to its address.
 
+To run from a checkout instead: `npm install`, `scripts/fetch-udpipe.sh` (optional, for "% you know"),
+then `npm run dev`.
+
 ## How it works
 
 - **Subtitles** come from your media server first, and from OpenSubtitles.com with your own free
   account when the server has none.
 - **Words** are picked by your AI provider: anything OpenAI-compatible (OpenAI, Ollama, LM Studio,
   OpenRouter, Groq, Mistral, Gemini) or Anthropic. Subtitle text goes only to the provider you set up.
+- **"% you know"** for each episode: Learnarr finds every word's dictionary form with
+  [UDPipe](https://github.com/ufal/udpipe) and counts how much of the dialogue you already know. Tick
+  the words you know, or tap any word in the transcript to make a card. The language model downloads
+  the first time someone learns that language. See [docs/languages.md](docs/languages.md).
 - **Everything stays on your server.** One container, one `/config` folder, no account with us.
 
 ## License

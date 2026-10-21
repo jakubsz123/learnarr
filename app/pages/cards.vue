@@ -32,36 +32,35 @@
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
     <ul v-if="cards.length" class="list">
-      <li v-for="card in cards" :key="card.id" class="item" :class="{ suspended: card.suspended }">
-        <div class="item-main">
-          <span class="term">{{ card.term }}</span>
-          <span class="muted"> · {{ card.translation }}</span>
-          <Sentence :text="card.sentence" :highlight="card.form" class="hint sentence" />
-          <span class="hint">
-            {{ stateLabel(card) }}<template v-if="card.source"> · {{ sourceLabel(card.source) }}</template>
-            <template v-if="card.ankiNoteId"> · in Anki</template>
-          </span>
-        </div>
-        <div class="item-actions">
-          <button
-            type="button"
-            class="icon-btn"
-            :aria-label="card.suspended ? `Resume ${card.term}` : `Suspend ${card.term}`"
-            :title="card.suspended ? 'Resume' : 'Suspend'"
-            @click="toggleSuspend(card)"
-          >
-            <AppIcon :name="card.suspended ? 'play' : 'pause'" :size="18" />
-          </button>
-          <button
-            type="button"
-            class="icon-btn danger"
-            :aria-label="`Delete ${card.term}`"
-            title="Delete"
-            @click="remove(card)"
-          >
-            <AppIcon name="trash" :size="18" />
-          </button>
-        </div>
+      <li v-for="card in cards" :key="card.id">
+        <CardItem :card="card" @updated="(c) => Object.assign(card, c)">
+          <div class="item-foot">
+            <span class="hint">
+              <template v-if="card.source">{{ sourceLabel(card.source) }}</template>
+              <template v-if="card.ankiNoteId"> · in Anki</template>
+            </span>
+            <span class="item-actions">
+              <button
+                type="button"
+                class="icon-btn"
+                :aria-label="card.suspended ? `Resume ${card.term}` : `Suspend ${card.term}`"
+                :title="card.suspended ? 'Resume' : 'Suspend'"
+                @click="toggleSuspend(card)"
+              >
+                <AppIcon :name="card.suspended ? 'play' : 'pause'" :size="18" />
+              </button>
+              <button
+                type="button"
+                class="icon-btn danger"
+                :aria-label="`Delete ${card.term}`"
+                title="Delete"
+                @click="remove(card)"
+              >
+                <AppIcon name="trash" :size="18" />
+              </button>
+            </span>
+          </div>
+        </CardItem>
       </li>
     </ul>
     <p v-else-if="!loading" class="muted">
@@ -76,18 +75,11 @@
 
 <script setup lang="ts">
 import type { AnkiCard } from "~/composables/useAnki";
+import type { Card as ApiCard } from "~/utils/api";
 
 useHead({ title: "Cards · Learnarr" });
 
-interface Card {
-  id: number;
-  term: string;
-  form: string;
-  translation: string;
-  sentence: string;
-  state: "new" | "learning" | "review";
-  due: string;
-  suspended: boolean;
+type Card = ApiCard & {
   ankiNoteId: number | null;
   source: {
     title: string;
@@ -95,7 +87,7 @@ interface Card {
     seasonNumber: number | null;
     episodeNumber: number | null;
   } | null;
-}
+};
 
 const FILTERS = [
   { value: "all", label: "All" },
@@ -116,18 +108,8 @@ const sending = ref(false);
 const ankiMessage = ref("");
 const ankiOk = ref(false);
 
-function stateLabel(card: Card) {
-  if (card.suspended) return "Suspended";
-  if (card.state === "new") return "New";
-  const due = new Date(card.due);
-  if (due.getTime() <= Date.now()) return "Due now";
-  return `Next ${due.toLocaleDateString(undefined, { day: "numeric", month: "short" })}`;
-}
-
 function sourceLabel(source: NonNullable<Card["source"]>) {
-  if (source.showTitle)
-    return `${source.showTitle} S${source.seasonNumber ?? "?"}E${source.episodeNumber ?? "?"}`;
-  return source.title;
+  return source.showTitle ? `${source.showTitle} · ${episodeLabel(source)}` : source.title;
 }
 
 async function load() {
@@ -240,36 +222,20 @@ onMounted(load);
   background: var(--surface);
 }
 
-.item {
+.list > li + li {
+  border-top: 1px solid var(--border);
+}
+
+.item-foot {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 10px 8px 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.item:last-child {
-  border-bottom: 0;
-}
-
-.item.suspended .item-main {
-  opacity: 0.6;
-}
-
-.item-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.term {
-  font-weight: 500;
+  margin: -4px -8px -8px 0;
 }
 
 .item-actions {
   display: flex;
-  align-items: flex-start;
 }
 
 .icon-btn {

@@ -132,11 +132,16 @@ export async function downloadModel(
   fs.mkdirSync(dir, { recursive: true });
   const target = path.join(dir, entry.file);
   const partial = `${target}.part`;
+  const name = languageName(entry.language);
   const res = await fetchFn(`${LINDAT}/${entry.uuid}/content`, {
     signal: AbortSignal.timeout(20 * 60 * 1000),
+  }).catch((error: Error) => {
+    const cause = (error.cause as Error | undefined)?.message ?? error.message;
+    throw new ModelError(`Couldn't reach lindat.mff.cuni.cz to download the ${name} model (${cause}).`);
   });
-  if (!res.ok || !res.body)
-    throw new ModelError(`LINDAT answered ${res.status} for the ${entry.language} model.`);
+  if (!res.ok || !res.body) {
+    throw new ModelError(`lindat.mff.cuni.cz answered ${res.status} for the ${name} model.`);
+  }
 
   const total = Number(res.headers.get("content-length")) || entry.bytes || null;
   const hash = crypto.createHash("sha256");
@@ -153,9 +158,7 @@ export async function downloadModel(
     await pipeline(Readable.fromWeb(res.body as never), count, fs.createWriteStream(partial));
     const sha256 = hash.digest("hex");
     if (sha256 !== entry.sha256) {
-      throw new ModelError(
-        `The ${entry.language} model from LINDAT doesn't match its checksum, so it wasn't used.`,
-      );
+      throw new ModelError(`The ${name} model from LINDAT doesn't match its checksum, so it wasn't used.`);
     }
     fs.renameSync(partial, target);
     return target;

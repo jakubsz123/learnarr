@@ -25,6 +25,31 @@
     </section>
     <p v-else-if="loading" class="muted">Checking the media server and AI provider…</p>
 
+    <section v-if="status?.languages.length" class="section">
+      <h2 class="section-title">Languages</h2>
+      <ul class="checks">
+        <li v-for="lang in status.languages" :key="lang.code" class="check">
+          <span class="dot" :class="modelDot(lang.model)" aria-hidden="true" />
+          <span class="stack" style="gap: 2px; flex: 1; min-width: 0">
+            <strong>{{ lang.name }}</strong>
+            <span class="hint">
+              {{ lang.learners }} {{ lang.learners === 1 ? "learner" : "learners" }} ·
+              {{ modelText(lang.model) }} ·
+              {{ lang.frequencyList ? "word list included" : "no word list" }}
+            </span>
+          </span>
+          <button
+            v-if="lang.model.state === 'missing' || lang.model.state === 'failed'"
+            type="button"
+            class="btn"
+            @click="download(lang.code)"
+          >
+            {{ lang.model.state === "failed" ? "Try again" : "Download" }}
+          </button>
+        </li>
+      </ul>
+    </section>
+
     <section v-if="status" class="section">
       <h2 class="section-title">About</h2>
       <dl class="about">
@@ -46,6 +71,15 @@
         <dd>{{ status.about.users }} · {{ status.about.cards }}</dd>
         <dt>Uptime</dt>
         <dd>{{ uptime }}</dd>
+        <dt>Language data</dt>
+        <dd>
+          Word lists from
+          <a href="https://github.com/hermitdave/FrequencyWords" rel="noopener">FrequencyWords</a>
+          (CC BY-SA 4.0). Lemmas by <a href="https://github.com/ufal/udpipe" rel="noopener">UDPipe</a> with
+          the
+          <a href="http://hdl.handle.net/11234/1-3131" rel="noopener">Universal Dependencies 2.5 models</a>
+          (CC BY-NC-SA 4.0).
+        </dd>
       </dl>
     </section>
   </div>
@@ -55,7 +89,13 @@
 definePageMeta({ admin: true });
 useHead({ title: "Status · System · Learnarr" });
 
+type ModelStatus =
+  | { state: "installed" | "missing" | "unsupported" }
+  | { state: "downloading"; percent: number | null }
+  | { state: "failed"; message: string };
+
 interface Status {
+  languages: { code: string; name: string; learners: number; model: ModelStatus; frequencyList: boolean }[];
   checks: { name: string; state: "ok" | "warning" | "error"; detail: string; fix?: string }[];
   about: {
     version: string;
@@ -80,6 +120,35 @@ const uptime = computed(() => {
   const minutes = Math.floor((s % 3600) / 60);
   return days ? `${days} d ${hours} h` : hours ? `${hours} h ${minutes} min` : `${minutes} min`;
 });
+
+function modelDot(model: ModelStatus) {
+  return model.state === "installed" ? "ok" : model.state === "failed" ? "error" : "warning";
+}
+
+function modelText(model: ModelStatus) {
+  switch (model.state) {
+    case "installed":
+      return "model installed";
+    case "downloading":
+      return `downloading the model${model.percent !== null ? ` (${model.percent}%)` : ""}`;
+    case "failed":
+      return model.message;
+    case "missing":
+      return "model downloads when first needed";
+    case "unsupported":
+      return "no model yet, so no “% you know”";
+  }
+  return "";
+}
+
+async function download(code: string) {
+  try {
+    await $fetch(`/api/system/languages/${code}/model`, { method: "POST" });
+    await load();
+  } catch (e) {
+    error.value = errorMessage(e);
+  }
+}
 
 async function load() {
   loading.value = true;

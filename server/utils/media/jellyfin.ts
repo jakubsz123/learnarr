@@ -2,6 +2,7 @@ import { toLanguageCode } from "#shared/languages";
 import { parseSubtitle } from "#shared/subtitles";
 import { mediaFetch, mediaJson, mediaText } from "./http";
 import type { Library, MediaDetail, MediaServer, MediaSummary, SubtitleTrack } from "./types";
+import { VERSION } from "#shared/version";
 
 // Jellyfin's JSON is untyped; the mappers below are where it becomes ours.
 type JellyfinItem = Record<string, any>;
@@ -54,7 +55,7 @@ export function mapJellyfinDetail(raw: JellyfinItem): MediaDetail & { mediaSourc
 export function createJellyfin(url: string, apiKey: string, fetchImpl: typeof fetch = fetch): MediaServer {
   const base = url.replace(/\/+$/, "");
   const headers = {
-    Authorization: `MediaBrowser Client="Learnarr", Device="Learnarr", DeviceId="learnarr", Version="0.1.0", Token="${apiKey}"`,
+    Authorization: `MediaBrowser Client="Learnarr", Device="Learnarr", DeviceId="learnarr", Version="${VERSION}", Token="${apiKey}"`,
   };
   const get = <T>(path: string, query: Record<string, string | number | boolean> = {}) => {
     const qs = new URLSearchParams(Object.entries(query).map(([k, v]) => [k, String(v)]));

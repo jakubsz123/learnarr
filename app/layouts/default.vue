@@ -1,7 +1,7 @@
 <template>
   <div class="shell">
     <header class="topbar">
-      <NuxtLink to="/library" class="topbar-brand" aria-label="Learnarr home">
+      <NuxtLink to="/" class="topbar-brand" aria-label="Learnarr home">
         <BrandMark />
       </NuxtLink>
       <div class="topbar-actions">
@@ -107,6 +107,7 @@ const nav = computed<NavItem[]>(() => {
       : []),
   ];
   return [
+    { label: "Today", icon: "home", to: "/", active: route.path === "/" },
     { label: "Library", icon: "library", to: "/library", active: under("/library") || under("/media") },
     { label: "Study", icon: "study", to: "/study", active: under("/study"), badge: dueCount.value || null },
     { label: "Cards", icon: "cards", to: "/cards", active: under("/cards") },
@@ -132,7 +133,7 @@ const nav = computed<NavItem[]>(() => {
 });
 
 const tabs = computed(() => [
-  ...nav.value.slice(0, 3),
+  ...nav.value.slice(0, 4),
   { label: "Settings", icon: "settings", to: "/settings", active: under("/settings") || under("/system") },
 ]);
 
@@ -211,7 +212,8 @@ async function signOut() {
   bottom: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--chrome);
