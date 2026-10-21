@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
-import type { H3Event } from "h3";
+import { createError, type H3Event } from "h3";
 import { eq } from "drizzle-orm";
 import { useDb, schema, type Db } from "../db";
 import { getOrCreateKey } from "./secrets";

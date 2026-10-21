@@ -96,7 +96,7 @@ function parseAss(content: string): Cue[] {
     if (!text || !start || !end) continue;
     cues.push({ index: 0, startMs: timeToMs(start), endMs: timeToMs(end), text });
   }
-  return cues.sort((a, b) => a.startMs - b.startMs).map((cue, index) => ({ ...cue, index }));
+  return cues.toSorted((a, b) => a.startMs - b.startMs).map((cue, index) => ({ ...cue, index }));
 }
 
 /** Parse SRT, WebVTT or ASS/SSA into cues in time order. An unreadable file gives []. */
@@ -106,8 +106,9 @@ export function parseSubtitle(raw: string): Cue[] {
   return parseTimedBlocks(content);
 }
 
+const pad = (n: number, width = 2) => String(n).padStart(width, "0");
+
 function msToSrtTime(ms: number): string {
-  const pad = (n: number, width = 2) => String(n).padStart(width, "0");
   const h = Math.floor(ms / 3_600_000);
   const m = Math.floor((ms % 3_600_000) / 60_000);
   const s = Math.floor((ms % 60_000) / 1000);
