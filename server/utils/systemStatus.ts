@@ -7,6 +7,10 @@ import { listModels } from "./ai/client";
 import { resolveAiConfig } from "./ai/config";
 import { createMediaServer } from "./media";
 import type { Settings } from "./settings";
+import { languageName } from "#shared/languages";
+import { frequencyRanks } from "./frequency";
+import type { Lemmas, ModelStatus } from "./lemmas";
+import { UDPIPE_BIN } from "./lemmas/models";
 
 export type CheckState = "ok" | "warning" | "error";
 
@@ -59,7 +63,47 @@ async function aiCheck(settings: Settings): Promise<Check> {
   }
 }
 
-export async function systemStatus(db: Db, settings: Settings) {
+export interface LanguageRow {
+  code: string;
+  name: string;
+  learners: number;
+  model: ModelStatus;
+  frequencyList: boolean;
+}
+
+/** The languages people here are learning, and whether their lemmatiser model and word list are in place. */
+async function languages(db: Db, lemmas: Pick<Lemmas, "modelStatus">): Promise<LanguageRow[]> {
+  const rows = db
+    .select({ code: schema.user.learningLanguage, learners: count() })
+    .from(schema.user)
+    .groupBy(schema.user.learningLanguage)
+    .all();
+  return Promise.all(
+    rows.map(async (row) => ({
+      code: row.code,
+      name: languageName(row.code),
+      learners: row.learners,
+      model: lemmas.modelStatus(row.code),
+      frequencyList: (await frequencyRanks(row.code)) !== null,
+    })),
+  );
+}
+
+function engineCheck(lemmas: Pick<Lemmas, "hasEngine">): Check {
+  return lemmas.hasEngine()
+    ? { name: "Lemmatiser · UDPipe", state: "ok", detail: `Installed at ${UDPIPE_BIN}` }
+    : {
+        name: "Lemmatiser · UDPipe",
+        state: "warning",
+        detail: `Not installed (looked for ${UDPIPE_BIN}), so there's no "% you know". The Docker image has it; outside Docker run scripts/fetch-udpipe.sh.`,
+      };
+}
+
+export async function systemStatus(
+  db: Db,
+  settings: Settings,
+  lemmas: Pick<Lemmas, "hasEngine" | "modelStatus">,
+) {
   const [media, ai] = await Promise.all([mediaCheck(settings), aiCheck(settings)]);
   const withoutOs =
     db.select({ n: count() }).from(schema.user).where(isNull(schema.user.opensubtitlesPassword)).get()?.n ??
@@ -82,7 +126,8 @@ export async function systemStatus(db: Db, settings: Settings) {
   }
 
   return {
-    checks: [media, ai, opensubtitles],
+    checks: [media, ai, opensubtitles, engineCheck(lemmas)],
+    languages: await languages(db, lemmas),
     about: {
       version: process.env.npm_package_version ?? "0.1.0",
       node: process.version,

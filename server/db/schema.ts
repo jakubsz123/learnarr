@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const timestamps = {
   createdAt: integer("created_at", { mode: "timestamp_ms" })
@@ -186,6 +186,57 @@ export const reviews = sqliteTable(
   },
   (t) => [index("reviews_user_time_idx").on(t.userId, t.reviewedAt)],
 );
+
+/**
+ * Words a user knows in a language: ones they marked, and the common words
+ * seeded for their level (see server/utils/knownWords.ts). Stored lowercased.
+ */
+export const knownWords = sqliteTable(
+  "known_words",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    language: text("language").notNull(),
+    word: text("word").notNull(),
+    source: text("source", { enum: ["seed", "marked"] }).notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [uniqueIndex("known_words_user_lang_word_idx").on(t.userId, t.language, t.word)],
+);
+
+/** Which level a user's seeded known words were taken for, per language. */
+export const wordSeeds = sqliteTable(
+  "word_seeds",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    language: text("language").notNull(),
+    level: text("level").notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.language] })],
+);
+
+/**
+ * A subtitle split into words with their dictionary forms (UDPipe). No row yet
+ * means not done: waiting, working, or a language without a model.
+ */
+export const subtitleLemmas = sqliteTable("subtitle_lemmas", {
+  subtitleId: integer("subtitle_id")
+    .primaryKey()
+    .references(() => subtitles.id, { onDelete: "cascade" }),
+  state: text("state", { enum: ["done", "failed"] }).notNull(),
+  /** `[cueIndex, start, end, lemma, upos][]`, offsets into the cue's text. */
+  tokens: text("tokens", { mode: "json" }).$type<LemmaToken[]>(),
+  model: text("model"),
+  message: text("message"),
+  createdAt: timestamps.createdAt,
+});
+
+export type LemmaToken = [cue: number, start: number, end: number, lemma: string | null, upos: string];
 
 /** Background work (picking words) the browser polls for. */
 export const jobs = sqliteTable(

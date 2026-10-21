@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { complete, listModels, type AiConfig } from "../server/utils/ai/client";
 import { buildPrompt, extractJson, parseAnswer, sampleCues } from "../server/utils/ai/pickWords";
+import { buildWordPrompt, explainWord } from "../server/utils/ai/explainWord";
 import type { Cue } from "../shared/subtitles";
 
 function fakeFetch(body: unknown, status = 200) {
@@ -151,5 +152,30 @@ describe("picking words", () => {
     });
     expect(parseAnswer(answer, { cues, known: [], count: 1 }).map((w) => w.translation)).toEqual(["a"]);
     expect(parseAnswer(answer, { cues, known: [], count: 5 }).map((w) => w.translation)).toEqual(["a", "c"]);
+  });
+});
+
+describe("explaining a tapped word", () => {
+  const req = {
+    language: "es",
+    nativeLanguage: "en",
+    form: "vengo",
+    lemma: "venir",
+    line: "Vengo del mercado.",
+  };
+
+  it("sends the line and the tagger's lemma", async () => {
+    const answer = '{"term": "venir", "translation": "to come", "partOfSpeech": "verb", "note": ""}';
+    const fake = fakeFetch({ choices: [{ message: { content: answer } }] });
+    const word = await explainWord(openai, req, fake.fn);
+    expect(word).toEqual({ term: "venir", translation: "to come", partOfSpeech: "verb", note: null });
+    const prompt = buildWordPrompt(req).user;
+    expect(prompt).toContain("Line: Vengo del mercado.");
+    expect(prompt).toContain("venir");
+  });
+
+  it("rejects an answer without a translation", async () => {
+    const fake = fakeFetch({ choices: [{ message: { content: '{"term": "venir"}' } }] });
+    await expect(explainWord(openai, req, fake.fn)).rejects.toThrow(/expected shape/);
   });
 });

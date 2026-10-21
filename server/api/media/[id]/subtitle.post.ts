@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { useDb } from "~~/server/db";
+import { useLemmas } from "~~/server/utils/lemmas";
 import { useMediaServer } from "~~/server/utils/media";
 import { MediaServerError } from "~~/server/utils/media/types";
 
@@ -11,6 +12,7 @@ export default defineEventHandler(async (event) => {
   const { id } = validParams(event, params);
   try {
     const subtitle = await getSubtitle({ db: useDb(), server: useMediaServer(), user, serverItemId: id });
+    useLemmas().queue(subtitle.id);
     return { id: subtitle.id, source: subtitle.source, cueCount: subtitle.cueCount };
   } catch (error) {
     if (error instanceof MediaServerError)

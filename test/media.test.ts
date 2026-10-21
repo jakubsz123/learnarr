@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { mapPlexDetail, mapPlexSummary } from "../server/utils/media/plex";
 import { mapJellyfinDetail, mapJellyfinSummary } from "../server/utils/media/jellyfin";
 import { candidateTracks } from "../server/utils/media/tracks";
-import type { SubtitleTrack } from "../server/utils/media/types";
+import {
+  nextEpisode,
+  type MediaDetail,
+  type MediaServer,
+  type MediaSummary,
+  type SubtitleTrack,
+} from "../server/utils/media/types";
 
 describe("Plex mapping", () => {
   it("maps an episode with its subtitle tracks and ids", () => {
@@ -164,5 +170,39 @@ describe("candidateTracks", () => {
       track({ id: "english", language: "en" }),
     ];
     expect(candidateTracks(tracks, "es").map((t) => t.id)).toEqual(["external", "sdh", "embedded"]);
+  });
+});
+
+const ep = (id: string, season: number, episode: number): MediaSummary => ({
+  id,
+  type: "episode",
+  title: id,
+  seasonNumber: season,
+  episodeNumber: episode,
+  hasPoster: false,
+});
+
+const episodeDetail = (e: MediaSummary, seasonId: string): MediaDetail => ({
+  ...e,
+  showId: "show",
+  seasonId,
+  subtitleTracks: [],
+});
+
+describe("next episode", () => {
+  const tree: Record<string, MediaSummary[]> = {
+    show: [
+      { id: "s1", type: "season", title: "Season 1", seasonNumber: 1, hasPoster: false },
+      { id: "s2", type: "season", title: "Season 2", seasonNumber: 2, hasPoster: false },
+    ],
+    s1: [ep("e1", 1, 1), ep("e2", 1, 2)],
+    s2: [ep("e3", 2, 1)],
+  };
+  const server = { children: async (id: string) => tree[id] ?? [] } as unknown as MediaServer;
+
+  it("is the next one in the season, then the first of the next season, then none", async () => {
+    expect((await nextEpisode(server, episodeDetail(ep("e1", 1, 1), "s1")))?.id).toBe("e2");
+    expect((await nextEpisode(server, episodeDetail(ep("e2", 1, 2), "s1")))?.id).toBe("e3");
+    expect(await nextEpisode(server, episodeDetail(ep("e3", 2, 1), "s2"))).toBeNull();
   });
 });

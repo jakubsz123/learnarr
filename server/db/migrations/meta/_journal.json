@@ -8,6 +8,13 @@
       "when": 1792573433074,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792576004155,
+      "tag": "0001_words_and_lemmas",
+      "breakpoints": true
     }
   ]
 }

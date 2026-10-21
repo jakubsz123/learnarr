@@ -1,18 +1,16 @@
 import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { parseSubtitle } from "#shared/subtitles";
 import { schema, useDb } from "~~/server/db";
+import { useLemmas } from "~~/server/utils/lemmas";
 
 const params = z.object({ id: z.coerce.number().int().positive() });
 
+/** A subtitle with its lines, its words and how well the learner knows them, and its cards. */
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { id } = validParams(event, params);
   const db = useDb();
-  const subtitle = db.select().from(schema.subtitles).where(eq(schema.subtitles.id, id)).get();
-  if (!subtitle || subtitle.userId !== user.id) {
-    throw createError({ statusCode: 404, statusMessage: "That subtitle isn't in your library." });
-  }
+  const subtitle = ownSubtitle(db, user.id, id);
   const mediaItem = db
     .select()
     .from(schema.mediaItems)
@@ -22,8 +20,17 @@ export default defineEventHandler(async (event) => {
     .select()
     .from(schema.cards)
     .where(eq(schema.cards.subtitleId, id))
-    .orderBy(asc(schema.cards.sentenceStartMs))
+    .orderBy(asc(schema.cards.sentenceStartMs), asc(schema.cards.id))
     .all();
-  const { content, ...meta } = subtitle;
-  return { subtitle: meta, mediaItem, cues: parseSubtitle(content), cards };
+  const { cues, transcript, coverage } = await subtitleTranscript(db, user, subtitle);
+  const { content: _content, ...meta } = subtitle;
+  return {
+    subtitle: meta,
+    mediaItem,
+    cues,
+    transcript,
+    coverage,
+    lemmas: useLemmas().status(subtitle),
+    cards,
+  };
 });

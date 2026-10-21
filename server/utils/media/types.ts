@@ -31,6 +31,8 @@ export interface SubtitleTrack {
 
 export interface MediaDetail extends MediaSummary {
   showId?: string;
+  /** For an episode, its season. */
+  seasonId?: string;
   imdbId?: string;
   /** For an episode, the show's IMDb id, which is what subtitle catalogues file episodes under. */
   showImdbId?: string;
@@ -65,4 +67,21 @@ export class MediaServerError extends Error {
     super(message);
     this.name = "MediaServerError";
   }
+}
+
+/** The episode after this one: next in its season, else the first of the next season. */
+export async function nextEpisode(server: MediaServer, item: MediaDetail): Promise<MediaSummary | null> {
+  if (item.type !== "episode" || !item.seasonId) return null;
+  const episodes = await server.children(item.seasonId);
+  const at = episodes.findIndex((e) => e.id === item.id);
+  if (at !== -1 && episodes[at + 1]) return episodes[at + 1]!;
+  if (!item.showId || item.seasonNumber === undefined) return null;
+  const later = (await server.children(item.showId))
+    .filter((s) => s.type === "season" && (s.seasonNumber ?? 0) > item.seasonNumber!)
+    .toSorted((a, b) => (a.seasonNumber ?? 0) - (b.seasonNumber ?? 0));
+  for (const season of later) {
+    const first = (await server.children(season.id))[0];
+    if (first) return first;
+  }
+  return null;
 }

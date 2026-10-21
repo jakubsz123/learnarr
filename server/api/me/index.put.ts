@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { LANGUAGE_CODES, LEVELS } from "#shared/languages";
 import { schema, useDb } from "~~/server/db";
+import { useLemmas } from "~~/server/utils/lemmas";
 
 const body = z.object({
   name: z.string().trim().min(1).max(100).optional(),
@@ -23,5 +24,7 @@ export default defineEventHandler(async (event) => {
     .set({ ...changes, updatedAt: new Date() })
     .where(eq(schema.user.id, user.id))
     .run();
+  // Fetch the new language's lemmatiser model now, so the first episode doesn't wait for it.
+  if (changes.learningLanguage) useLemmas().prepare(changes.learningLanguage);
   return { saved: true };
 });

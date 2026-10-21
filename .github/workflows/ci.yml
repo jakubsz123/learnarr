@@ -18,6 +18,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
+      - run: scripts/fetch-udpipe.sh
       - run: npm test
       - run: npm run build
 
@@ -38,12 +39,26 @@ jobs:
         run: |
           curl -fsS -X POST http://127.0.0.1:7979/api/auth/sign-up/email \
             -H "content-type: application/json" -H "origin: http://127.0.0.1:7979" \
-            -d '{"name":"Admin","email":"admin@example.com","password":"correct-horse-9"}'
+            -c cookies.txt -d '{"name":"Admin","email":"admin@example.com","password":"correct-horse-9"}'
           curl -fsS http://127.0.0.1:7979/api/setup/status | grep -q '"needsAccount":false'
           # Sign-up is closed once the admin exists.
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:7979/api/auth/sign-up/email \
             -H "content-type: application/json" -H "origin: http://127.0.0.1:7979" \
             -d '{"name":"X","email":"x@example.com","password":"correct-horse-9"}')" = "403"
           test -f config/auth.key
+      - name: Download a language model on demand and lemmatise with it
+        run: |
+          curl -fsS -X PUT http://127.0.0.1:7979/api/me -b cookies.txt \
+            -H "content-type: application/json" -H "origin: http://127.0.0.1:7979" -d '{"learningLanguage":"es"}'
+          for i in $(seq 1 60); do
+            curl -fsS -b cookies.txt http://127.0.0.1:7979/api/system/status > status.json
+            grep -q '"code":"es"[^}]*"model":{"state":"installed"' status.json && break
+            grep -q '"code":"es"[^}]*"model":{"state":"failed"' status.json && break
+            sleep 5
+          done
+          cat status.json
+          grep -q '"code":"es"[^}]*"model":{"state":"installed"' status.json
+          printf 'Los gatos comen.' | docker exec -i learnarr /opt/udpipe/udpipe --tokenize --tag \
+            /config/udpipe/models/spanish-ancora-ud-2.5-191206.udpipe | tee /dev/stderr | grep -q $'\tgato\t'
       - if: failure()
         run: docker logs learnarr

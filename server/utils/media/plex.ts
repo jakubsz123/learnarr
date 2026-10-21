@@ -26,6 +26,8 @@ function guid(raw: PlexMetadata, scheme: string): string | undefined {
   return match ? match.id.slice(scheme.length + 3) : undefined;
 }
 
+const key = (value: unknown) => (value === undefined || value === null ? undefined : String(value));
+
 export function mapPlexSummary(raw: PlexMetadata): MediaSummary {
   return {
     id: String(raw.ratingKey),
@@ -57,7 +59,8 @@ export function mapPlexDetail(raw: PlexMetadata): MediaDetail & { streamKeys: Re
   const subtitles = streams.filter((s) => s.streamType === SUBTITLE_STREAM);
   return {
     ...mapPlexSummary(raw),
-    showId: raw.grandparentRatingKey ? String(raw.grandparentRatingKey) : undefined,
+    showId: key(raw.grandparentRatingKey ?? (raw.type === "season" ? raw.parentRatingKey : undefined)),
+    seasonId: raw.type === "episode" ? key(raw.parentRatingKey) : undefined,
     imdbId: guid(raw, "imdb"),
     subtitleTracks: subtitles.map(mapPlexTrack),
     streamKeys: Object.fromEntries(subtitles.filter((s) => s.key).map((s) => [String(s.id), String(s.key)])),

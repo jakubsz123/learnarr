@@ -44,6 +44,7 @@ export function mapJellyfinDetail(raw: JellyfinItem): MediaDetail & { mediaSourc
   return {
     ...mapJellyfinSummary(raw),
     showId: raw.SeriesId,
+    seasonId: raw.Type === "Episode" ? raw.SeasonId : undefined,
     imdbId: raw.ProviderIds?.Imdb,
     subtitleTracks: streams.filter((s) => s.Type === "Subtitle").map(mapJellyfinTrack),
     mediaSourceId: raw.MediaSources?.[0]?.Id ?? raw.Id,
