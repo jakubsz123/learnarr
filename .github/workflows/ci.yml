@@ -59,6 +59,6 @@ jobs:
           cat status.json
           grep -q '"code":"es"[^}]*"model":{"state":"installed"' status.json
           printf 'Los gatos comen.' | docker exec -i learnarr /opt/udpipe/udpipe --tokenize --tag \
-            /config/udpipe/models/spanish-ancora-ud-2.5-191206.udpipe | tee /dev/stderr | grep -q $'\tgato\t'
+            /config/udpipe/models/spanish-ancora-ud-2.5-191206.udpipe | tee /dev/stderr | grep -q $'\tLos\tel\t'
       - if: failure()
         run: docker logs learnarr
