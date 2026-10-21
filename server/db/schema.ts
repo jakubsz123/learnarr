@@ -179,6 +179,8 @@ export const reviews = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     rating: integer("rating").notNull(),
+    /** The card was new when reviewed; counts against the daily new-card limit. */
+    wasNew: integer("was_new", { mode: "boolean" }).notNull().default(false),
     intervalDays: real("interval_days").notNull(),
     reviewedAt: integer("reviewed_at", { mode: "timestamp_ms" }).notNull(),
   },

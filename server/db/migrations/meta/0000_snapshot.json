@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "fa76943a-7be1-42fb-bffe-487df125d094",
+  "id": "a5ec0018-5ce6-4499-8c43-38074b718f2e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -608,6 +608,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "was_new": {
+          "name": "was_new",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "interval_days": {
           "name": "interval_days",

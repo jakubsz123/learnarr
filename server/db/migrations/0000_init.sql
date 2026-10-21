@@ -83,6 +83,7 @@ CREATE TABLE `reviews` (
 	`card_id` integer NOT NULL,
 	`user_id` text NOT NULL,
 	`rating` integer NOT NULL,
+	`was_new` integer DEFAULT false NOT NULL,
 	`interval_days` real NOT NULL,
 	`reviewed_at` integer NOT NULL,
 	FOREIGN KEY (`card_id`) REFERENCES `cards`(`id`) ON UPDATE no action ON DELETE cascade,
