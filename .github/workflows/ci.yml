@@ -34,5 +34,16 @@ jobs:
           curl -fsS http://127.0.0.1:7979/api/health
           curl -fsS http://127.0.0.1:7979/api/setup/status | tee /dev/stderr | grep -q '"needsAccount":true'
           test -f config/learnarr.db
+      - name: Create the first account, as the setup wizard does
+        run: |
+          curl -fsS -X POST http://127.0.0.1:7979/api/auth/sign-up/email \
+            -H "content-type: application/json" -H "origin: http://127.0.0.1:7979" \
+            -d '{"name":"Admin","email":"admin@example.com","password":"correct-horse-9"}'
+          curl -fsS http://127.0.0.1:7979/api/setup/status | grep -q '"needsAccount":false'
+          # Sign-up is closed once the admin exists.
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:7979/api/auth/sign-up/email \
+            -H "content-type: application/json" -H "origin: http://127.0.0.1:7979" \
+            -d '{"name":"X","email":"x@example.com","password":"correct-horse-9"}')" = "403"
+          test -f config/auth.key
       - if: failure()
         run: docker logs learnarr
