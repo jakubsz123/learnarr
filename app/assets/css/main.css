@@ -1,0 +1,380 @@
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/roboto-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Tokens ─────────────────────────────────────────────────────────────── */
+
+:root {
+  --font: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Chrome (top bar, sidebar) stays dark in both themes, as in Sonarr. */
+  --chrome: #0f1114;
+  --chrome-text: #e6e8ec;
+  --sidebar: #2b2f3a;
+  --sidebar-active: #20232b;
+  --sidebar-text: #d4d7de;
+
+  --accent: #ff7a5c;
+  --on-accent: #1a0e0a;
+
+  --radius: 6px;
+  --radius-lg: 12px;
+  --tap: 44px;
+  --topbar-h: 56px;
+  --tabbar-h: 60px;
+
+  /* Light content */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #eef0f3;
+  --border: #dcdfe4;
+  --input: #ffffff;
+  --text: #1b1d21;
+  --muted: #5b616b;
+  --accent-text: #b8432a;
+  --ok: #1d7a4b;
+  --warn: #9a5b00;
+  --danger: #b42318;
+  --shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171c;
+    --surface: #20242c;
+    --surface-2: #262a31;
+    --border: #323844;
+    --input: #101215;
+    --text: #e8eaed;
+    --muted: #a0a6b1;
+    --accent-text: #ff9277;
+    --ok: #4ade80;
+    --warn: #f5b83d;
+    --danger: #f87171;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #15171c;
+  --surface: #20242c;
+  --surface-2: #262a31;
+  --border: #323844;
+  --input: #101215;
+  --text: #e8eaed;
+  --muted: #a0a6b1;
+  --accent-text: #ff9277;
+  --ok: #4ade80;
+  --warn: #f5b83d;
+  --danger: #f87171;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ─── Page parts ─────────────────────────────────────────────────────────── */
+
+.page {
+  width: 100%;
+  max-width: 1100px;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 900px) {
+  .page {
+    padding: 24px 32px 48px;
+  }
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 300;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ok {
+  color: var(--ok);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.danger {
+  color: var(--danger);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  line-height: 1.45;
+}
+
+/* ─── Controls ───────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.btn-primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: transparent;
+  color: var(--danger);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.input,
+.select {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input);
+  color: var(--text);
+  font: inherit;
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+/* Label above on phones, label left from 700px, like *arr settings forms. */
+.field {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.field > label,
+.field > .field-label {
+  font-weight: 500;
+}
+
+@media (min-width: 700px) {
+  .field {
+    grid-template-columns: 200px minmax(0, 520px);
+    column-gap: 24px;
+  }
+  .field > label,
+  .field > .field-label {
+    padding-top: 11px;
+  }
+  .field > :not(label, .field-label) {
+    grid-column: 2;
+  }
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: var(--tap);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choice[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.choice-title {
+  font-weight: 500;
+}
+
+.choice-hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12px;
+  font-weight: 700;
+  justify-content: center;
+}
+
+/* ─── Tables ─────────────────────────────────────────────────────────────── */
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table th {
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface-2);
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}

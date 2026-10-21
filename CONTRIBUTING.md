@@ -6,7 +6,7 @@ Thanks for helping. A few conventions keep the code easy to read for the next pe
 
 - Standard Nuxt layout: `app/` for the frontend, `server/` for the API, `shared/` for code both use.
 - Small modules with plain names. If a file needs a table of contents, split it.
-- Comments explain *why*, not *what*, and only when the code can't say it. No references to
+- Comments explain _why_, not _what_, and only when the code can't say it. No references to
   tickets, chats or documents a reader can't open.
 - Validate every API input with zod. Errors go through `createError` with a clear message.
 - Database changes go through Drizzle migrations (`npm run db:generate`). Never edit a migration that

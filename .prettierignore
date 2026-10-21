@@ -1,0 +1,7 @@
+node_modules
+.nuxt
+.output
+coverage
+package-lock.json
+server/db/migrations/meta
+public/fonts
