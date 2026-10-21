@@ -78,10 +78,12 @@
           <button type="button" class="btn" :disabled="testing" @click="test">
             {{ testing ? "Testing…" : "Test" }}
           </button>
-          <span :class="test_?.ok ? 'ok' : test_ ? 'danger' : 'muted'" role="status">{{ testLine }}</span>
+          <span :class="testResult?.ok ? 'ok' : testResult ? 'danger' : 'muted'" role="status">{{
+            testLine
+          }}</span>
         </div>
-        <div v-if="test_?.ok" class="row" lang="es">
-          <span v-for="w in test_.words" :key="w.term" class="word-chip">
+        <div v-if="testResult?.ok" class="row" lang="es">
+          <span v-for="w in testResult.words" :key="w.term" class="word-chip">
             <strong>{{ w.term }}</strong> <span class="muted" lang="en">{{ w.translation }}</span>
           </span>
         </div>
@@ -119,7 +121,7 @@ const models = ref<string[]>([]);
 const modelsError = ref("");
 const loadingModels = ref(false);
 const testing = ref(false);
-const test_ = ref<TestResult | null>(null);
+const testResult = ref<TestResult | null>(null);
 
 const preset = computed(() => AI_PRESETS.find((p) => p.id === presetId.value));
 const sameConnection = computed(
@@ -139,7 +141,7 @@ function pick(id: string) {
   apiKey.value = "";
   models.value = [];
   modelsError.value = "";
-  test_.value = null;
+  testResult.value = null;
 }
 
 function body() {
@@ -170,11 +172,11 @@ async function loadModels() {
 
 async function test() {
   testing.value = true;
-  test_.value = null;
+  testResult.value = null;
   try {
-    test_.value = await $fetch<TestResult>("/api/settings/ai/test", { method: "POST", body: body() });
+    testResult.value = await $fetch<TestResult>("/api/settings/ai/test", { method: "POST", body: body() });
   } catch (error) {
-    test_.value = { ok: false, error: errorMessage(error) };
+    testResult.value = { ok: false, error: errorMessage(error) };
   } finally {
     testing.value = false;
   }
@@ -182,7 +184,7 @@ async function test() {
 
 const testLine = computed(() => {
   if (testing.value) return "Picking words from a short sample…";
-  const r = test_.value;
+  const r = testResult.value;
   if (!r) return "Test picks words from a short sample, so you can see what you get and how long it takes.";
   return r.ok ? `Works · ${r.words.length} words in ${(r.ms / 1000).toFixed(1)} s` : r.error;
 });

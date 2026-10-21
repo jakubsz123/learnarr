@@ -24,20 +24,23 @@
         <button type="button" class="btn btn-danger" @click="disconnect">Disconnect</button>
       </div>
       <form v-else class="stack" @submit.prevent="connect">
-        <label class="stack-label">
-          Username
-          <input v-model.trim="os.username" class="input" autocomplete="username" required />
-        </label>
-        <label class="stack-label">
-          Password
-          <input
-            v-model="os.password"
-            class="input"
-            type="password"
-            autocomplete="current-password"
-            required
-          />
-        </label>
+        <div>
+          <div class="field">
+            <label for="os-user">Username</label>
+            <input id="os-user" v-model.trim="os.username" class="input" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label for="os-pass">Password</label>
+            <input
+              id="os-pass"
+              v-model="os.password"
+              class="input"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+        </div>
         <div class="row">
           <button type="submit" class="btn btn-primary" :disabled="busy">
             {{ busy ? "Checking…" : "Connect" }}
@@ -86,7 +89,8 @@ import type { LanguageChoice } from "~/components/LanguageFields.vue";
 useHead({ title: "Account · Settings · Learnarr" });
 
 const { me, refresh } = useMe();
-const origin = import.meta.client ? window.location.origin : "";
+// The same value on the server and in the browser, so the page hydrates cleanly.
+const origin = useRequestURL().origin;
 const busy = ref(false);
 
 const languages = ref<LanguageChoice>({

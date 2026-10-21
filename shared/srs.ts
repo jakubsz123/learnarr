@@ -78,19 +78,22 @@ export function schedule(card: SrsState, rating: Rating, now: number): Scheduled
   return { ...card, state: "review", ease, intervalDays: days, reps, due: now + days * DAY };
 }
 
+/** "10 min", "3 d", "2 mo": how long an interval is, briefly. */
+function intervalLabel(ms: number): string {
+  const minutes = Math.round(ms / MINUTE);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} h`;
+  const days = Math.round(ms / DAY);
+  if (days < 31) return `${days} d`;
+  const months = Math.round(days / 30);
+  return months < 12 ? `${months} mo` : `${(days / 365).toFixed(1)} y`;
+}
+
 /** How long each answer would put the card away for, for the buttons' labels. */
 export function previewIntervals(card: SrsState, now: number): Record<Rating, string> {
-  const label = (ms: number) => {
-    const minutes = Math.round(ms / MINUTE);
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.round(minutes / 60);
-    if (hours < 24) return `${hours} h`;
-    const days = Math.round(ms / DAY);
-    if (days < 31) return `${days} d`;
-    const months = Math.round(days / 30);
-    return months < 12 ? `${months} mo` : `${(days / 365).toFixed(1)} y`;
-  };
   const out = {} as Record<Rating, string>;
-  for (const rating of [1, 2, 3, 4] as Rating[]) out[rating] = label(schedule(card, rating, now).due - now);
+  for (const rating of [1, 2, 3, 4] as Rating[])
+    out[rating] = intervalLabel(schedule(card, rating, now).due - now);
   return out;
 }

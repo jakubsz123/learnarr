@@ -20,6 +20,8 @@ import { decryptSecret } from "./secrets";
 /** A subtitle with fewer lines than this is a forced or broken track, not dialogue. */
 const MIN_CUES = 20;
 
+const usable = (raw: string | null): raw is string => !!raw && parseSubtitle(raw).length >= MIN_CUES;
+
 export interface CatalogueDeps {
   search(search: SubtitleSearch): Promise<SubtitleFile[]>;
   download(
@@ -131,7 +133,6 @@ export async function getSubtitle(opts: {
       .returning()
       .get();
   };
-  const usable = (raw: string | null): raw is string => !!raw && parseSubtitle(raw).length >= MIN_CUES;
 
   for (const track of candidateTracks(item.subtitleTracks, language)) {
     const raw = await server.subtitle(item, track).catch(() => null);

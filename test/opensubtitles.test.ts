@@ -10,6 +10,10 @@ function fakeFetch(handler: (url: string, init?: RequestInit) => Response) {
   return { fn, calls };
 }
 
+const file = (id: number, extra: object) => ({
+  attributes: { files: [{ file_id: id }], download_count: 10, ...extra },
+});
+
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 
 describe("searchSubtitles", () => {
@@ -28,9 +32,6 @@ describe("searchSubtitles", () => {
   });
 
   it("drops machine-translated files and puts hearing-impaired ones last", async () => {
-    const file = (id: number, extra: object) => ({
-      attributes: { files: [{ file_id: id }], download_count: 10, ...extra },
-    });
     const fake = fakeFetch(() =>
       json({
         data: [

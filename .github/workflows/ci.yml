@@ -20,3 +20,20 @@ jobs:
       - run: npm run format:check
       - run: npm test
       - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t learnarr:ci .
+      - name: Start from an empty /config with no environment variables
+        run: |
+          mkdir config
+          docker run -d --name learnarr -p 7979:7979 -v "$PWD/config:/config" learnarr:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:7979/api/health && break; sleep 2; done
+          curl -fsS http://127.0.0.1:7979/api/health
+          curl -fsS http://127.0.0.1:7979/api/setup/status | tee /dev/stderr | grep -q '"needsAccount":true'
+          test -f config/learnarr.db
+          test -f config/auth.key
+      - if: failure()
+        run: docker logs learnarr

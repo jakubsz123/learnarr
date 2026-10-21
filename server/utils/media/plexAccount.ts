@@ -49,6 +49,8 @@ export interface PlexServerChoice {
   token: string;
 }
 
+const rank = (c: { local: boolean; relay: boolean }) => (c.local ? 0 : c.relay ? 2 : 1);
+
 export async function listPlexServers(
   accountToken: string,
   fetchImpl: typeof fetch = fetch,
@@ -58,7 +60,6 @@ export async function listPlexServers(
     { headers: { ...headers, "X-Plex-Token": accountToken }, label: "plex.tv" },
     fetchImpl,
   );
-  const rank = (c: { local: boolean; relay: boolean }) => (c.local ? 0 : c.relay ? 2 : 1);
   return resources
     .filter((r) =>
       String(r.provides ?? "")

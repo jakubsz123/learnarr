@@ -7,7 +7,19 @@ Learnarr reads its subtitles, asks the AI provider you choose for the words wort
 turns them into flashcards built around the real lines you heard. Study in the app or send the
 cards to Anki.
 
-> **Status:** early development. Nothing to install yet.
+> **Status:** v0.1, early. The core loop works; expect rough edges.
+
+## Run it
+
+```bash
+git clone https://github.com/jakubsz123/learnarr && cd learnarr
+docker compose up -d
+```
+
+Open `http://<your-server>:7979`. The setup wizard creates the admin account, connects Plex or
+Jellyfin and your AI provider, and asks which language you're learning. Everything Learnarr keeps is
+in `./config`; back that folder up. No environment variables are needed. If you put Learnarr behind
+an HTTPS reverse proxy, set `PUBLIC_URL` to its address.
 
 ## How it works
 

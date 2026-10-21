@@ -142,18 +142,18 @@ describe("Jellyfin mapping", () => {
   });
 });
 
-describe("candidateTracks", () => {
-  const track = (over: Partial<SubtitleTrack>): SubtitleTrack => ({
-    id: "1",
-    language: "es",
-    label: "Spanish",
-    codec: "srt",
-    forced: false,
-    external: false,
-    text: true,
-    ...over,
-  });
+const track = (over: Partial<SubtitleTrack>): SubtitleTrack => ({
+  id: "1",
+  language: "es",
+  label: "Spanish",
+  codec: "srt",
+  forced: false,
+  external: false,
+  text: true,
+  ...over,
+});
 
+describe("candidateTracks", () => {
   it("keeps readable, unforced tracks in the language, external and non-SDH first", () => {
     const tracks = [
       track({ id: "embedded" }),
