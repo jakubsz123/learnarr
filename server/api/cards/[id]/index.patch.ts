@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { schema, useDb } from "~~/server/db";
 
@@ -16,10 +16,9 @@ export default defineEventHandler(async (event) => {
   const result = useDb()
     .update(schema.cards)
     .set({ ...changes, updatedAt: new Date() })
-    .where(eq(schema.cards.id, id))
+    .where(and(eq(schema.cards.id, id), eq(schema.cards.userId, user.id)))
     .returning()
     .get();
-  if (!result || result.userId !== user.id)
-    throw createError({ statusCode: 404, statusMessage: "No such card." });
+  if (!result) throw createError({ statusCode: 404, statusMessage: "No such card." });
   return result;
 });
