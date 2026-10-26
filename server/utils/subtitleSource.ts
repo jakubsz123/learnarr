@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { createError } from "h3";
 import { languageName } from "#shared/languages";
-import { parseSubtitle, toSrt } from "#shared/subtitles";
+import { parseSubtitle, toSrt, withoutSoundDescriptions } from "#shared/subtitles";
 import { schema, type Db } from "../db";
 import type { AppUser } from "./auth";
 import { candidateTracks } from "./media/tracks";
@@ -119,7 +119,7 @@ export async function getSubtitle(opts: {
   if (existing) return existing;
 
   const save = (raw: string, source: "plex" | "jellyfin" | "opensubtitles") => {
-    const cues = parseSubtitle(raw);
+    const cues = withoutSoundDescriptions(parseSubtitle(raw));
     return db
       .insert(schema.subtitles)
       .values({

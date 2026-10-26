@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSubtitle, toSrt } from "../shared/subtitles";
+import { parseSubtitle, toSrt, withoutSoundDescriptions } from "../shared/subtitles";
 
 describe("parseSubtitle", () => {
   it("reads SRT, dropping tags and decoding entities", () => {
@@ -56,5 +56,16 @@ describe("parseSubtitle", () => {
       { index: 1, startMs: 3_724_000, endMs: 3_725_000, text: "Next" },
     ];
     expect(parseSubtitle(toSrt(cues))).toEqual(cues);
+  });
+});
+
+describe("withoutSoundDescriptions", () => {
+  it("drops bracketed descriptions and the cues left empty", () => {
+    const cue = (index: number, text: string) => ({ index, startMs: index * 1000, endMs: index * 1000 + 500, text });
+    const cues = [cue(0, "[sirenas de ambulancia]"), cue(1, "[mujer] Samuel."), cue(2, "- [ríe]\n- ¿Qué pasa?")];
+    expect(withoutSoundDescriptions(cues)).toEqual([
+      { ...cue(1, "Samuel."), index: 0 },
+      { ...cue(2, "- ¿Qué pasa?"), index: 1 },
+    ]);
   });
 });

@@ -106,6 +106,25 @@ export function parseSubtitle(raw: string): Cue[] {
   return parseTimedBlocks(content);
 }
 
+/**
+ * Drop what subtitles for the deaf and hard of hearing add in square brackets,
+ * like "[sirens]" or "[woman]": it isn't dialogue, so it shouldn't become words
+ * to learn. Cues left with nothing to say are removed.
+ */
+export function withoutSoundDescriptions(cues: Cue[]): Cue[] {
+  return cues
+    .map((cue) => ({
+      ...cue,
+      text: cue.text
+        .split("\n")
+        .map((line) => line.replace(/\[[^\]]*\]/g, "").replace(/\s{2,}/g, " ").trim())
+        .filter((line) => line && !/^[-–—:]+$/.test(line))
+        .join("\n"),
+    }))
+    .filter((cue) => cue.text)
+    .map((cue, index) => ({ ...cue, index }));
+}
+
 const pad = (n: number, width = 2) => String(n).padStart(width, "0");
 
 function msToSrtTime(ms: number): string {
