@@ -117,7 +117,12 @@ export function withoutSoundDescriptions(cues: Cue[]): Cue[] {
       ...cue,
       text: cue.text
         .split("\n")
-        .map((line) => line.replace(/\[[^\]]*\]/g, "").replace(/\s{2,}/g, " ").trim())
+        .map((line) =>
+          line
+            .replace(/\[[^\]]*\]/g, "")
+            .replace(/\s{2,}/g, " ")
+            .trim(),
+        )
         .filter((line) => line && !/^[-–—:]+$/.test(line))
         .join("\n"),
     }))
