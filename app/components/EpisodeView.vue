@@ -381,11 +381,6 @@ async function pick() {
   font-size: 14px;
 }
 
-.panel-title {
-  font-size: 17px;
-  font-weight: 500;
-}
-
 .overview {
   display: grid;
   grid-template-columns: auto 1fr;
