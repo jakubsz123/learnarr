@@ -1,6 +1,5 @@
 import { and, asc, count, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { schema, type Db } from "../db";
-import type { PickedWord } from "./ai/pickWords";
 
 export type Card = typeof schema.cards.$inferSelect;
 
@@ -14,36 +13,6 @@ export function knownTerms(db: Db, userId: string, language: string): string[] {
     .where(and(eq(schema.cards.userId, userId), eq(schema.cards.language, language)))
     .all()
     .map((r) => r.term);
-}
-
-/** Save picked words as new cards. A word the user already has is left alone. */
-export function addCards(
-  db: Db,
-  subtitle: { id: number; userId: string; mediaItemId: number; language: string },
-  words: PickedWord[],
-): number {
-  let added = 0;
-  for (const word of words) {
-    const result = db
-      .insert(schema.cards)
-      .values({
-        userId: subtitle.userId,
-        subtitleId: subtitle.id,
-        mediaItemId: subtitle.mediaItemId,
-        language: subtitle.language,
-        term: word.term,
-        form: word.form,
-        translation: word.translation,
-        partOfSpeech: word.partOfSpeech,
-        note: word.note,
-        sentence: word.cue.text,
-        sentenceStartMs: word.cue.startMs,
-      })
-      .onConflictDoNothing()
-      .run();
-    added += result.changes;
-  }
-  return added;
 }
 
 function startOfDay(now: number): number {

@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import { addUser, testDb } from "./helpers";
 import { schema, type Db } from "../server/db";
-import { addCards, NEW_CARDS_PER_DAY, studyQueue } from "../server/utils/cards";
+import { NEW_CARDS_PER_DAY, studyQueue } from "../server/utils/cards";
+import { addSuggestions, decideSuggestions } from "../server/utils/suggestions";
 import { createJobRunner } from "../server/utils/jobs";
 import type { PickedWord } from "../server/utils/ai/pickWords";
 
@@ -40,19 +41,60 @@ const word = (term: string): PickedWord => ({
   cue: { index: 0, startMs: 1000, endMs: 2000, text: `Line with ${term}` },
 });
 
-describe("addCards", () => {
-  it("saves the real line as the example and skips words the user already has", () => {
-    expect(addCards(db, subtitle, [word("uno"), word("dos")])).toBe(2);
-    expect(addCards(db, subtitle, [word("dos"), word("tres")])).toBe(1);
-    const card = db.select().from(schema.cards).where(eq(schema.cards.term, "uno")).get();
-    expect(card).toMatchObject({ sentence: "Line with uno", sentenceStartMs: 1000, state: "new" });
+const suggestionIds = () =>
+  db
+    .select({ id: schema.suggestions.id })
+    .from(schema.suggestions)
+    .all()
+    .map((s) => s.id);
+
+/** Words as the AI would pick them, all learned. */
+function addCards(sub: typeof subtitle, words: PickedWord[]) {
+  addSuggestions(db, sub, words);
+  decideSuggestions(db, sub.userId, suggestionIds(), "learn");
+}
+
+describe("suggestions", () => {
+  it("keeps the real line and skips words already suggested", () => {
+    expect(addSuggestions(db, subtitle, [word("uno"), word("dos")])).toBe(2);
+    expect(addSuggestions(db, subtitle, [word("dos"), word("tres")])).toBe(1);
+    const suggestion = db.select().from(schema.suggestions).where(eq(schema.suggestions.term, "uno")).get();
+    expect(suggestion).toMatchObject({ sentence: "Line with uno", sentenceStartMs: 1000 });
+    expect(db.select().from(schema.cards).all()).toHaveLength(0);
+  });
+
+  it("turns a learned suggestion into a new card for the same film or episode", () => {
+    addSuggestions(db, subtitle, [word("uno")]);
+    const [card] = decideSuggestions(db, subtitle.userId, suggestionIds(), "learn");
+    expect(card).toMatchObject({ term: "uno", state: "new", mediaItemId: subtitle.mediaItemId });
+    expect(suggestionIds()).toEqual([]);
+  });
+
+  it("marks a known suggestion's word known and makes no card", () => {
+    addSuggestions(db, subtitle, [word("Uno")]);
+    expect(decideSuggestions(db, subtitle.userId, suggestionIds(), "know")).toEqual([]);
+    expect(db.select().from(schema.knownWords).all()).toMatchObject([{ word: "uno", source: "marked" }]);
+    expect(db.select().from(schema.cards).all()).toHaveLength(0);
+  });
+
+  it("drops a skipped suggestion without remembering anything", () => {
+    addSuggestions(db, subtitle, [word("uno")]);
+    decideSuggestions(db, subtitle.userId, suggestionIds(), "skip");
+    expect(suggestionIds()).toEqual([]);
+    expect(db.select().from(schema.knownWords).all()).toHaveLength(0);
+  });
+
+  it("ignores someone else's suggestions", () => {
+    addSuggestions(db, subtitle, [word("uno")]);
+    const other = addUser(db);
+    expect(decideSuggestions(db, other.id, suggestionIds(), "learn")).toEqual([]);
+    expect(suggestionIds()).toHaveLength(1);
   });
 });
 
 describe("studyQueue", () => {
   it("serves due cards, then new cards up to the daily limit", () => {
     addCards(
-      db,
       subtitle,
       Array.from({ length: NEW_CARDS_PER_DAY + 5 }, (_, i) => word(`w${i}`)),
     );
@@ -73,7 +115,6 @@ describe("studyQueue", () => {
 
   it("counts new cards already introduced today against the limit", () => {
     addCards(
-      db,
       subtitle,
       Array.from({ length: NEW_CARDS_PER_DAY }, (_, i) => word(`w${i}`)),
     );
@@ -94,8 +135,8 @@ describe("studyQueue", () => {
   });
 
   it("leaves out suspended cards and other languages", () => {
-    addCards(db, subtitle, [word("uno")]);
-    addCards(db, { ...subtitle, language: "fr" }, [word("deux")]);
+    addCards(subtitle, [word("uno")]);
+    addCards({ ...subtitle, language: "fr" }, [word("deux")]);
     db.update(schema.cards).set({ suspended: true }).where(eq(schema.cards.term, "uno")).run();
     expect(studyQueue(db, subtitle.userId, "es").total).toBe(0);
   });

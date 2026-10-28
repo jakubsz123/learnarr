@@ -1,10 +1,11 @@
 import { wordKey } from "#shared/words";
-import type { Card, SubtitleResponse, VocabEntry, WordUse } from "~/utils/api";
+import type { Card, Decision, SubtitleResponse, VocabEntry, WordUse } from "~/utils/api";
 
 /**
- * A subtitle's words and cards, and the two things the learner does with a
- * word: mark it known (or not) and make a card for it. Changes show at once:
- * every use of the word changes colour and "% you know" moves.
+ * A subtitle's words, cards and suggested words, and what the learner does
+ * with a word: mark it known (or not), make a card for it, or decide on a
+ * suggestion. Changes show at once: every use of the word changes colour and
+ * "% you know" moves.
  */
 export function useEpisodeWords() {
   const data = ref<SubtitleResponse | null>(null);
@@ -73,6 +74,7 @@ export function useEpisodeWords() {
         body: { ...use, lemma: data.value.transcript.lemmatised ? entry.word : null },
       });
       if (!data.value.cards.some((c) => c.id === card.id)) data.value.cards.push(card);
+      data.value.suggestions = data.value.suggestions.filter((s) => wordKey(s.term) !== wordKey(card.term));
       entry.state = "learning";
       useDueCount().refresh();
       return card;
@@ -83,5 +85,45 @@ export function useEpisodeWords() {
     }
   }
 
-  return { data, error, busyWord, coverage, load, cardFor, firstUse, setKnown, makeCard };
+  const deciding = ref(false);
+
+  /** Learn, know or skip suggested words; the transcript reflects it straight away. */
+  async function decide(ids: number[], decision: Decision) {
+    if (!data.value || !ids.length) return;
+    deciding.value = true;
+    error.value = "";
+    try {
+      const { cards } = await $fetch<{ cards: Card[] }>("/api/suggestions", {
+        method: "POST",
+        body: { ids, decision },
+      });
+      const decided = data.value.suggestions.filter((s) => ids.includes(s.id));
+      data.value.suggestions = data.value.suggestions.filter((s) => !ids.includes(s.id));
+      data.value.cards.push(...cards);
+      if (decision !== "skip") {
+        const state = decision === "know" ? "known" : "learning";
+        const terms = new Set(decided.map((s) => wordKey(s.term)));
+        for (const entry of data.value.transcript.vocab) if (terms.has(entry.word)) entry.state = state;
+      }
+      if (cards.length) useDueCount().refresh();
+    } catch (e) {
+      error.value = errorMessage(e);
+    } finally {
+      deciding.value = false;
+    }
+  }
+
+  return {
+    data,
+    error,
+    busyWord,
+    deciding,
+    coverage,
+    load,
+    cardFor,
+    firstUse,
+    setKnown,
+    makeCard,
+    decide,
+  };
 }

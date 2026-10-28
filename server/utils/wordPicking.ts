@@ -6,9 +6,10 @@ import { schema, type Db } from "../db";
 import type { AppUser } from "./auth";
 import { pickWords, type PickRequest } from "./ai/pickWords";
 import type { AiConfig } from "./ai/client";
-import { addCards, knownTerms } from "./cards";
+import { knownTerms } from "./cards";
 import { useJobs } from "./jobs";
 import { markedWords, wordStates } from "./knownWords";
+import { addSuggestions, suggestedTerms } from "./suggestions";
 
 export const WORD_COUNTS = [10, 20, 30] as const;
 
@@ -41,13 +42,17 @@ export function startWordPicking(
       nativeLanguage: user.nativeLanguage,
       level: user.level,
       count,
-      known: [...knownTerms(db, user.id, subtitle.language), ...markedWords(db, user.id, subtitle.language)],
+      known: [
+        ...knownTerms(db, user.id, subtitle.language),
+        ...suggestedTerms(db, user.id, subtitle.language),
+        ...markedWords(db, user.id, subtitle.language),
+      ],
     };
     // The prompt can only list so many words; the common ones seeded for the
     // level are dropped here instead.
     const states = await wordStates(db, user, subtitle.language);
     const words = (await pickWords(config, request)).filter((w) => states.get(wordKey(w.term)) !== "known");
-    const added = addCards(db, subtitle, words);
+    const added = addSuggestions(db, subtitle, words);
     db.update(schema.subtitles)
       .set({ wordsPickedAt: new Date() })
       .where(eq(schema.subtitles.id, subtitleId))
