@@ -192,6 +192,11 @@ p {
   padding: 16px;
 }
 
+.panel-title {
+  font-size: 17px;
+  font-weight: 500;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;
