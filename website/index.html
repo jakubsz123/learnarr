@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Learnarr: learn a language from your Plex or Jellyfin library</title>
+    <meta
+      name="description"
+      content="Learnarr is a free, self-hosted companion for Plex and Jellyfin. It turns the shows you watch into vocabulary flashcards built around the real lines you hear."
+    />
+    <meta name="theme-color" content="#0f1114" />
+    <link rel="icon" href="logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a href="#" class="brand"><img src="logo.svg" alt="" width="32" height="32" /> Learnarr</a>
+        <nav aria-label="Main">
+          <a href="#features">Features</a>
+          <a href="#install">Install</a>
+          <a href="https://github.com/jakubsz123/learnarr">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-inner">
+          <div class="hero-text">
+            <h1>Learn a language from the shows on your server</h1>
+            <p class="lead">
+              Learnarr is a free, self-hosted companion for Plex and Jellyfin. Pick an episode, and it shows
+              how much of the dialogue you already understand, suggests the words worth learning, and turns
+              them into flashcards built around the real lines you'll hear.
+            </p>
+            <div class="actions">
+              <a class="btn btn-primary" href="#install">Install</a>
+              <a class="btn" href="https://github.com/jakubsz123/learnarr">View on GitHub</a>
+            </div>
+            <p class="small">Open source, GPL-3.0. One Docker container. No account with us.</p>
+          </div>
+
+          <div class="phones" aria-hidden="true">
+            <div class="phone">
+              <div class="phone-bar">La casa de enfrente · S1 E3</div>
+              <div class="screen">
+                <div class="score">
+                  <span class="ring"></span>
+                  <div><b>86%</b><span>you know</span></div>
+                </div>
+                <p class="label">3 suggested words</p>
+                <div class="suggestion">
+                  <p><b lang="es">últimamente</b> · lately</p>
+                  <p class="line" lang="es"><mark>Últimamente</mark> no duermo nada bien.</p>
+                  <div class="mini-actions">
+                    <span class="mini primary">Learn</span><span class="mini">I know it</span>
+                  </div>
+                </div>
+                <div class="suggestion">
+                  <p><b lang="es">congraciarse</b> · to win over</p>
+                  <p class="line" lang="es">Siempre intenta <mark>congraciarse</mark> con el jefe.</p>
+                  <div class="mini-actions">
+                    <span class="mini primary">Learn</span><span class="mini">I know it</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="phone phone-back">
+              <div class="phone-bar">Study · 12 left</div>
+              <div class="screen center">
+                <span class="tag">New word</span>
+                <p class="card-line" lang="es">Yo solo estaba <mark>sujetando</mark> la puerta.</p>
+                <p class="card-answer">sujetar · to hold</p>
+                <div class="grades">
+                  <span>Again</span><span>Hard</span><span class="good">Good</span><span>Easy</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="steps">
+        <div class="wrap">
+          <h2>How it works</h2>
+          <ol class="step-list">
+            <li>
+              <span class="step-n">1</span>
+              <h3>Pick an episode</h3>
+              <p>
+                Browse your Plex or Jellyfin library. Learnarr reads the episode's subtitle and tells you how
+                much of it you already know.
+              </p>
+            </li>
+            <li>
+              <span class="step-n">2</span>
+              <h3>Choose your words</h3>
+              <p>
+                Your AI provider suggests the words worth learning at your level. Keep the ones you want, mark
+                the ones you know.
+              </p>
+            </li>
+            <li>
+              <span class="step-n">3</span>
+              <h3>Study, then watch</h3>
+              <p>
+                Review the cards on your phone with spaced repetition. When the episode comes on, you'll hear
+                them.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <div class="wrap">
+          <h2>Features</h2>
+          <div class="grid">
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 4h16v16H4z M8 4v16M16 4v16M4 8h4M4 16h4M16 8h4M16 16h4" />
+              </svg>
+              <h3>Your library, your subtitles</h3>
+              <p>
+                Uses the subtitle tracks already on your media server. When there are none, it downloads one
+                from OpenSubtitles.com with each person's own free account.
+              </p>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M12 7v5l3 3" />
+              </svg>
+              <h3>"% you know" per episode</h3>
+              <p>
+                Every word is matched to its dictionary form and checked against what you know, so you can
+                find shows at your level.
+              </p>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7" /></svg>
+              <h3>Words worth learning</h3>
+              <p>
+                Suggestions for your level, not every word in the script. Learn them, mark them known, or tap
+                any word in the transcript.
+              </p>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>
+              <h3>Study anywhere</h3>
+              <p>
+                Spaced-repetition flashcards made for a phone, with the real line from the episode on every
+                card. Or push them to Anki.
+              </p>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
+              <h3>Bring your own AI</h3>
+              <p>
+                OpenAI, Claude, Gemini, OpenRouter, Groq, Mistral, or a local model through Ollama or LM
+                Studio. Run it locally and nothing leaves your network.
+              </p>
+            </article>
+            <article>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21v-1a6 6 0 0 1 12 0v1 M16 11a3 3 0 1 0 0-6 M22 21v-1a5 5 0 0 0-4-4.9"
+                />
+              </svg>
+              <h3>For the household</h3>
+              <p>
+                One server, an account for everyone, each with their own languages, level and cards. The admin
+                sets things up once.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="install" class="install">
+        <div class="wrap">
+          <h2>Install</h2>
+          <p class="lead">
+            One container, one <code>/config</code> folder. Start it, open
+            <code>http://&lt;your-server&gt;:7979</code>, and the setup wizard connects your media server and
+            AI provider.
+          </p>
+          <div class="code">
+            <button type="button" class="copy" data-copy="compose">Copy</button>
+            <pre id="compose"><code>services:
+  learnarr:
+    image: ghcr.io/jakubsz123/learnarr:latest
+    container_name: learnarr
+    ports:
+      - "7979:7979"
+    volumes:
+      - ./config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+    restart: unless-stopped</code></pre>
+          </div>
+          <p class="small">
+            Save it as <code>docker-compose.yml</code> and run <code>docker compose up -d</code>. Images for
+            amd64 and arm64. Configuration, updates and backups are in the
+            <a href="https://github.com/jakubsz123/learnarr#readme">README</a>.
+          </p>
+        </div>
+      </section>
+
+      <section class="faq">
+        <div class="wrap">
+          <h2>Questions</h2>
+          <details>
+            <summary>Is it free?</summary>
+            <p>
+              Yes. Learnarr is open source under GPL-3.0. The only cost is your AI provider, if you use a paid
+              one.
+            </p>
+          </details>
+          <details>
+            <summary>Which languages does it support?</summary>
+            <p>
+              Any language your subtitles are in. "% you know" works for Czech, Danish, Dutch, English,
+              French, German, Italian, Polish, Portuguese, Spanish and Swedish so far.
+            </p>
+          </details>
+          <details>
+            <summary>Does my data leave my server?</summary>
+            <p>
+              Only the subtitle text of an episode you pick words for, sent to the AI provider you chose. With
+              a local model, nothing leaves your network.
+            </p>
+          </details>
+          <details>
+            <summary>Do I need Plex?</summary>
+            <p>Plex or Jellyfin. Learnarr works from the library you already have.</p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <p>
+          <a href="https://github.com/jakubsz123/learnarr">Learnarr</a> is free software under the GPL-3.0, by
+          Jakub Szura and Victor Buch.
+        </p>
+        <p class="small">
+          Subtitles provided by <a href="https://www.opensubtitles.com">OpenSubtitles.com</a>. Not affiliated
+          with Sonarr, Radarr, Plex, Jellyfin or OpenSubtitles.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      for (const button of document.querySelectorAll("[data-copy]")) {
+        button.addEventListener("click", async () => {
+          const text = document.getElementById(button.dataset.copy).textContent;
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = "Copied";
+          } catch {
+            button.textContent = "Select and copy";
+          }
+          setTimeout(() => (button.textContent = "Copy"), 2000);
+        });
+      }
+    </script>
+  </body>
+</html>
