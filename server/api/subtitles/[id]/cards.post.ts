@@ -80,6 +80,16 @@ export default defineEventHandler(async (event) => {
     })
     .returning()
     .get();
+  // Tapping a word the AI had suggested settles the suggestion too.
+  db.delete(schema.suggestions)
+    .where(
+      and(
+        eq(schema.suggestions.userId, user.id),
+        eq(schema.suggestions.language, subtitle.language),
+        eq(schema.suggestions.term, explained.term),
+      ),
+    )
+    .run();
   // A word you are making a card for is one you don't know yet.
   setKnown(db, user.id, subtitle.language, input.lemma ?? form, false);
   if (wordKey(explained.term) !== wordKey(input.lemma ?? form)) {

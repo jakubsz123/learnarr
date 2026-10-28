@@ -168,6 +168,33 @@ export const cards = sqliteTable(
   ],
 );
 
+/**
+ * Words the AI picked from a subtitle that the learner hasn't decided on yet.
+ * Learning one turns it into a card; knowing one marks the word known.
+ */
+export const suggestions = sqliteTable(
+  "suggestions",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    subtitleId: integer("subtitle_id")
+      .notNull()
+      .references(() => subtitles.id, { onDelete: "cascade" }),
+    language: text("language").notNull(),
+    term: text("term").notNull(),
+    form: text("form").notNull(),
+    translation: text("translation").notNull(),
+    partOfSpeech: text("part_of_speech"),
+    note: text("note"),
+    sentence: text("sentence").notNull(),
+    sentenceStartMs: integer("sentence_start_ms"),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [uniqueIndex("suggestions_user_lang_term_idx").on(t.userId, t.language, t.term)],
+);
+
 export const reviews = sqliteTable(
   "reviews",
   {

@@ -59,14 +59,15 @@ describe("parseSubtitle", () => {
   });
 });
 
+const cue = (index: number, text: string) => ({
+  index,
+  startMs: index * 1000,
+  endMs: index * 1000 + 500,
+  text,
+});
+
 describe("withoutSoundDescriptions", () => {
   it("drops bracketed descriptions and the cues left empty", () => {
-    const cue = (index: number, text: string) => ({
-      index,
-      startMs: index * 1000,
-      endMs: index * 1000 + 500,
-      text,
-    });
     const cues = [
       cue(0, "[sirenas de ambulancia]"),
       cue(1, "[mujer] Samuel."),

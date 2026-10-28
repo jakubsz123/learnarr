@@ -66,9 +66,9 @@
         </div>
         <p class="muted">
           {{
-            sub.cards.length
-              ? "Your AI provider reads the whole subtitle and adds the next words worth learning at your level."
-              : "Your AI provider reads the whole subtitle and picks the words worth learning at your level. Or tap words yourself below."
+            hasPicked
+              ? "Your AI provider reads the whole subtitle and suggests the next words worth learning at your level."
+              : "Your AI provider reads the whole subtitle and suggests the words worth learning at your level. Or tap words yourself below."
           }}
         </p>
         <div class="row" role="group" aria-label="How many words">
@@ -83,7 +83,7 @@
             {{ n }}
           </button>
           <button type="button" class="btn btn-primary" :disabled="picking" @click="pick">
-            {{ picking ? "Picking words…" : sub.cards.length ? "Pick more" : "Pick words" }}
+            {{ picking ? "Picking words…" : hasPicked ? "Pick more" : "Pick words" }}
           </button>
         </div>
         <p v-if="picking" class="hint">
@@ -91,6 +91,13 @@
         </p>
         <p v-if="pickMessage" :class="pickOk ? 'ok' : 'danger'" role="status">{{ pickMessage }}</p>
       </section>
+
+      <SuggestionList
+        v-if="sub.suggestions.length"
+        :suggestions="sub.suggestions"
+        :busy="words.deciding.value"
+        @decide="words.decide"
+      />
 
       <div class="tabs" role="tablist" aria-label="This episode">
         <button
@@ -206,6 +213,9 @@ const counted = computed(() => sub.value?.transcript.vocab.filter((v) => v.count
 const wordCount = computed(() => counted.value.length);
 const newCount = computed(() => counted.value.filter((v) => v.state === null).length);
 const sortedCards = computed(() => sub.value?.cards ?? []);
+const hasPicked = computed(
+  () => !!sub.value && (sub.value.cards.length > 0 || sub.value.suggestions.length > 0),
+);
 
 const language = computed(() => languageName(me.value?.learningLanguage ?? ""));
 const subtitleHint = computed(() =>
@@ -318,10 +328,9 @@ async function pick() {
       if (job.state === "done") {
         const added = job.result?.added ?? 0;
         pickMessage.value = added
-          ? `Added ${added} new ${added === 1 ? "card" : "cards"}.`
+          ? `${added} new ${added === 1 ? "word" : "words"} to go through below.`
           : "No new words: you have them all already.";
         pickOk.value = true;
-        if (added) tab.value = "cards";
         break;
       }
       if (job.state === "failed") {

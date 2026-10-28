@@ -44,6 +44,20 @@ export interface Card {
   subtitleId: number | null;
 }
 
+/** A word the AI picked that the learner hasn't decided on yet. */
+export interface Suggestion {
+  id: number;
+  term: string;
+  form: string;
+  translation: string;
+  partOfSpeech: string | null;
+  note: string | null;
+  sentence: string;
+  language: string;
+}
+
+export type Decision = "learn" | "know" | "skip";
+
 export type WordState = "known" | "learning" | null;
 
 export interface VocabEntry {
@@ -79,6 +93,7 @@ export interface SubtitleResponse {
   coverage: number | null;
   lemmas: LemmaStatus;
   cards: Card[];
+  suggestions: Suggestion[];
 }
 
 /** One use of a word: which line, and where in it. */
