@@ -4,12 +4,7 @@
       <h2 class="panel-title">
         {{ suggestions.length }} suggested {{ suggestions.length === 1 ? "word" : "words" }}
       </h2>
-      <button
-        type="button"
-        class="btn btn-primary"
-        :disabled="busy"
-        @click="emit('decide', allIds, 'learn')"
-      >
+      <button type="button" class="btn btn-primary" :disabled="busy" @click="emit('decide', allIds, 'learn')">
         Learn all
       </button>
     </div>
