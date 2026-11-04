@@ -8,7 +8,14 @@ import { addUser, srtWith, testDb } from "./helpers";
 import { schema, type Db } from "../server/db";
 import { alignToCues, CUE_SEPARATOR, parseConllu, udpipe } from "../server/utils/lemmas/engine";
 import { createLemmas } from "../server/utils/lemmas";
-import { downloadModel, modelEntry, ModelError, type ModelEntry } from "../server/utils/lemmas/models";
+import {
+  downloadModel,
+  modelEntry,
+  ModelError,
+  MODELS,
+  type ModelEntry,
+} from "../server/utils/lemmas/models";
+import { LANGUAGE_CODES } from "../shared/languages";
 
 const row = (id: string, form: string, lemma: string, upos: string, misc: string) =>
   [id, form, lemma, upos, "_", "_", "_", "_", "_", misc].join("\t");
@@ -67,10 +74,10 @@ describe("downloading models", () => {
   const bytes = Buffer.from("a model");
   const entry: ModelEntry = {
     language: "xx",
-    treebank: "T",
     file: "xx.udpipe",
     uuid: "u",
     sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+    bytes: bytes.length,
   };
 
   it("puts the file in place when its checksum matches", async () => {
@@ -85,6 +92,16 @@ describe("downloading models", () => {
     const dir = tempDir();
     await expect(downloadModel(entry, dir, bodyOf(Buffer.from("tampered")))).rejects.toThrow(ModelError);
     expect(fs.readdirSync(dir)).toEqual([]);
+  });
+});
+
+describe("the model registry", () => {
+  it("has a pinned model for each language it names, and only for languages Learnarr offers", () => {
+    for (const model of MODELS) {
+      expect(LANGUAGE_CODES).toContain(model.language);
+      expect(model.sha256).toMatch(/^[0-9a-f]{64}$/);
+    }
+    expect(MODELS.length).toBeGreaterThanOrEqual(50);
   });
 });
 
@@ -160,7 +177,7 @@ describe("lemmatising subtitles", () => {
 
   it("leaves languages without a model, and setups without UDPipe, alone", async () => {
     const lemmas = createLemmas({ db, lemmatizer: () => lemmatizer, modelDir: dir });
-    expect(lemmas.status(subtitle("ja"))).toEqual({ state: "unsupported" });
+    expect(lemmas.status(subtitle("ko"))).toEqual({ state: "unsupported" });
     const none = createLemmas({ db, lemmatizer: () => null, modelDir: dir });
     expect(none.status(subtitle("es"))).toEqual({ state: "no-engine" });
     await lemmas.idle();

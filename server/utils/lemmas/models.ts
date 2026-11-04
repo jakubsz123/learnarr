@@ -5,107 +5,94 @@ import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { languageName } from "#shared/languages";
 import { DATA_DIR } from "../dataDir";
+import pins from "./udpipe-models.json";
 
 /**
  * A UDPipe 1 model from the Universal Dependencies 2.5 release
  * (hdl:11234/1-3131), downloaded from LINDAT the first time a language needs it.
- * The sha256 was taken from a real download; a file that doesn't match it is
- * thrown away, so a changed upstream file can never quietly change every lemma.
+ * The pins (bitstream id, sha256, size) live in udpipe-models.json, written by
+ * scripts/pin-udpipe-models.mjs from real downloads checked against LINDAT's
+ * MD5s; a file that doesn't match its sha256 is thrown away, so a changed
+ * upstream file can never quietly change every lemma.
  */
 export interface ModelEntry {
   language: string;
-  treebank: string;
   file: string;
   uuid: string;
   sha256: string;
-  /** Size in bytes, to show download progress. */
-  bytes?: number;
+  bytes: number;
 }
 
 /**
- * One model per language. Where UD has several treebanks, the pick is the one
- * with the best lemmas and the most everyday text: German HDT over GSD (curated
- * lemmas), English EWT (web conversation), Portuguese Bosque (both variants).
+ * The treebank each language's model was trained on. Where UD has several, the
+ * pick favours good lemmas and everyday text: German HDT over GSD (curated
+ * lemmas), English EWT (web conversation), Portuguese Bosque (both variants),
+ * Chinese GSDSimp (simplified characters, as most subtitles are), Russian
+ * SynTagRus (the largest). Korean is left out: its treebanks' lemmas are
+ * morpheme chains ("먹+었+다"), which don't group a word's forms.
  */
-export const MODELS: readonly ModelEntry[] = [
-  {
-    language: "cs",
-    treebank: "PDT",
-    file: "czech-pdt-ud-2.5-191206.udpipe",
-    uuid: "124d9958-240e-44e6-b522-eea8447a8de6",
-    sha256: "8ced138bf1c2121cf03d2494f08c663a8b27b5218fb9c322064a7d943ba02266",
-  },
-  {
-    language: "es",
-    treebank: "AnCora",
-    file: "spanish-ancora-ud-2.5-191206.udpipe",
-    uuid: "52474ca8-939b-4fcf-80b0-228679464582",
-    sha256: "eb7c37977de18072d1f63740c06c588620d48b51dc0c0d0a3604a21db12600fc",
-  },
-  {
-    language: "de",
-    treebank: "HDT",
-    file: "german-hdt-ud-2.5-191206.udpipe",
-    uuid: "0d5a53e7-039b-4997-af3f-94faad001a6c",
-    sha256: "881bda50fb1e72f88d5765ad5e670af8ceb203c8bd128a6d783ad8de7b4af43a",
-  },
-  {
-    language: "fr",
-    treebank: "GSD",
-    file: "french-gsd-ud-2.5-191206.udpipe",
-    uuid: "75091a21-f175-4a57-8bbd-8f9a12a7d417",
-    sha256: "3b10b4c87e7667ac4cf5b301fa075720303c6a1d101cd11a62abde670bebea30",
-  },
-  {
-    language: "it",
-    treebank: "ISDT",
-    file: "italian-isdt-ud-2.5-191206.udpipe",
-    uuid: "ee10c62a-01c5-42cb-a8b6-b7751c5da12c",
-    sha256: "dad54daaa01c250f39ec0ae7d29b3f3830c1eea066db4e3a92c39b41f2dd1a40",
-  },
-  {
-    language: "pt",
-    treebank: "Bosque",
-    file: "portuguese-bosque-ud-2.5-191206.udpipe",
-    uuid: "29d8c3fd-1eb3-479f-93fc-e8982b051aa2",
-    sha256: "6d6ff79c2388347426e8dc29c61b759a437ee55789f5925fe21a6df955aac4af",
-  },
-  {
-    language: "pl",
-    treebank: "PDB",
-    file: "polish-pdb-ud-2.5-191206.udpipe",
-    uuid: "3da49192-d502-483b-8592-66eb503b8e60",
-    sha256: "ffe6ab0f604f88f82a7d8e8096d94491f99336d0d4c8e2b9700d28190f352e46",
-  },
-  {
-    language: "da",
-    treebank: "DDT",
-    file: "danish-ddt-ud-2.5-191206.udpipe",
-    uuid: "a8049933-959e-4744-a25e-01ec99459867",
-    sha256: "fe25149d355609eb551963d70b971fcd3730d35558b758f34d4eb341c6b8569c",
-  },
-  {
-    language: "nl",
-    treebank: "Alpino",
-    file: "dutch-alpino-ud-2.5-191206.udpipe",
-    uuid: "51d5eb7c-b84b-4673-a9a1-3076416bd520",
-    sha256: "700198d252054f4625ba03f9ea29881816491077691960a0912f24814ca440d7",
-  },
-  {
-    language: "sv",
-    treebank: "Talbanken",
-    file: "swedish-talbanken-ud-2.5-191206.udpipe",
-    uuid: "4da4b80f-082d-4251-8dc9-c86638bc546b",
-    sha256: "116548cf458f4bc47426ab8fa525af704e71886c4acd69a8f84865860a7d2f57",
-  },
-  {
-    language: "en",
-    treebank: "EWT",
-    file: "english-ewt-ud-2.5-191206.udpipe",
-    uuid: "8d51e3d3-1f87-47fe-8975-c197ddf7907b",
-    sha256: "784bd0fa85e3d831fd02a55290d0acfd05c953159dc38cc33d52e1b28add9957",
-  },
-];
+const TREEBANKS: Record<string, string> = {
+  af: "afrikaans-afribooms",
+  ar: "arabic-padt",
+  be: "belarusian-hse",
+  bg: "bulgarian-btb",
+  ca: "catalan-ancora",
+  cs: "czech-pdt",
+  da: "danish-ddt",
+  de: "german-hdt",
+  el: "greek-gdt",
+  en: "english-ewt",
+  es: "spanish-ancora",
+  et: "estonian-edt",
+  eu: "basque-bdt",
+  fa: "persian-seraji",
+  fi: "finnish-tdt",
+  fr: "french-gsd",
+  ga: "irish-idt",
+  gd: "scottish_gaelic-arcosg",
+  gl: "galician-ctg",
+  he: "hebrew-htb",
+  hi: "hindi-hdtb",
+  hr: "croatian-set",
+  hu: "hungarian-szeged",
+  hy: "armenian-armtdp",
+  id: "indonesian-gsd",
+  it: "italian-isdt",
+  ja: "japanese-gsd",
+  lt: "lithuanian-alksnis",
+  lv: "latvian-lvtb",
+  mr: "marathi-ufal",
+  mt: "maltese-mudt",
+  nl: "dutch-alpino",
+  nn: "norwegian-nynorsk",
+  no: "norwegian-bokmaal",
+  pl: "polish-pdb",
+  pt: "portuguese-bosque",
+  ro: "romanian-rrt",
+  ru: "russian-syntagrus",
+  se: "north_sami-giella",
+  sk: "slovak-snk",
+  sl: "slovenian-ssj",
+  sr: "serbian-set",
+  sv: "swedish-talbanken",
+  ta: "tamil-ttb",
+  te: "telugu-mtg",
+  tr: "turkish-imst",
+  ug: "uyghur-udt",
+  uk: "ukrainian-iu",
+  ur: "urdu-udtb",
+  vi: "vietnamese-vtb",
+  wo: "wolof-wtb",
+  zh: "chinese-gsdsimp",
+};
+
+const PINS = new Map((pins as Omit<ModelEntry, "language">[]).map((pin) => [pin.file, pin]));
+
+export const MODELS: readonly ModelEntry[] = Object.entries(TREEBANKS).map(([language, treebank]) => {
+  const pin = PINS.get(`${treebank}-ud-2.5-191206.udpipe`);
+  if (!pin) throw new Error(`udpipe-models.json has no pin for the ${language} model (${treebank}).`);
+  return { language, ...pin };
+});
 
 export const LINDAT = "https://lindat.mff.cuni.cz/repository/server/api/core/bitstreams";
 
@@ -143,7 +130,7 @@ export async function downloadModel(
     throw new ModelError(`lindat.mff.cuni.cz answered ${res.status} for the ${name} model.`);
   }
 
-  const total = Number(res.headers.get("content-length")) || entry.bytes || null;
+  const total = Number(res.headers.get("content-length")) || entry.bytes;
   const hash = crypto.createHash("sha256");
   let bytes = 0;
   const count = new Transform({

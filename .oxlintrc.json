@@ -2,5 +2,9 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "vue", "import"],
   "categories": { "correctness": "error", "suspicious": "warn" },
-  "ignorePatterns": [".nuxt", ".output", "node_modules", "server/db/migrations"]
+  "rules": {
+    "no-underscore-dangle": ["warn", { "allow": ["_embedded", "_links"] }]
+  },
+  "overrides": [{ "files": ["website/.vitepress/theme/*.ts"], "rules": { "import/no-unassigned-import": "off" } }],
+  "ignorePatterns": [".nuxt", ".output", "node_modules", "server/db/migrations", "website/.vitepress/cache"]
 }
