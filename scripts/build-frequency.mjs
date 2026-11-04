@@ -14,33 +14,64 @@ import { fileURLToPath } from "node:url";
 const BASE = "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018";
 const TOP = 10_000;
 
-// Learnarr's code → the folder FrequencyWords keeps it in. Japanese is left out
-// on purpose (its list is split into word stems, not words) and Hindi has no list.
+// Learnarr's code → the folder FrequencyWords keeps it in, and whether only its
+// full list exists (most languages have a 50k one). Left out on purpose:
+// Japanese (its list is split into word stems, not words), Thai (written without
+// spaces, so its words can't be matched without a model) and Georgian (the
+// list is mis-encoded).
 const SOURCES = {
-  en: "en",
-  es: "es",
-  fr: "fr",
-  de: "de",
-  it: "it",
-  pt: "pt",
-  nl: "nl",
-  pl: "pl",
-  cs: "cs",
-  sk: "sk",
-  da: "da",
-  sv: "sv",
-  no: "no",
-  fi: "fi",
-  ru: "ru",
-  uk: "uk",
-  tr: "tr",
-  el: "el",
-  hu: "hu",
-  ro: "ro",
-  ko: "ko",
-  zh: "zh_cn",
-  ar: "ar",
+  af: { folder: "af" },
+  ar: { folder: "ar" },
+  bg: { folder: "bg" },
+  bn: { folder: "bn" },
+  bs: { folder: "bs" },
+  ca: { folder: "ca" },
+  cs: { folder: "cs" },
+  da: { folder: "da" },
+  de: { folder: "de" },
+  el: { folder: "el" },
+  en: { folder: "en" },
+  es: { folder: "es" },
+  et: { folder: "et" },
+  eu: { folder: "eu" },
+  fa: { folder: "fa" },
+  fi: { folder: "fi" },
+  fr: { folder: "fr" },
+  gl: { folder: "gl" },
+  he: { folder: "he" },
+  hi: { folder: "hi" },
+  hr: { folder: "hr" },
+  hu: { folder: "hu" },
+  hy: { folder: "hy" },
+  id: { folder: "id" },
+  is: { folder: "is" },
+  it: { folder: "it" },
+  ko: { folder: "ko" },
+  lt: { folder: "lt" },
+  lv: { folder: "lv" },
+  mk: { folder: "mk" },
+  ms: { folder: "ms" },
+  nl: { folder: "nl" },
+  no: { folder: "no" },
+  pl: { folder: "pl" },
+  pt: { folder: "pt" },
+  ro: { folder: "ro" },
+  ru: { folder: "ru" },
+  sk: { folder: "sk" },
+  sl: { folder: "sl" },
+  sq: { folder: "sq" },
+  sr: { folder: "sr" },
+  sv: { folder: "sv" },
+  ta: { folder: "ta" },
+  te: { folder: "te" },
+  tl: { folder: "tl" },
+  tr: { folder: "tr" },
+  uk: { folder: "uk" },
+  ur: { folder: "ur" },
+  vi: { folder: "vi" },
+  zh: { folder: "zh_cn" },
 };
+const FULL_ONLY = new Set(["af", "hy", "hi", "ta", "te", "tl", "ur"]);
 
 const OUT = fileURLToPath(new URL("../server/assets/frequency/", import.meta.url));
 
@@ -55,7 +86,8 @@ function isWord(word) {
 }
 
 async function build(code) {
-  const res = await fetch(`${BASE}/${SOURCES[code]}/${SOURCES[code]}_50k.txt`);
+  const { folder } = SOURCES[code];
+  const res = await fetch(`${BASE}/${folder}/${folder}_${FULL_ONLY.has(code) ? "full" : "50k"}.txt`);
   if (!res.ok) throw new Error(`${code}: ${res.status}`);
   const seen = new Set();
   for (const line of (await res.text()).split(/\r?\n/)) {
