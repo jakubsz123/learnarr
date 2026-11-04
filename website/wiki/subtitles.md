@@ -11,7 +11,8 @@ episode and press **Get subtitle**, Learnarr looks in three places, in order:
 2. **OpenSubtitles.com**, with your own free account, if the media server has nothing. Each person connects
    their account in **Settings → Account**. A free account allows a limited number of downloads a day, so
    Learnarr downloads only when you ask, and stops at the first file that works.
-3. **A file you upload**, in **Upload a subtitle** on the episode, if neither has one. `.srt`, `.vtt` and
+3. **A file you upload**, with **Upload a file** on the episode, if neither has one. **Use another subtitle
+   file** replaces one you already have, keeping your cards from it. `.srt`, `.vtt` and
    `.ass` all work.
 
 A subtitle belongs to the person who fetched it. If two people in the household learn from the same episode,

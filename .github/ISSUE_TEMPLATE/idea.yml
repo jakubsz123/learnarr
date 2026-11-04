@@ -1,0 +1,10 @@
+name: An idea
+description: Something Learnarr could do.
+labels: [idea]
+body:
+  - type: textarea
+    attributes:
+      label: What you'd like to do
+      description: Describe what you're trying to do, not only the feature. It helps find the simplest way.
+    validations:
+      required: true

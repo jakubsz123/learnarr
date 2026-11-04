@@ -18,7 +18,7 @@ pressing the button again only sends new ones.
 
 ## Export a file
 
-**Export** on the **Cards** page downloads your cards as a tab-separated file that Anki imports with _File →
+**Export for Anki** on the **Cards** page downloads your cards as a tab-separated file that Anki imports with _File →
 Import_. Pick "Tab" as the separator and map the fields in order: Term, Translation, Sentence, Note, Source.
 This works without AnkiConnect, and with other flashcard apps that read CSV or TSV.
 

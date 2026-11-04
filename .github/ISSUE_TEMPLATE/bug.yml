@@ -1,0 +1,29 @@
+name: Something's broken
+description: Learnarr does something it shouldn't, or doesn't do what it should.
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version
+      description: From System → Status (for example 0.3.0).
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Media server
+      options: [Plex, Jellyfin, Not relevant]
+  - type: input
+    attributes:
+      label: AI provider and model
+      placeholder: "e.g. Ollama with qwen3:14b"
+  - type: textarea
+    attributes:
+      label: Logs
+      description: The relevant lines of `docker logs learnarr`. Remove tokens and addresses first.
+      render: text

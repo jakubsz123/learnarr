@@ -2,9 +2,13 @@ node_modules
 .nuxt
 .output
 .git
+.github
 config
 data
 coverage
+test
+docs
+website
 *.log
 .env
 .env.*

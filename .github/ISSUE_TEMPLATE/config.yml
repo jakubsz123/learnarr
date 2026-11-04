@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Wiki
+    url: https://learnarr.rushandhurry.us/wiki/
+    about: Install, setup, troubleshooting and how Learnarr works.

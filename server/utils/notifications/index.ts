@@ -3,8 +3,6 @@ import { schema, type Db } from "../../db";
 import { sendNtfy } from "./ntfy";
 import { sendPush, type PushMessage } from "./push";
 
-export type { PushMessage } from "./push";
-
 /**
  * Tell a person something on every channel they set up: push to their devices
  * and their ntfy topic. Returns whether anything was sent; a channel that fails
