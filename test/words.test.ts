@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { frequencyBand, frequencyLabel } from "#shared/frequency";
+import { frequencyBand } from "#shared/frequency";
 import { splitWords } from "#shared/words";
 import { addUser, testDb } from "./helpers";
 import { schema, type Db } from "../server/db";
@@ -25,7 +25,6 @@ describe("frequency lists", () => {
     expect(frequencyBand(2500)).toBe("common");
     expect(frequencyBand(9000)).toBe("less");
     expect(frequencyBand(null)).toBe("rare");
-    expect(frequencyLabel(12)).toBe("Very common · #12");
   });
 });
 

@@ -1,50 +1,31 @@
+import { ANKI_FIELDS, sentenceHtml } from "#shared/sentence";
+import type { AnkiCard } from "~/utils/api";
+
 /**
  * AnkiConnect runs on the user's own computer, so Learnarr's server can't reach
  * it: the browser talks to it directly, and AnkiConnect has to list this page's
  * address in its webCorsOriginList.
  */
 
-export interface AnkiCard {
-  id: number;
-  term: string;
-  form: string;
-  translation: string;
-  partOfSpeech: string | null;
-  note: string | null;
-  sentence: string;
-  source: string;
-}
-
 const MODEL = "Learnarr";
-const FIELDS = ["Term", "Translation", "Sentence", "Note", "Source"];
 
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-/** The line as HTML, the word in bold. */
-export function sentenceHtml(sentence: string, form: string): string {
-  const text = sentence.replace(/\n/g, " ");
-  const at = text.toLocaleLowerCase().indexOf(form.toLocaleLowerCase());
-  if (!form || at === -1) return escapeHtml(text);
-  return `${escapeHtml(text.slice(0, at))}<b>${escapeHtml(text.slice(at, at + form.length))}</b>${escapeHtml(text.slice(at + form.length))}`;
-}
 
 async function call<T>(url: string, action: string, params: object = {}): Promise<T> {
   let response: Response;
   try {
     response = await fetch(url, { method: "POST", body: JSON.stringify({ action, version: 6, params }) });
   } catch {
-    throw new Error(
-      `Couldn't reach AnkiConnect at ${url}. Is Anki open with AnkiConnect installed, and is ${window.location.origin} in its webCorsOriginList?`,
-    );
+    throw new LocalError("errors.anki.unreachable", { url, origin: window.location.origin });
   }
   const data = (await response.json()) as { result: T; error: string | null };
-  if (data.error) throw new Error(`AnkiConnect: ${data.error}`);
+  if (data.error) throw new LocalError("errors.anki.error", { detail: data.error });
   return data.result;
 }
 
 async function check(url: string): Promise<number> {
   const permission = await call<{ permission: string }>(url, "requestPermission");
-  if (permission.permission !== "granted") throw new Error("Anki didn't allow Learnarr to connect.");
+  if (permission.permission !== "granted") throw new LocalError("errors.anki.denied");
   return call<number>(url, "version");
 }
 
@@ -53,7 +34,7 @@ async function ensureModel(url: string) {
   if (models.includes(MODEL)) return;
   await call(url, "createModel", {
     modelName: MODEL,
-    inOrderFields: FIELDS,
+    inOrderFields: [...ANKI_FIELDS],
     css: ".card { font-family: system-ui, sans-serif; font-size: 22px; text-align: center; } .meta { color: #777; font-size: 15px; } b { color: #d9543f; }",
     cardTemplates: [
       {
@@ -100,7 +81,7 @@ async function push(url: string, deck: string, cards: AnkiCard[]): Promise<numbe
     const [noteId] = await call<number[]>(url, "findNotes", { query });
     if (noteId) links.push({ cardId: card.id, noteId });
   }
-  if (links.length) await $fetch("/api/cards/anki", { method: "POST", body: { links } });
+  if (links.length) await api("/api/cards/anki", { method: "POST", body: { links } });
   return ids.filter(Boolean).length;
 }
 

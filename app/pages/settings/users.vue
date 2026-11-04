@@ -1,37 +1,38 @@
 <template>
   <div class="page">
     <div class="section">
-      <h1 class="page-title">Users</h1>
-      <p class="muted">
-        Everyone in the household gets their own account: their own words, cards and OpenSubtitles account.
-        They share the media server and the AI provider. Sign-up is closed, so add people here.
-      </p>
+      <h1 class="page-title">{{ $t("users.title") }}</h1>
+      <p class="muted">{{ $t("users.intro") }}</p>
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Email</th>
+              <th scope="col">{{ $t("users.name") }}</th>
+              <th scope="col">{{ $t("signIn.email") }}</th>
               <th scope="col">OpenSubtitles</th>
-              <th scope="col"><span class="sr-only">Actions</span></th>
+              <th scope="col">
+                <span class="sr-only">{{ $t("users.actions") }}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="u in users" :key="u.id">
-              <td>{{ u.name }}<span v-if="u.isAdmin" class="hint"> · admin</span></td>
+              <td>
+                {{ u.name }}<span v-if="u.isAdmin" class="hint"> · {{ $t("users.admin") }}</span>
+              </td>
               <td>{{ u.email }}</td>
               <td :class="u.opensubtitles ? 'ok' : 'muted'">
-                {{ u.opensubtitles ? "Connected" : "Not connected" }}
+                {{ u.opensubtitles ? $t("users.connected") : $t("users.notConnected") }}
               </td>
-              <td style="text-align: right">
+              <td class="actions">
                 <button
                   v-if="u.id !== me?.id"
                   type="button"
                   class="btn btn-danger"
-                  :aria-label="`Delete ${u.name}`"
+                  :aria-label="$t('users.deleteNamed', { name: u.name })"
                   @click="remove(u)"
                 >
-                  Delete
+                  {{ $t("users.delete") }}
                 </button>
               </td>
             </tr>
@@ -40,16 +41,16 @@
       </div>
     </div>
 
-    <form class="section" @submit.prevent="add">
-      <h2 class="section-title">Add someone</h2>
+    <form class="section" method="post" @submit.prevent="add">
+      <h2 class="section-title">{{ $t("users.add") }}</h2>
       <div>
         <div class="field">
-          <label for="new-name">Name</label>
+          <label for="new-name">{{ $t("users.name") }}</label>
           <input id="new-name" v-model.trim="draft.name" class="input" autocomplete="off" required />
         </div>
         <div class="field">
-          <label for="new-email">Email</label>
-          <div class="stack" style="gap: 6px">
+          <label for="new-email">{{ $t("signIn.email") }}</label>
+          <div class="stack-tight">
             <input
               id="new-email"
               v-model.trim="draft.email"
@@ -58,12 +59,12 @@
               autocomplete="off"
               required
             />
-            <span class="hint">What they sign in with. Nothing is emailed.</span>
+            <span class="hint">{{ $t("users.emailHint") }}</span>
           </div>
         </div>
         <div class="field">
-          <label for="new-password">Password</label>
-          <div class="stack" style="gap: 6px">
+          <label for="new-password">{{ $t("signIn.password") }}</label>
+          <div class="stack-tight">
             <input
               id="new-password"
               v-model="draft.password"
@@ -73,67 +74,63 @@
               autocomplete="off"
               required
             />
-            <span class="hint">At least 8 characters. Tell them it.</span>
+            <span class="hint">{{ $t("users.passwordHint") }}</span>
           </div>
         </div>
       </div>
       <div class="row">
-        <button type="submit" class="btn btn-primary" :disabled="busy">Add</button>
-        <span v-if="message" :class="ok ? 'ok' : 'danger'" role="status">{{ message }}</span>
+        <button type="submit" class="btn btn-primary" :disabled="feedback.busy.value">
+          {{ $t("users.addButton") }}
+        </button>
+        <Feedback :text="feedback.text.value" :ok="feedback.ok.value" />
       </div>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ admin: true });
-useHead({ title: "Users · Settings · Learnarr" });
+import type { Get } from "~/utils/api";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  isAdmin: boolean;
-  opensubtitles: boolean;
-}
+type User = Get<"/api/users">["users"][number];
+
+definePageMeta({ admin: true });
+const { t } = useI18n();
+useHead({ title: () => `${t("users.title")} · ${t("nav.settings")} · Learnarr` });
 
 const { me } = useMe();
 const users = ref<User[]>([]);
 const draft = reactive({ name: "", email: "", password: "" });
-const busy = ref(false);
-const message = ref("");
-const ok = ref(false);
+const feedback = useFeedback();
 
 async function load() {
-  users.value = (await $fetch<{ users: User[] }>("/api/users")).users;
+  users.value = (await api<{ users: User[] }>("/api/users")).users;
 }
 
-async function add() {
-  busy.value = true;
-  try {
-    await $fetch("/api/users", { method: "POST", body: { ...draft } });
-    message.value = `Added ${draft.email}.`;
-    ok.value = true;
-    Object.assign(draft, { name: "", email: "", password: "" });
+function add() {
+  const email = draft.email;
+  return feedback.run(
+    async () => {
+      await api("/api/users", { method: "POST", body: { ...draft } });
+      Object.assign(draft, { name: "", email: "", password: "" });
+      await load();
+    },
+    () => t("users.added", { email }),
+  );
+}
+
+function remove(user: User) {
+  if (!window.confirm(t("users.confirmDelete", { name: user.name }))) return;
+  return feedback.run(async () => {
+    await api(`/api/users/${encodeURIComponent(user.id)}`, { method: "DELETE" });
     await load();
-  } catch (e) {
-    message.value = errorMessage(e);
-    ok.value = false;
-  } finally {
-    busy.value = false;
-  }
+  });
 }
 
-async function remove(user: User) {
-  if (!window.confirm(`Delete ${user.name}? Their cards and progress go too.`)) return;
-  try {
-    await $fetch(`/api/users/${encodeURIComponent(user.id)}`, { method: "DELETE" });
-    await load();
-  } catch (e) {
-    message.value = errorMessage(e);
-    ok.value = false;
-  }
-}
-
-onMounted(() => load().catch((e) => (message.value = errorMessage(e))));
+onMounted(() => feedback.run(load));
 </script>
+
+<style scoped>
+.actions {
+  text-align: right;
+}
+</style>

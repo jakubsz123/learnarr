@@ -18,6 +18,10 @@
   --sidebar: #2b2f3a;
   --sidebar-active: #20232b;
   --sidebar-text: #d4d7de;
+  --chrome-muted: #a6abb5;
+  --chrome-strong: #ffffff;
+  --chrome-accent: #ffa58f;
+  --chrome-edge: #000000;
 
   --accent: #ff7a5c;
   --on-accent: #1a0e0a;
@@ -389,4 +393,136 @@ p {
   flex-direction: column;
   gap: 6px;
   font-weight: 500;
+}
+
+/* ─── Shared patterns ────────────────────────────────────────────────────── */
+
+.row-between {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stack-tight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.panel-title {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+/* A bordered list of rows: episodes, cards, words, checks. */
+.list-box {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.list-box > li + li {
+  border-top: 1px solid var(--border);
+}
+
+/* Rounded toggle buttons for filters and choices, pressed with aria-pressed. */
+.pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  min-width: 40px;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pill[aria-pressed="true"],
+.pill[aria-selected="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  font-weight: 500;
+}
+
+.pill-count {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+/* Underlined tabs, selected with aria-selected. */
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+
+.tab {
+  flex: none;
+  min-height: var(--tap);
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--text);
+}
+
+/* A square button holding one icon. */
+.icon-btn {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-btn.danger {
+  color: var(--danger);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+}
+
+.toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
 }

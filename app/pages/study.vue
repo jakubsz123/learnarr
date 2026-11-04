@@ -1,130 +1,84 @@
 <template>
   <div class="page study">
-    <div class="row" style="justify-content: space-between">
-      <h1 class="page-title">Study</h1>
-      <span v-if="queue.length" class="hint">{{ queue.length }} left · {{ reviewed }} done</span>
+    <div class="row-between">
+      <h1 class="page-title">{{ $t("nav.study") }}</h1>
+      <span v-if="queue.length" class="hint">{{
+        $t("study.progress", { left: queue.length, done: reviewed })
+      }}</span>
     </div>
 
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
     <article v-if="card" class="panel flashcard" aria-live="polite">
-      <span class="kind" :class="card.state">{{ card.state === "new" ? "New word" : "Review" }}</span>
-      <p class="line" :lang="card.language">
-        <Sentence :text="card.sentence" :highlight="card.form" />
-      </p>
-      <p v-if="!revealed" class="label">What does “{{ card.form }}” mean here?</p>
+      <span class="kind" :class="card.state">{{
+        card.state === "new" ? $t("study.newWord") : $t("study.review")
+      }}</span>
+      <p class="line" :lang="card.language"><Sentence :text="card.sentence" :highlight="card.form" /></p>
+      <p v-if="!revealed" class="label">{{ $t("study.question", { word: card.form }) }}</p>
 
       <div v-else class="answer">
         <p class="term" :lang="card.language">{{ card.term }}</p>
-        <form v-if="editing" class="edit" @submit.prevent="saveEdit">
-          <label class="sr-only" for="edit-translation">Translation</label>
-          <input
-            id="edit-translation"
-            ref="editInput"
-            v-model.trim="draft"
-            class="input"
-            maxlength="200"
-            required
-          />
-          <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-        <p v-else class="translation">
-          {{ card.translation }}
-          <button
-            type="button"
-            class="edit-btn"
-            aria-label="Edit the translation"
-            title="Edit"
-            @click="startEdit"
-          >
-            <AppIcon name="edit" :size="16" />
-          </button>
-        </p>
+        <TranslationEdit
+          :key="card.id"
+          class="translation"
+          :card="card"
+          @saved="(text) => (card!.translation = text)"
+        />
         <p v-if="card.partOfSpeech || card.note" class="hint">
           {{ [card.partOfSpeech, card.note].filter(Boolean).join(" · ") }}
         </p>
       </div>
       <NuxtLink v-if="card.source" :to="`/media/${card.source.serverItemId}`" class="source hint">
-        {{ sourceLabel(card.source) }}
+        {{ sourceTitle(card.source) }}
       </NuxtLink>
     </article>
 
     <div v-if="card" class="actions">
       <button v-if="!revealed" type="button" class="btn btn-primary btn-block big" @click="revealed = true">
-        Show answer
+        {{ $t("study.showAnswer") }}
       </button>
-      <div v-else class="ratings" role="group" aria-label="How well did you know it?">
+      <div v-else class="ratings" role="group" :aria-label="$t('study.howWell')">
         <button
-          v-for="r in RATINGS"
-          :key="r.value"
+          v-for="(value, name) in RATINGS"
+          :key="value"
           type="button"
           class="btn rating"
-          :class="r.class"
+          :class="name"
           :disabled="answering"
-          @click="answer(r.value)"
+          @click="answer(value)"
         >
-          <span>{{ r.label }}</span>
-          <span class="hint">{{ card.intervals[r.value] }}</span>
+          <span>{{ $t(`study.ratings.${name}`) }}</span>
+          <span class="hint">{{ intervalText(card.intervals[value]) }}</span>
         </button>
       </div>
     </div>
 
     <div v-else-if="!loading" class="panel stack done">
-      <h2 class="page-title">{{ reviewed ? "Done for now" : "Nothing to study" }}</h2>
-      <p class="muted">
-        {{
-          reviewed
-            ? "Cards you just learned come back in a few minutes; the rest when they're due."
-            : "Pick words from an episode in the library to make cards."
-        }}
-      </p>
+      <h2 class="page-title">{{ reviewed ? $t("study.doneTitle") : $t("study.emptyTitle") }}</h2>
+      <p class="muted">{{ reviewed ? $t("study.doneText") : $t("study.emptyText") }}</p>
       <div class="row">
-        <button v-if="reviewed" type="button" class="btn" @click="load">Check again</button>
-        <NuxtLink to="/library" class="btn btn-primary">Open the library</NuxtLink>
+        <button v-if="reviewed" type="button" class="btn" @click="load">{{ $t("study.checkAgain") }}</button>
+        <NuxtLink to="/library" class="btn btn-primary">{{ $t("setup.done.library") }}</NuxtLink>
       </div>
     </div>
 
     <div v-if="last" class="undo-bar">
-      <span class="hint"
-        >{{ last.card.term }}: {{ RATINGS.find((r) => r.value === last!.rating)?.label }}</span
-      >
+      <span class="hint">{{ last.card.term }}: {{ $t(`study.ratings.${ratingName(last.rating)}`) }}</span>
       <button type="button" class="btn" :disabled="answering" @click="undo">
-        <AppIcon name="undo" :size="18" /> Undo
+        <AppIcon name="undo" :size="18" /> {{ $t("study.undo") }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-useHead({ title: "Study · Learnarr" });
+import { RATINGS, type IntervalUnit, type Rating } from "#shared/srs";
+import type { StudyCard } from "~/utils/api";
 
-interface StudyCard {
-  id: number;
-  term: string;
-  form: string;
-  translation: string;
-  partOfSpeech: string | null;
-  note: string | null;
-  sentence: string;
-  language: string;
-  intervals: Record<1 | 2 | 3 | 4, string>;
-  state: "new" | "learning" | "review";
-  source: {
-    serverItemId: string;
-    title: string;
-    showTitle: string | null;
-    seasonNumber: number | null;
-    episodeNumber: number | null;
-  } | null;
-}
+const { t } = useI18n();
+useHead({ title: () => `${t("nav.study")} · Learnarr` });
 
-const RATINGS = [
-  { value: 1, label: "Again", class: "again" },
-  { value: 2, label: "Hard", class: "" },
-  { value: 3, label: "Good", class: "good" },
-  { value: 4, label: "Easy", class: "" },
-] as const;
-
+const { errorText } = useErrorMessage();
 const queue = ref<StudyCard[]>([]);
 const card = computed(() => queue.value[0]);
 const revealed = ref(false);
@@ -132,41 +86,42 @@ const loading = ref(true);
 const answering = ref(false);
 const reviewed = ref(0);
 const error = ref("");
-const last = ref<{ card: StudyCard; rating: 1 | 2 | 3 | 4 } | null>(null);
-const editing = ref(false);
-const draft = ref("");
-const editInput = ref<HTMLInputElement | null>(null);
+const last = ref<{ card: StudyCard; rating: Rating } | null>(null);
 
-const sourceLabel = (s: NonNullable<StudyCard["source"]>) =>
-  s.showTitle ? `${s.showTitle} · ${episodeLabel(s)}` : s.title;
+const ratingName = (rating: Rating) =>
+  (Object.keys(RATINGS) as (keyof typeof RATINGS)[]).find((k) => RATINGS[k] === rating)!;
+
+/** "10 min", "3 d": the server's interval, in words for the reader. */
+function intervalText(interval: { value: number; unit: IntervalUnit }) {
+  return t(`study.intervals.${interval.unit}`, { count: interval.value });
+}
 
 async function load() {
   loading.value = true;
   error.value = "";
   try {
-    queue.value = (await $fetch<{ cards: StudyCard[] }>("/api/study")).cards;
+    queue.value = (await api<{ cards: StudyCard[] }>("/api/study")).cards;
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   } finally {
     loading.value = false;
   }
 }
 
-async function answer(rating: 1 | 2 | 3 | 4) {
+async function answer(rating: Rating) {
   const current = card.value;
   if (!current || answering.value) return;
   answering.value = true;
   try {
-    await $fetch(`/api/cards/${current.id}/review`, { method: "POST", body: { rating } });
+    await api(`/api/cards/${current.id}/review`, { method: "POST", body: { rating } });
     reviewed.value++;
     last.value = { card: current, rating };
     queue.value = queue.value.slice(1);
     revealed.value = false;
-    editing.value = false;
     if (!queue.value.length) await load();
     useDueCount().refresh();
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   } finally {
     answering.value = false;
   }
@@ -178,36 +133,16 @@ async function undo() {
   if (!previous || answering.value) return;
   answering.value = true;
   try {
-    await $fetch(`/api/cards/${previous.card.id}/undo`, { method: "POST" });
+    await api(`/api/cards/${previous.card.id}/undo`, { method: "POST" });
     queue.value = [previous.card, ...queue.value.filter((c) => c.id !== previous.card.id)];
     reviewed.value--;
     revealed.value = true;
     last.value = null;
     useDueCount().refresh();
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   } finally {
     answering.value = false;
-  }
-}
-
-async function startEdit() {
-  if (!card.value) return;
-  draft.value = card.value.translation;
-  editing.value = true;
-  await nextTick();
-  editInput.value?.focus();
-}
-
-async function saveEdit() {
-  const current = card.value;
-  if (!current || !draft.value) return;
-  try {
-    await $fetch(`/api/cards/${current.id}`, { method: "PATCH", body: { translation: draft.value } });
-    current.translation = draft.value;
-    editing.value = false;
-  } catch (e) {
-    error.value = errorMessage(e);
   }
 }
 
@@ -223,7 +158,7 @@ function onKey(event: KeyboardEvent) {
     event.preventDefault();
     revealed.value = true;
   } else if (revealed.value && ["1", "2", "3", "4"].includes(event.key)) {
-    answer(Number(event.key) as 1 | 2 | 3 | 4);
+    answer(Number(event.key) as Rating);
   }
 }
 
@@ -329,25 +264,6 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 .term {
   font-size: 17px;
   color: var(--muted);
-}
-
-.edit {
-  display: flex;
-  gap: 8px;
-}
-
-.edit-btn {
-  width: 32px;
-  height: 32px;
-  vertical-align: middle;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: var(--radius);
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
 }
 
 .source {

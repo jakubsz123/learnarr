@@ -1,41 +1,40 @@
 <template>
   <div class="page">
-    <div class="row" style="justify-content: space-between">
-      <h1 class="page-title">Status</h1>
+    <div class="row-between">
+      <h1 class="page-title">{{ $t("nav.status") }}</h1>
       <button type="button" class="btn" :disabled="loading" @click="load">
-        <AppIcon name="refresh" :size="18" /> {{ loading ? "Checking…" : "Check again" }}
+        <AppIcon name="refresh" :size="18" /> {{ loading ? $t("status.checking") : $t("status.checkAgain") }}
       </button>
     </div>
 
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
     <section v-if="status" class="section">
-      <h2 class="section-title">Health</h2>
-      <ul class="checks">
-        <li v-for="check in status.checks" :key="check.name" class="check">
+      <h2 class="section-title">{{ $t("status.health") }}</h2>
+      <ul class="list-box">
+        <li v-for="check in status.checks" :key="check.id" class="check">
           <span class="dot" :class="check.state" aria-hidden="true" />
-          <span class="stack" style="gap: 2px; flex: 1; min-width: 0">
-            <strong>{{ check.name }}</strong>
-            <span class="hint">{{ check.detail }}</span>
+          <span class="stack-tight grow">
+            <strong>{{ $t(`status.checks.${check.id}.name`, check.params) }}</strong>
+            <span class="hint">{{ checkDetail(check) }}</span>
           </span>
-          <NuxtLink v-if="check.fix" :to="check.fix" class="btn">Fix</NuxtLink>
-          <span class="sr-only">{{ check.state }}</span>
+          <NuxtLink v-if="check.fix" :to="check.fix" class="btn">{{ $t("status.fix") }}</NuxtLink>
+          <span class="sr-only">{{ $t(`status.states.${check.state}`) }}</span>
         </li>
       </ul>
     </section>
-    <p v-else-if="loading" class="muted">Checking the media server and AI provider…</p>
+    <p v-else-if="loading" class="muted">{{ $t("status.checkingLong") }}</p>
 
     <section v-if="status?.languages.length" class="section">
-      <h2 class="section-title">Languages</h2>
-      <ul class="checks">
+      <h2 class="section-title">{{ $t("account.languages") }}</h2>
+      <ul class="list-box">
         <li v-for="lang in status.languages" :key="lang.code" class="check">
           <span class="dot" :class="modelDot(lang.model)" aria-hidden="true" />
-          <span class="stack" style="gap: 2px; flex: 1; min-width: 0">
-            <strong>{{ lang.name }}</strong>
+          <span class="stack-tight grow">
+            <strong>{{ languageName(lang.code) }}</strong>
             <span class="hint">
-              {{ lang.learners }} {{ lang.learners === 1 ? "learner" : "learners" }} ·
-              {{ modelText(lang.model) }} ·
-              {{ lang.frequencyList ? "word list included" : "no word list" }}
+              {{ $t("status.learners", { count: lang.learners }) }} · {{ modelText(lang.model) }} ·
+              {{ lang.frequencyList ? $t("status.wordList") : $t("status.noWordList") }}
             </span>
           </span>
           <button
@@ -44,72 +43,67 @@
             class="btn"
             @click="download(lang.code)"
           >
-            {{ lang.model.state === "failed" ? "Try again" : "Download" }}
+            {{ lang.model.state === "failed" ? $t("common.tryAgain") : $t("status.download") }}
           </button>
         </li>
       </ul>
     </section>
 
     <section v-if="status" class="section">
-      <h2 class="section-title">About</h2>
+      <h2 class="section-title">{{ $t("status.about") }}</h2>
       <dl class="about">
-        <dt>Version</dt>
+        <dt>{{ $t("status.version") }}</dt>
         <dd>Learnarr {{ status.about.version }}</dd>
-        <dt>Running on</dt>
+        <dt>{{ $t("status.runningOn") }}</dt>
         <dd>Node {{ status.about.node }} · {{ status.about.platform }}</dd>
-        <dt>Data folder</dt>
+        <dt>{{ $t("status.dataFolder") }}</dt>
         <dd>{{ status.about.dataDir }}</dd>
-        <dt>Database</dt>
+        <dt>{{ $t("status.database") }}</dt>
         <dd>
           {{
             status.about.databaseBytes === null
               ? "—"
-              : `${(status.about.databaseBytes / 1048576).toFixed(1)} MB`
+              : $t("status.megabytes", {
+                  size: $n(status.about.databaseBytes / 1048576, { maximumFractionDigits: 1 }),
+                })
           }}
         </dd>
-        <dt>Users · cards</dt>
+        <dt>{{ $t("status.usersAndCards") }}</dt>
         <dd>{{ status.about.users }} · {{ status.about.cards }}</dd>
-        <dt>Uptime</dt>
+        <dt>{{ $t("status.uptime") }}</dt>
         <dd>{{ uptime }}</dd>
-        <dt>Language data</dt>
-        <dd>
-          Word lists from
-          <a href="https://github.com/hermitdave/FrequencyWords" rel="noopener">FrequencyWords</a>
-          (CC BY-SA 4.0). Lemmas by <a href="https://github.com/ufal/udpipe" rel="noopener">UDPipe</a> with
-          the
-          <a href="http://hdl.handle.net/11234/1-3131" rel="noopener">Universal Dependencies 2.5 models</a>
-          (CC BY-NC-SA 4.0).
-        </dd>
+        <dt>{{ $t("status.languageData") }}</dt>
+        <i18n-t keypath="status.credits" tag="dd">
+          <template #frequency>
+            <a href="https://github.com/hermitdave/FrequencyWords" rel="noopener">FrequencyWords</a>
+          </template>
+          <template #udpipe>
+            <a href="https://github.com/ufal/udpipe" rel="noopener">UDPipe</a>
+          </template>
+          <template #models>
+            <a href="http://hdl.handle.net/11234/1-3131" rel="noopener">Universal Dependencies 2.5</a>
+          </template>
+          <template #wiktionary>
+            <a href="https://en.wiktionary.org" rel="noopener">Wiktionary</a>
+          </template>
+        </i18n-t>
       </dl>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { ModelStatus, SystemStatus } from "~/utils/api";
+
+type Check = SystemStatus["checks"][number];
+
 definePageMeta({ admin: true });
-useHead({ title: "Status · System · Learnarr" });
+const { t } = useI18n();
+useHead({ title: () => `${t("nav.status")} · ${t("nav.system")} · Learnarr` });
 
-type ModelStatus =
-  | { state: "installed" | "missing" | "unsupported" }
-  | { state: "downloading"; percent: number | null }
-  | { state: "failed"; message: string };
-
-interface Status {
-  languages: { code: string; name: string; learners: number; model: ModelStatus; frequencyList: boolean }[];
-  checks: { name: string; state: "ok" | "warning" | "error"; detail: string; fix?: string }[];
-  about: {
-    version: string;
-    node: string;
-    platform: string;
-    dataDir: string;
-    databaseBytes: number | null;
-    users: number;
-    cards: number;
-    uptimeSeconds: number;
-  };
-}
-
-const status = ref<Status | null>(null);
+const { languageName } = useLanguageNames();
+const { errorText, reasonText } = useErrorMessage();
+const status = ref<SystemStatus | null>(null);
 const loading = ref(false);
 const error = ref("");
 
@@ -118,8 +112,14 @@ const uptime = computed(() => {
   const days = Math.floor(s / 86400);
   const hours = Math.floor((s % 86400) / 3600);
   const minutes = Math.floor((s % 3600) / 60);
-  return days ? `${days} d ${hours} h` : hours ? `${hours} h ${minutes} min` : `${minutes} min`;
+  if (days) return t("status.uptimeDays", { days, hours });
+  return hours ? t("status.uptimeHours", { hours, minutes }) : t("status.uptimeMinutes", { minutes });
 });
+
+function checkDetail(check: Check) {
+  if (check.error) return reasonText(check.error, check.error.message);
+  return t(`status.checks.${check.id}.${check.state}`, check.params);
+}
 
 function modelDot(model: ModelStatus) {
   return model.state === "installed" ? "ok" : model.state === "failed" ? "error" : "warning";
@@ -127,26 +127,23 @@ function modelDot(model: ModelStatus) {
 
 function modelText(model: ModelStatus) {
   switch (model.state) {
-    case "installed":
-      return "model installed";
     case "downloading":
-      return `downloading the model${model.percent !== null ? ` (${model.percent}%)` : ""}`;
+      return model.percent !== null
+        ? t("status.model.downloadingPercent", { percent: model.percent })
+        : t("status.model.downloading");
     case "failed":
-      return model.message;
-    case "missing":
-      return "model downloads when first needed";
-    case "unsupported":
-      return "no model yet, so no “% you know”";
+      return reasonText(model.error, model.message);
+    default:
+      return t(`status.model.${model.state}`);
   }
-  return "";
 }
 
 async function download(code: string) {
   try {
-    await $fetch(`/api/system/languages/${code}/model`, { method: "POST" });
+    await api(`/api/system/languages/${code}/model`, { method: "POST" });
     await load();
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   }
 }
 
@@ -154,9 +151,9 @@ async function load() {
   loading.value = true;
   error.value = "";
   try {
-    status.value = await $fetch<Status>("/api/system/status");
+    status.value = await api<SystemStatus>("/api/system/status");
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   } finally {
     loading.value = false;
   }
@@ -166,25 +163,15 @@ onMounted(load);
 </script>
 
 <style scoped>
-.checks {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
 .check {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
 }
 
-.check:last-child {
-  border-bottom: 0;
+.grow {
+  flex: 1;
 }
 
 .dot {

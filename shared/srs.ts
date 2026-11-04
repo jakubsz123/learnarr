@@ -12,6 +12,9 @@ export const RATING_VALUES = Object.values(RATINGS) as Rating[];
 export const CARD_STATES = ["new", "learning", "review"] as const;
 export type CardState = (typeof CARD_STATES)[number];
 
+/** The ways the Cards page can narrow the list: by state, or the suspended ones. */
+export const CARD_FILTERS = ["all", ...CARD_STATES, "suspended"] as const;
+
 /** A card reviewed out to three weeks counts as a word the learner knows. */
 export const MATURE_DAYS = 21;
 
@@ -86,22 +89,28 @@ export function schedule(card: SrsState, rating: Rating, now: number): Scheduled
   return { ...card, state: "review", ease, intervalDays: days, reps, due: now + days * DAY };
 }
 
-/** "10 min", "3 d", "2 mo": how long an interval is, briefly. */
-function intervalLabel(ms: number): string {
+export type IntervalUnit = "minute" | "hour" | "day" | "month" | "year";
+
+/** How long an interval is, in the largest unit that fits ("10 min", "3 d", "2 mo" once worded). */
+export function roughInterval(ms: number): { value: number; unit: IntervalUnit } {
   const minutes = Math.round(ms / MINUTE);
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return { value: minutes, unit: "minute" };
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} h`;
+  if (hours < 24) return { value: hours, unit: "hour" };
   const days = Math.round(ms / DAY);
-  if (days < 31) return `${days} d`;
+  if (days < 31) return { value: days, unit: "day" };
   const months = Math.round(days / 30);
-  return months < 12 ? `${months} mo` : `${(days / 365).toFixed(1)} y`;
+  return months < 12
+    ? { value: months, unit: "month" }
+    : { value: Math.round((days / 365) * 10) / 10, unit: "year" };
 }
 
 /** How long each answer would put the card away for, for the buttons' labels. */
-export function previewIntervals(card: SrsState, now: number): Record<Rating, string> {
-  const out = {} as Record<Rating, string>;
-  for (const rating of [1, 2, 3, 4] as Rating[])
-    out[rating] = intervalLabel(schedule(card, rating, now).due - now);
+export function previewIntervals(
+  card: SrsState,
+  now: number,
+): Record<Rating, ReturnType<typeof roughInterval>> {
+  const out = {} as Record<Rating, ReturnType<typeof roughInterval>>;
+  for (const rating of RATING_VALUES) out[rating] = roughInterval(schedule(card, rating, now).due - now);
   return out;
 }

@@ -1,3 +1,4 @@
+import { coverageOfVocab } from "#shared/coverage";
 import type { Cue } from "#shared/subtitles";
 import { isCounted, isWordText, splitWords, wordKey } from "#shared/words";
 import type { LemmaToken } from "../db/schema";
@@ -72,12 +73,5 @@ export function buildTranscript(
 
 /** Share of the counted uses of words that the learner knows, 0–1; null without lemmas. */
 export function transcriptCoverage(transcript: Transcript): number | null {
-  if (!transcript.lemmatised) return null;
-  let total = 0;
-  let known = 0;
-  for (const entry of transcript.vocab) {
-    total += entry.count;
-    if (entry.state === "known") known += entry.count;
-  }
-  return total ? known / total : null;
+  return transcript.lemmatised ? coverageOfVocab(transcript.vocab) : null;
 }

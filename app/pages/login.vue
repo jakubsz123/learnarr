@@ -1,26 +1,28 @@
 <template>
   <BrandMark :size="36" />
-  <form class="panel login" @submit.prevent="signIn">
-    <h1 class="page-title">Sign in</h1>
+  <!-- POST, so a tap before the page is ready never puts the password in the address. -->
+  <form class="panel login" method="post" @submit.prevent="signIn">
+    <h1 class="page-title">{{ $t("signIn.title") }}</h1>
     <label class="stack-label">
-      Email
+      {{ $t("signIn.email") }}
       <input v-model.trim="email" class="input" type="email" autocomplete="email" required />
     </label>
     <label class="stack-label">
-      Password
+      {{ $t("signIn.password") }}
       <input v-model="password" class="input" type="password" autocomplete="current-password" required />
     </label>
     <p v-if="error" class="danger" role="alert">{{ error }}</p>
     <button type="submit" class="btn btn-primary btn-block" :disabled="busy">
-      {{ busy ? "Signing in…" : "Sign in" }}
+      {{ busy ? $t("signIn.busy") : $t("signIn.submit") }}
     </button>
-    <p class="hint">No account? Ask whoever runs this server to add you.</p>
+    <p class="hint">{{ $t("signIn.noAccount") }}</p>
   </form>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: "plain" });
-useHead({ title: "Sign in · Learnarr" });
+const { t } = useI18n();
+useHead({ title: () => `${t("signIn.title")} · Learnarr` });
 
 const route = useRoute();
 const email = ref("");
@@ -28,21 +30,22 @@ const password = ref("");
 const busy = ref(false);
 const error = ref("");
 
+/** Only a path on this server: "//host" or "/\host" would leave it. */
+function safeRedirect(value: unknown): string {
+  return typeof value === "string" && /^\/(?![/\\])/.test(value) ? value : "/";
+}
+
 async function signIn() {
   busy.value = true;
   error.value = "";
   const result = await authClient.signIn.email({ email: email.value, password: password.value });
   busy.value = false;
   if (result.error) {
-    error.value = result.error.message || "That email and password don't match an account.";
+    error.value = authErrorMessage(result.error, t);
     return;
   }
   await useMe().refresh();
-  const redirect =
-    typeof route.query.redirect === "string" && route.query.redirect.startsWith("/")
-      ? route.query.redirect
-      : "/";
-  await navigateTo(redirect);
+  await navigateTo(safeRedirect(route.query.redirect));
 }
 </script>
 

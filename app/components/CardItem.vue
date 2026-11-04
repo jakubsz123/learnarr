@@ -1,24 +1,10 @@
 <template>
   <article class="card-item" :class="{ suspended: card.suspended }">
-    <div class="card-top">
+    <div class="row-between">
       <span class="term" :lang="card.language">{{ card.term }}</span>
       <span class="state" :class="card.state">{{ stateLabel }}</span>
     </div>
-    <form v-if="editing" class="edit" @submit.prevent="save">
-      <label class="sr-only" :for="`tr-${card.id}`">Translation</label>
-      <input :id="`tr-${card.id}`" ref="input" v-model.trim="draft" class="input" maxlength="200" required />
-      <button type="submit" class="btn btn-primary" :disabled="saving">Save</button>
-      <button type="button" class="btn" @click="editing = false">Cancel</button>
-    </form>
-    <button
-      v-else
-      type="button"
-      class="translation"
-      :aria-label="`Edit translation: ${card.translation}`"
-      @click="edit"
-    >
-      {{ card.translation }}
-    </button>
+    <TranslationEdit :card="card" @saved="(translation) => emit('updated', { ...card, translation })" />
     <p class="sentence" :lang="card.language"><Sentence :text="card.sentence" :highlight="card.form" /></p>
     <p v-if="card.partOfSpeech || card.note" class="hint">
       {{ [card.partOfSpeech, card.note].filter(Boolean).join(" · ") }}
@@ -27,46 +13,26 @@
   </article>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="C extends Card">
+import { MATURE_DAYS } from "#shared/srs";
 import type { Card } from "~/utils/api";
 
-const props = defineProps<{ card: Card }>();
-const emit = defineEmits<{ updated: [card: Card] }>();
+/** A card as a list row: its word, translation (tap to correct), line and when it's due. */
+const props = defineProps<{ card: C }>();
+const emit = defineEmits<{ updated: [card: C] }>();
 
-const editing = ref(false);
-const saving = ref(false);
-const draft = ref("");
-const input = ref<HTMLInputElement | null>(null);
+const { t } = useI18n();
+const DAY = 86_400_000;
 
 const stateLabel = computed(() => {
-  if (props.card.suspended) return "Suspended";
-  if (props.card.state === "new") return "New";
-  if (props.card.intervalDays >= 21) return "Known";
-  const days = Math.round((new Date(props.card.due).getTime() - Date.now()) / 86_400_000);
-  return days <= 0 ? "Due" : days === 1 ? "Due tomorrow" : `Due in ${days} days`;
+  const card = props.card;
+  if (card.suspended) return t("cards.state.suspended");
+  if (card.state === "new") return t("cards.state.new");
+  if (card.intervalDays >= MATURE_DAYS) return t("cards.state.known");
+  const days = Math.round((new Date(card.due).getTime() - Date.now()) / DAY);
+  if (days <= 0) return t("cards.state.due");
+  return days === 1 ? t("cards.state.dueTomorrow") : t("cards.state.dueIn", { count: days });
 });
-
-async function edit() {
-  draft.value = props.card.translation;
-  editing.value = true;
-  await nextTick();
-  input.value?.focus();
-}
-
-async function save() {
-  if (!draft.value) return;
-  saving.value = true;
-  try {
-    const card = await $fetch<Card>(`/api/cards/${props.card.id}`, {
-      method: "PATCH",
-      body: { translation: draft.value },
-    });
-    emit("updated", card);
-    editing.value = false;
-  } finally {
-    saving.value = false;
-  }
-}
 </script>
 
 <style scoped>
@@ -78,13 +44,6 @@ async function save() {
 
 .card-item.suspended {
   opacity: 0.6;
-}
-
-.card-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
 }
 
 .term {
@@ -102,24 +61,7 @@ async function save() {
   color: var(--accent-text);
 }
 
-.translation {
-  justify-self: start;
-  padding: 0;
-  border: 0;
-  border-bottom: 1px dashed var(--border);
-  background: none;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: text;
-}
-
 .sentence {
   color: var(--muted);
-}
-
-.edit {
-  display: flex;
-  gap: 8px;
 }
 </style>

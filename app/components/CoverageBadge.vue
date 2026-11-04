@@ -1,5 +1,5 @@
 <template>
-  <span class="coverage" :class="[tier?.id ?? 'none', size]" :title="title">
+  <span class="coverage" :class="[tier ?? 'none', size]" :title="title">
     <svg :width="px" :height="px" viewBox="0 0 36 36" aria-hidden="true">
       <circle cx="18" cy="18" r="15" class="track" />
       <circle
@@ -13,8 +13,8 @@
         transform="rotate(-90 18 18)"
       />
     </svg>
-    <span class="value">{{ formatCoverage(coverage) }}</span>
-    <span v-if="size === 'lg'" class="label">{{ tier?.label ?? emptyLabel }}</span>
+    <span class="value" aria-hidden="true">{{ formatCoverage(coverage) }}</span>
+    <span v-if="size === 'lg'" class="label" aria-hidden="true">{{ label }}</span>
     <span class="sr-only">{{ title }}</span>
   </span>
 </template>
@@ -22,18 +22,26 @@
 <script setup lang="ts">
 import { coverageTier, formatCoverage } from "#shared/coverage";
 
+/** "% you know" as a ring, coloured by how comfortable the episode would be to watch. */
 const props = withDefaults(
   defineProps<{ coverage: number | null; size?: "sm" | "lg"; emptyLabel?: string }>(),
-  { size: "sm", emptyLabel: "Not scored yet" },
+  {
+    size: "sm",
+    emptyLabel: undefined,
+  },
 );
 
+const { t } = useI18n();
 const tier = computed(() => coverageTier(props.coverage));
 const px = computed(() => (props.size === "lg" ? 44 : 22));
 const dash = computed(() => Math.floor((props.coverage ?? 0) * 100));
+const label = computed(() =>
+  tier.value ? t(`coverage.tiers.${tier.value}`) : (props.emptyLabel ?? t("coverage.notScored")),
+);
 const title = computed(() =>
   props.coverage === null
-    ? `You know: ${props.emptyLabel.toLowerCase()}`
-    : `You know ${formatCoverage(props.coverage)} of the words: ${tier.value?.label.toLowerCase()}`,
+    ? t("coverage.titleEmpty", { reason: label.value })
+    : t("coverage.title", { percent: formatCoverage(props.coverage), tier: label.value }),
 );
 </script>
 

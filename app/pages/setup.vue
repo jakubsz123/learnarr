@@ -1,40 +1,40 @@
 <template>
   <BrandMark :size="36" />
 
-  <ol class="steps" aria-label="Setup steps">
+  <ol class="steps" :aria-label="$t('setup.steps')">
     <li
-      v-for="(label, i) in STEPS"
-      :key="label"
+      v-for="(name, i) in STEPS"
+      :key="name"
       class="step"
       :class="{ 'is-current': i === step, 'is-done': i < step }"
       :aria-current="i === step ? 'step' : undefined"
     >
       <span class="step-dot" aria-hidden="true">{{ i < step ? "✓" : i + 1 }}</span>
-      {{ label }}
+      {{ $t(`setup.stepNames.${name}`) }}
     </li>
   </ol>
 
-  <section class="panel wizard" :aria-labelledby="`step-title`">
-    <form v-if="step === 0" class="stack" @submit.prevent="createAccount">
-      <h1 id="step-title">Welcome to Learnarr</h1>
-      <p class="muted">
-        Create the admin account for this server. You'll add the rest of your household later.
-      </p>
-      <label class="stack-label"
-        >Name<input v-model.trim="account.name" class="input" autocomplete="name" required
-      /></label>
+  <section class="panel wizard" aria-labelledby="step-title">
+    <form v-if="step === 0" class="stack" method="post" @submit.prevent="createAccount">
+      <h1 id="step-title">{{ $t("setup.account.title") }}</h1>
+      <p class="muted">{{ $t("setup.account.intro") }}</p>
       <label class="stack-label">
-        Email<input v-model.trim="account.email" class="input" type="email" autocomplete="email" required />
+        {{ $t("setup.account.name") }}
+        <input v-model.trim="account.name" class="input" autocomplete="name" required />
       </label>
       <label class="stack-label">
-        Password
+        {{ $t("signIn.email") }}
+        <input v-model.trim="account.email" class="input" type="email" autocomplete="email" required />
+      </label>
+      <label class="stack-label">
+        {{ $t("signIn.password") }}
         <input
           v-model="account.password"
           class="input"
           type="password"
           autocomplete="new-password"
           minlength="8"
-          placeholder="At least 8 characters"
+          :placeholder="$t('setup.account.passwordHint')"
           required
         />
       </label>
@@ -42,76 +42,74 @@
       <div class="nav">
         <span />
         <button type="submit" class="btn btn-primary" :disabled="busy">
-          {{ busy ? "Creating…" : "Create account" }}
+          {{ busy ? $t("setup.account.creating") : $t("setup.account.create") }}
         </button>
       </div>
     </form>
 
     <div v-else-if="step === 1" class="stack">
-      <h1 id="step-title">Connect your media server</h1>
-      <p class="muted">
-        Learnarr reads your library and the subtitles that come with it. Everyone here shares it.
-      </p>
+      <h1 id="step-title">{{ $t("setup.media.title") }}</h1>
+      <p class="muted">{{ $t("setup.media.intro") }}</p>
       <MediaServerForm @connected="mediaConnected = true" />
       <div class="nav">
         <span />
         <button type="button" class="btn" :class="{ 'btn-primary': mediaConnected }" @click="step = 2">
-          {{ mediaConnected ? "Continue" : "Skip for now" }}
+          {{ mediaConnected ? $t("setup.continue") : $t("setup.skip") }}
         </button>
       </div>
     </div>
 
     <div v-else-if="step === 2" class="stack">
-      <h1 id="step-title">Pick an AI provider</h1>
-      <p class="muted">
-        It picks the words worth learning and translates them. Use a cloud model or run one yourself.
-      </p>
+      <h1 id="step-title">{{ $t("setup.ai.title") }}</h1>
+      <p class="muted">{{ $t("setup.ai.intro") }}</p>
       <AiProviderForm ref="aiForm" />
       <p v-if="error" class="danger" role="alert">{{ error }}</p>
       <div class="nav">
-        <button type="button" class="btn" @click="back">Back</button>
+        <button type="button" class="btn" @click="back">{{ $t("common.back") }}</button>
         <div class="row">
-          <button type="button" class="btn" @click="step = 3">Skip for now</button>
+          <button type="button" class="btn" @click="step = 3">{{ $t("setup.skip") }}</button>
           <button type="button" class="btn btn-primary" :disabled="busy" @click="saveAi">
-            {{ busy ? "Saving…" : "Continue" }}
+            {{ busy ? $t("setup.saving") : $t("setup.continue") }}
           </button>
         </div>
       </div>
     </div>
 
     <form v-else-if="step === 3" class="stack" @submit.prevent="saveLanguages">
-      <h1 id="step-title">Your languages</h1>
-      <p class="muted">Everyone in the household picks their own; these are yours.</p>
+      <h1 id="step-title">{{ $t("setup.languages.title") }}</h1>
+      <p class="muted">{{ $t("setup.languages.intro") }}</p>
       <LanguageFields v-model="languages" />
       <p v-if="error" class="danger" role="alert">{{ error }}</p>
       <div class="nav">
-        <button type="button" class="btn" @click="back">Back</button>
+        <button type="button" class="btn" @click="back">{{ $t("common.back") }}</button>
         <button type="submit" class="btn btn-primary" :disabled="busy">
-          {{ busy ? "Saving…" : "Finish" }}
+          {{ busy ? $t("setup.saving") : $t("setup.finish") }}
         </button>
       </div>
     </form>
 
     <div v-else class="stack">
-      <h1 id="step-title">You're set</h1>
-      <p class="muted">Pick a show from your library, get its words and start studying.</p>
+      <h1 id="step-title">{{ $t("setup.done.title") }}</h1>
+      <p class="muted">{{ $t("setup.done.intro") }}</p>
       <div class="row">
-        <NuxtLink to="/library" class="btn btn-primary">Open the library</NuxtLink>
-        <NuxtLink to="/settings/users" class="btn">Add household members</NuxtLink>
+        <NuxtLink to="/library" class="btn btn-primary">{{ $t("setup.done.library") }}</NuxtLink>
+        <NuxtLink to="/settings/users" class="btn">{{ $t("setup.done.household") }}</NuxtLink>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import type { LanguageChoice } from "~/components/LanguageFields.vue";
+import type { Level } from "#shared/languages";
 
 definePageMeta({ layout: "plain" });
-useHead({ title: "Set up Learnarr" });
+const { t, locale } = useI18n();
+useHead({ title: () => t("setup.pageTitle") });
 
-const STEPS = ["Account", "Media server", "AI", "Languages"];
+const STEPS = ["account", "media", "ai", "languages"] as const;
 
 const { me, refresh } = useMe();
+const { errorText } = useErrorMessage();
 const step = ref(me.value ? 1 : 0);
 const busy = ref(false);
 const error = ref("");
@@ -130,7 +128,7 @@ async function createAccount() {
   const result = await authClient.signUp.email({ ...account });
   busy.value = false;
   if (result.error) {
-    error.value = result.error.message || "Couldn't create the account.";
+    error.value = authErrorMessage(result.error, t);
     return;
   }
   account.password = "";
@@ -149,21 +147,24 @@ async function saveAi() {
   if (!error.value) step.value = 3;
 }
 
-const languages = ref<LanguageChoice>({
+const languages = ref({
   learningLanguage: me.value?.learningLanguage ?? "es",
   nativeLanguage: me.value?.nativeLanguage ?? "en",
-  level: me.value?.level ?? "intermediate",
+  level: (me.value?.level ?? "intermediate") as Level,
 });
 
 async function saveLanguages() {
   busy.value = true;
   error.value = "";
   try {
-    await $fetch("/api/me", { method: "PUT", body: languages.value });
+    await api("/api/me", {
+      method: "PUT",
+      body: { ...languages.value, locale: locale.value, onboarded: true },
+    });
     await refresh();
     step.value = 4;
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   } finally {
     busy.value = false;
   }

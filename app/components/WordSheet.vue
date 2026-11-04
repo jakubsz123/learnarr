@@ -1,32 +1,72 @@
 <template>
-  <aside class="sheet panel" role="dialog" aria-modal="false" :aria-label="`The word ${shown}`">
+  <aside
+    class="sheet panel"
+    role="dialog"
+    aria-modal="false"
+    :aria-label="$t('wordSheet.label', { word: shown })"
+  >
     <div class="sheet-head">
-      <div class="stack" style="gap: 2px; min-width: 0">
+      <div class="stack-tight">
         <span class="word" :lang="language">{{ shown }}</span>
-        <span v-if="dictionaryForm" class="hint" :lang="language">from {{ dictionaryForm }}</span>
+        <span v-if="dictionaryForm" class="hint" :lang="language">{{
+          $t("wordSheet.from", { word: dictionaryForm })
+        }}</span>
       </div>
-      <button ref="closeButton" type="button" class="icon-close" aria-label="Close" @click="emit('close')">
+      <button
+        ref="closeButton"
+        type="button"
+        class="icon-btn close"
+        :aria-label="$t('common.close')"
+        @click="emit('close')"
+      >
         <AppIcon name="x" />
       </button>
     </div>
 
     <div class="row facts">
-      <span class="fact" :class="stateClass">{{ stateLabel }}</span>
-      <span class="fact">{{ frequencyLabel(entry.rank) }}</span>
-      <span v-if="entry.count > 1" class="fact">{{ entry.count }}× here</span>
+      <span class="fact" :class="`state-${entry.state ?? 'new'}`">{{
+        $t(`wordSheet.state.${entry.state ?? "new"}`)
+      }}</span>
+      <span class="fact">{{ frequencyText(entry.rank) }}</span>
+      <span v-if="entry.count > 1" class="fact">{{ $t("wordSheet.usesHere", { count: entry.count }) }}</span>
     </div>
 
     <p v-if="line" class="line" :lang="language"><Sentence :text="line" :highlight="usedForm" /></p>
 
-    <div v-if="card" class="card-answer">
+    <div v-if="card" class="stack-tight">
       <p class="translation">{{ card.translation }}</p>
       <p v-if="card.note || card.partOfSpeech" class="hint">
         {{ [card.partOfSpeech, card.note].filter(Boolean).join(" · ") }}
       </p>
       <p class="hint">
-        {{ card.term === shown ? "In your cards." : `In your cards as “${card.term}”.` }}
+        {{ card.term === shown ? $t("wordSheet.inCards") : $t("wordSheet.inCardsAs", { term: card.term }) }}
       </p>
     </div>
+
+    <details class="dictionary" @toggle="lookUp">
+      <summary>{{ $t("wordSheet.dictionary") }}</summary>
+      <p v-if="definitions === null" class="hint">{{ $t("common.loading") }}</p>
+      <p v-else-if="!definitions.reached" class="hint">{{ $t("wordSheet.dictionaryOffline") }}</p>
+      <p v-else-if="!definitions.entries.length" class="hint">{{ $t("wordSheet.dictionaryNothing") }}</p>
+      <div v-for="(d, i) in definitions?.entries ?? []" :key="i" class="definition">
+        <p class="hint">
+          {{ d.partOfSpeech
+          }}<template v-if="d.formOf"> · {{ $t("wordSheet.formOf", { word: d.formOf }) }}</template>
+        </p>
+        <ol>
+          <li v-for="(text, j) in d.definitions" :key="j">{{ text }}</li>
+        </ol>
+      </div>
+      <a
+        v-if="definitions?.reached"
+        class="hint"
+        :href="`https://en.wiktionary.org/wiki/${encodeURIComponent(definitions.word ?? entry.word)}`"
+        target="_blank"
+        rel="noopener"
+      >
+        Wiktionary
+      </a>
+    </details>
 
     <div class="actions">
       <button
@@ -36,7 +76,8 @@
         :aria-pressed="entry.state === 'known' ? 'true' : 'false'"
         @click="emit('known', entry.state !== 'known')"
       >
-        <AppIcon name="check" :size="18" /> {{ entry.state === "known" ? "Known" : "I know this" }}
+        <AppIcon name="check" :size="18" />
+        {{ entry.state === "known" ? $t("wordSheet.known") : $t("wordSheet.iKnow") }}
       </button>
       <button
         v-if="!card"
@@ -45,7 +86,7 @@
         :disabled="busy || !canCard"
         @click="emit('card')"
       >
-        <AppIcon name="plus" :size="18" /> {{ busy ? "Asking the AI…" : "Make a card" }}
+        <AppIcon name="plus" :size="18" /> {{ busy ? $t("wordSheet.asking") : $t("wordSheet.makeCard") }}
       </button>
     </div>
     <p v-if="error" class="hint danger" role="alert">{{ error }}</p>
@@ -53,9 +94,13 @@
 </template>
 
 <script setup lang="ts">
-import { frequencyLabel } from "#shared/frequency";
-import type { Card, VocabEntry } from "~/utils/api";
+import type { Card, Get, VocabEntry } from "~/utils/api";
 
+/**
+ * A tapped word: its dictionary form, how common it is, the line, its card or
+ * a definition, and the two things to do with it. A sheet at the bottom of a
+ * phone, a panel in the corner of a wider screen; Escape closes it.
+ */
 const props = defineProps<{
   entry: VocabEntry;
   /** The form as used where it was tapped. */
@@ -70,22 +115,37 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ close: []; known: [known: boolean]; card: [] }>();
 
+const { frequencyText } = useFrequencyText();
 const shown = computed(() => props.usedForm || props.entry.forms[0] || props.entry.word);
 const dictionaryForm = computed(() =>
   props.lemmatised && props.entry.word !== shown.value.toLocaleLowerCase() ? props.entry.word : "",
 );
-const stateLabel = computed(() =>
-  props.entry.state === "known" ? "Known" : props.entry.state === "learning" ? "Learning" : "New to you",
+
+const definitions = ref<Get<"/api/dictionary"> | null>(null);
+async function lookUp(event: Event) {
+  if (!(event.target as HTMLDetailsElement).open || definitions.value) return;
+  const words = [props.entry.word, ...props.entry.forms].slice(0, 3).join(",");
+  definitions.value = await api<Definitions>("/api/dictionary", {
+    query: { language: props.language, words },
+  }).catch(() => ({
+    reached: false,
+    word: props.entry.word,
+    entries: [],
+  }));
+}
+watch(
+  () => props.entry,
+  () => (definitions.value = null),
 );
-const stateClass = computed(() => `state-${props.entry.state ?? "new"}`);
 
 const closeButton = ref<HTMLButtonElement | null>(null);
-onMounted(() => closeButton.value?.focus({ preventScroll: true }));
-
 function onKey(event: KeyboardEvent) {
   if (event.key === "Escape") emit("close");
 }
-onMounted(() => window.addEventListener("keydown", onKey));
+onMounted(() => {
+  closeButton.value?.focus({ preventScroll: true });
+  window.addEventListener("keydown", onKey);
+});
 onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 </script>
 
@@ -126,19 +186,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
   overflow-wrap: anywhere;
 }
 
-.icon-close {
-  flex: none;
-  width: var(--tap);
-  height: var(--tap);
+.close {
   margin: -8px -8px 0 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
 }
 
 .facts {
@@ -176,9 +225,17 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
   font-size: 18px;
 }
 
-.card-answer {
-  display: grid;
-  gap: 2px;
+.dictionary summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.definition ol {
+  margin: 4px 0 8px;
+  padding-left: 20px;
 }
 
 .actions {

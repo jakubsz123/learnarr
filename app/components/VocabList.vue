@@ -1,27 +1,19 @@
 <template>
   <div class="stack">
-    <div class="row" role="group" aria-label="Show words">
+    <div class="pills" role="group" :aria-label="$t('words.show')">
       <button
         v-for="f in FILTERS"
-        :key="f.id"
+        :key="f"
         type="button"
-        class="chip"
-        :aria-pressed="filter === f.id ? 'true' : 'false'"
-        @click="filter = f.id"
+        class="pill"
+        :aria-pressed="filter === f ? 'true' : 'false'"
+        @click="filter = f"
       >
-        {{ f.label }} <span class="chip-count">{{ counts[f.id] }}</span>
+        {{ $t(`words.filters.${f}`) }} <span class="pill-count">{{ counts[f] }}</span>
       </button>
     </div>
-    <p class="hint">
-      {{
-        filter === "new"
-          ? "Most common first. Tick the ones you know; tap a word to see it in its line or make a card."
-          : filter === "learning"
-            ? "Words you have cards for."
-            : "Words you know, including the common ones counted as known for your level."
-      }}
-    </p>
-    <ul v-if="shown.length" class="words" :lang="language">
+    <p class="hint">{{ $t(`words.hints.${filter}`) }}</p>
+    <ul v-if="shown.length" class="list-box" :lang="language">
       <li v-for="row in shown" :key="row.index" class="word-row">
         <button type="button" class="word-main" @click="emit('pick', row.index)">
           <span class="word">{{ row.entry.forms[0] ?? row.entry.word }}</span>
@@ -29,41 +21,44 @@
             row.entry.word
           }}</span>
           <span class="hint freq" :class="frequencyBand(row.entry.rank)">{{
-            frequencyLabel(row.entry.rank)
+            frequencyText(row.entry.rank)
           }}</span>
         </button>
-        <span class="uses hint">{{ row.entry.count }}×</span>
+        <span class="uses hint">{{ $t("words.uses", { count: row.entry.count }) }}</span>
         <button
           type="button"
           class="tick"
           :aria-pressed="row.entry.state === 'known' ? 'true' : 'false'"
-          :aria-label="`${row.entry.state === 'known' ? 'Known' : 'Mark as known'}: ${row.entry.word}`"
+          :aria-label="
+            $t(row.entry.state === 'known' ? 'words.knownNamed' : 'words.markKnownNamed', {
+              word: row.entry.word,
+            })
+          "
           @click="emit('known', row.index, row.entry.state !== 'known')"
         >
           <AppIcon name="check" :size="20" />
         </button>
       </li>
     </ul>
-    <p v-else class="muted">Nothing here.</p>
+    <p v-else class="muted">{{ $t("words.nothing") }}</p>
     <button v-if="visible < filtered.length" type="button" class="btn btn-block" @click="visible += PAGE">
-      Show more ({{ filtered.length - visible }} left)
+      {{ $t("words.showMore", { count: filtered.length - visible }) }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { frequencyBand, frequencyLabel } from "#shared/frequency";
+/** An episode's words, new ones most common first, with a tick to mark each known. */
+import { frequencyBand } from "#shared/frequency";
 import type { VocabEntry } from "~/utils/api";
 
 const props = defineProps<{ vocab: VocabEntry[]; language: string; lemmatised: boolean }>();
 const emit = defineEmits<{ pick: [index: number]; known: [index: number, known: boolean] }>();
 
-const FILTERS = [
-  { id: "new", label: "New" },
-  { id: "learning", label: "Learning" },
-  { id: "known", label: "Known" },
-] as const;
-type Filter = (typeof FILTERS)[number]["id"];
+const FILTERS = ["new", "learning", "known"] as const;
+type Filter = (typeof FILTERS)[number];
+
+const { frequencyText } = useFrequencyText();
 
 const PAGE = 60;
 const filter = ref<Filter>("new");
@@ -98,49 +93,11 @@ const counts = computed(() => {
 </script>
 
 <style scoped>
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-}
-
-.chip[aria-pressed="true"] {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
-}
-
-.chip-count {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.words {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
 .word-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding-left: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.word-row:last-child {
-  border-bottom: 0;
 }
 
 .word-main {

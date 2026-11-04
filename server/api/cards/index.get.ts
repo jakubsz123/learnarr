@@ -1,12 +1,10 @@
 import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
 import { defineEventHandler } from "h3";
 import { z } from "zod";
-import { CARD_STATES } from "#shared/srs";
+import { CARD_FILTERS } from "#shared/srs";
 import { schema, useDb } from "~~/server/db";
 import { requireUser } from "~~/server/utils/auth";
 import { validQuery } from "~~/server/utils/validate";
-
-export const CARD_FILTERS = ["all", ...CARD_STATES, "suspended"] as const;
 
 const query = z.object({
   search: z.string().trim().max(100).optional(),

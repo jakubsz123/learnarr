@@ -1,40 +1,72 @@
+import { coverageOfVocab } from "#shared/coverage";
 import { wordKey } from "#shared/words";
-import type { Card, Decision, SubtitleResponse, VocabEntry, WordUse } from "~/utils/api";
+import type { Decision, SubtitleResponse, VocabEntry, WordUse } from "~/utils/api";
 
 /**
  * A subtitle's words, cards and suggested words, and what the learner does
- * with a word: mark it known (or not), make a card for it, or decide on a
+ * with them: mark a word known (or not), make a card for it, or decide on a
  * suggestion. Changes show at once: every use of the word changes colour and
- * "% you know" moves.
+ * "% you know" moves. While the subtitle is being analysed, it checks back
+ * until the words are ready.
  */
 export function useEpisodeWords() {
+  const { errorText } = useErrorMessage();
+  const { poll } = usePolling();
   const data = ref<SubtitleResponse | null>(null);
   const error = ref("");
   const busyWord = ref<string | null>(null);
+  const deciding = ref(false);
 
   async function load(subtitleId: number) {
     error.value = "";
     try {
-      data.value = await $fetch<SubtitleResponse>(`/api/subtitles/${subtitleId}`);
+      data.value = await api<SubtitleResponse>(`/api/subtitles/${subtitleId}`);
+      if (isAnalysing()) void waitForLemmas(subtitleId);
     } catch (e) {
-      error.value = errorMessage(e);
+      error.value = errorText(e);
     }
   }
 
-  const coverage = computed(() => {
-    const t = data.value?.transcript;
-    if (!t?.lemmatised) return null;
-    let total = 0;
-    let known = 0;
-    for (const entry of t.vocab) {
-      total += entry.count;
-      if (entry.state === "known") known += entry.count;
+  const isAnalysing = () =>
+    data.value?.lemmas.state === "working" || data.value?.lemmas.state === "downloading-model";
+
+  async function waitForLemmas(subtitleId: number) {
+    try {
+      data.value = await poll<SubtitleResponse>(
+        () => api<SubtitleResponse>(`/api/subtitles/${subtitleId}`),
+        (next) => {
+          // Show the download's progress while waiting.
+          if (data.value) data.value.lemmas = next.lemmas;
+          return next.lemmas.state !== "working" && next.lemmas.state !== "downloading-model";
+        },
+        { intervalMs: 3000, timeoutMs: 30 * 60_000 },
+      );
+    } catch (e) {
+      if (!(e instanceof PollingStopped)) error.value = errorText(e);
     }
-    return total ? known / total : null;
-  });
+  }
+
+  async function retryLemmas() {
+    if (!data.value) return;
+    const id = data.value.subtitle.id;
+    try {
+      data.value.lemmas = (
+        await api<{ lemmas: SubtitleResponse["lemmas"] }>(`/api/subtitles/${id}/lemmas/retry`, {
+          method: "POST",
+        })
+      ).lemmas;
+      void waitForLemmas(id);
+    } catch (e) {
+      error.value = errorText(e);
+    }
+  }
+
+  const coverage = computed(() =>
+    data.value?.transcript.lemmatised ? coverageOfVocab(data.value.transcript.vocab) : null,
+  );
 
   /** The card for a word, if the learner has one from this subtitle. */
-  function cardFor(entry: VocabEntry): Card | undefined {
+  function cardFor(entry: VocabEntry) {
     return data.value?.cards.find(
       (c) => wordKey(c.term) === entry.word || entry.forms.includes(wordKey(c.form)),
     );
@@ -54,22 +86,22 @@ export function useEpisodeWords() {
     const before = entry.state;
     entry.state = known ? "known" : cardFor(entry) ? "learning" : null;
     try {
-      await $fetch("/api/words", {
+      await api("/api/words", {
         method: "POST",
         body: { word: entry.word, known, language: data.value?.subtitle.language },
       });
     } catch (e) {
       entry.state = before;
-      error.value = errorMessage(e);
+      error.value = errorText(e);
     }
   }
 
-  async function makeCard(entry: VocabEntry, use: WordUse) {
-    if (!data.value) return;
+  /** Make a card from a word; returns an error to show next to the word, or null. */
+  async function makeCard(entry: VocabEntry, use: WordUse): Promise<string | null> {
+    if (!data.value) return null;
     busyWord.value = entry.word;
-    error.value = "";
     try {
-      const { card } = await $fetch<{ card: Card }>(`/api/subtitles/${data.value.subtitle.id}/cards`, {
+      const { card } = await api<MadeCard>(`/api/subtitles/${data.value.subtitle.id}/cards`, {
         method: "POST",
         body: { ...use, lemma: data.value.transcript.lemmatised ? entry.word : null },
       });
@@ -77,15 +109,13 @@ export function useEpisodeWords() {
       data.value.suggestions = data.value.suggestions.filter((s) => wordKey(s.term) !== wordKey(card.term));
       entry.state = "learning";
       useDueCount().refresh();
-      return card;
+      return null;
     } catch (e) {
-      error.value = errorMessage(e);
+      return errorText(e);
     } finally {
       busyWord.value = null;
     }
   }
-
-  const deciding = ref(false);
 
   /** Learn, know or skip suggested words; the transcript reflects it straight away. */
   async function decide(ids: number[], decision: Decision) {
@@ -93,7 +123,7 @@ export function useEpisodeWords() {
     deciding.value = true;
     error.value = "";
     try {
-      const { cards } = await $fetch<{ cards: Card[] }>("/api/suggestions", {
+      const { cards } = await api<DecideResult>("/api/suggestions", {
         method: "POST",
         body: { ids, decision },
       });
@@ -107,7 +137,7 @@ export function useEpisodeWords() {
       }
       if (cards.length) useDueCount().refresh();
     } catch (e) {
-      error.value = errorMessage(e);
+      error.value = errorText(e);
     } finally {
       deciding.value = false;
     }
@@ -120,6 +150,7 @@ export function useEpisodeWords() {
     deciding,
     coverage,
     load,
+    retryLemmas,
     cardFor,
     firstUse,
     setKnown,
