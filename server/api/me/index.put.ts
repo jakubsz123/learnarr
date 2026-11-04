@@ -17,6 +17,11 @@ const body = z.object({
     .max(200)
     .optional(),
   ankiDeck: z.string().trim().min(1).max(100).optional(),
+  /** The interface language, a code from i18n/locales. */
+  locale: z
+    .string()
+    .regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/)
+    .optional(),
   /** Set when the person finishes their first-sign-in questions. */
   onboarded: z.literal(true).optional(),
 });

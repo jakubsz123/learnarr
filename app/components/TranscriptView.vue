@@ -1,6 +1,6 @@
 <template>
   <div class="transcript" :class="{ highlight }" :lang="language">
-    <p v-if="!shownLines.length" class="muted">No lines with new words. You know everything here.</p>
+    <p v-if="!shownLines.length" class="muted">{{ $t("transcript.allKnown") }}</p>
     <ol class="lines">
       <li v-for="line in shownLines" :key="line.cue" class="line">
         <span class="time">{{ timestamp(line.startMs) }}</span>
@@ -21,12 +21,13 @@
       </li>
     </ol>
     <button v-if="visible < lines.length" type="button" class="btn btn-block" @click="visible += PAGE">
-      Show more lines ({{ lines.length - visible }} left)
+      {{ $t("transcript.showMore", { count: lines.length - visible }) }}
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
+/** A subtitle's lines with every word tappable: new words highlighted, words being learned underlined. */
 import type { Cue, Transcript, WordUse } from "~/utils/api";
 
 const props = defineProps<{

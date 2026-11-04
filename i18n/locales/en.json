@@ -20,7 +20,8 @@
       "noItem": "{server} doesn't have that item.",
       "httpError": "{server} answered with an error (HTTP {status}).",
       "noPoster": "There's no poster for this.",
-      "plexPin": "plex.tv didn't answer. Try again, or paste a token instead."
+      "plexPin": "plex.tv didn't answer. Try again, or paste a token instead.",
+      "noPlexServers": "That Plex account can't reach any servers."
     },
     "ai": {
       "notConfigured": "No AI provider is set up yet. The admin sets one up in Settings.",
@@ -80,7 +81,21 @@
     "notifications": {
       "pushNotConfigured": "Push notifications aren't available on this server.",
       "ntfyFailed": "The ntfy server answered with an error (HTTP {status})."
-    }
+    },
+    "anki": {
+      "unreachable": "Couldn't reach AnkiConnect at {url}. Is Anki open with AnkiConnect installed, and is {origin} in its webCorsOriginList?",
+      "denied": "Anki didn't allow Learnarr to connect.",
+      "error": "AnkiConnect: {detail}"
+    },
+    "push": {
+      "unsupported": "This browser can't receive notifications. On an iPhone, add Learnarr to the home screen first.",
+      "denied": "Notifications are blocked for Learnarr in this browser's settings."
+    },
+    "signIn": {
+      "wrongPassword": "That email and password don't match an account.",
+      "passwordTooShort": "Use at least 8 characters for the password."
+    },
+    "timedOut": "This is taking too long. Try again."
   },
   "notifications": {
     "practice": {
@@ -97,5 +112,536 @@
       "title": "Notifications work",
       "body": "This is how Learnarr will tell you when cards are waiting."
     }
+  },
+  "nav": {
+    "home": "Learnarr home",
+    "main": "Main",
+    "signOut": "Sign out",
+    "today": "Today",
+    "library": "Library",
+    "study": "Study",
+    "cards": "Cards",
+    "settings": "Settings",
+    "system": "System",
+    "status": "Status",
+    "account": "Account",
+    "notifications": "Notifications",
+    "mediaServer": "Media server",
+    "ai": "AI",
+    "users": "Users",
+    "theme": {
+      "system": "Theme: system (switch to dark)",
+      "dark": "Theme: dark (switch to light)",
+      "light": "Theme: light (follow the system)"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading…",
+    "tryAgain": "Try again",
+    "back": "Back",
+    "saved": "Saved.",
+    "remove": "Remove",
+    "yes": "Yes",
+    "no": "No",
+    "comingSoon": "Coming soon"
+  },
+  "cards": {
+    "translation": "Translation",
+    "editTranslation": "Edit the translation: {translation}",
+    "state": {
+      "suspended": "Suspended",
+      "new": "New",
+      "known": "Known",
+      "due": "Due",
+      "dueTomorrow": "Due tomorrow",
+      "dueIn": "Due in {count} day | Due in {count} days"
+    }
+  },
+  "coverage": {
+    "tiers": {
+      "easy": "Easy going",
+      "ideal": "Just right",
+      "stretch": "A stretch",
+      "hard": "Hard going"
+    },
+    "notScored": "Not scored yet",
+    "noWords": "No words",
+    "title": "You know {percent} of the words: {tier}",
+    "titleEmpty": "You know: {reason}"
+  },
+  "languages": {
+    "learning": "I'm learning",
+    "native": "Translate into",
+    "levelQuestion": "How much do you know already?",
+    "levels": {
+      "beginner": {
+        "title": "Beginner",
+        "hint": "Everyday words first"
+      },
+      "intermediate": {
+        "title": "Intermediate",
+        "hint": "Skip the basics"
+      },
+      "advanced": {
+        "title": "Advanced",
+        "hint": "Idioms and rarer words"
+      }
+    },
+    "interface": "Interface language",
+    "helpTranslate": "Help translate Learnarr"
+  },
+  "account": {
+    "title": "Account",
+    "languages": "Languages",
+    "opensubtitles": {
+      "intro": "When your media server has no subtitle in your language, Learnarr downloads one with your own free OpenSubtitles.com account, on its daily allowance.",
+      "signedInAs": "Signed in as {name}",
+      "disconnect": "Disconnect",
+      "username": "Username",
+      "password": "Password",
+      "connect": "Connect",
+      "checking": "Checking…",
+      "signUp": "Create a free account",
+      "connected": "Connected.",
+      "connectedWithAllowance": "Connected · {count} download a day. | Connected · {count} downloads a day.",
+      "credit": "Subtitles provided by {site}."
+    },
+    "anki": {
+      "intro": "Send your cards to Anki on your computer with the AnkiConnect add-on. Add {origin} to its {setting} (Anki → Tools → Add-ons → AnkiConnect → Config).",
+      "address": "AnkiConnect address",
+      "deck": "Deck",
+      "test": "Test",
+      "connected": "Connected to AnkiConnect (version {version})."
+    }
+  },
+  "notificationSettings": {
+    "title": "Notifications",
+    "intro": "Learnarr can remind you when cards are waiting, and offer an episode's words when you press play on it.",
+    "when": "When",
+    "practice": "Remind me to study when cards are waiting (around {hour}, if I haven't studied yet)",
+    "watch": "When I press play on Plex or Jellyfin, offer that episode's words first",
+    "mediaUser": "My media server user name",
+    "mediaUserHint": "The name you sign in to Plex or Jellyfin with, so Learnarr knows which plays are yours. The admin connects the server's webhook in Settings → Media server.",
+    "thisDevice": "On this device",
+    "pushIntro": "Notifications on this phone or computer, straight from your browser. On an iPhone or iPad, add Learnarr to the home screen first (Share → Add to Home Screen).",
+    "enablePush": "Turn on notifications",
+    "disablePush": "Turn off on this device",
+    "devices": "On for {count} device | On for {count} devices",
+    "pushOn": "Notifications are on for this device.",
+    "ntfyIntro": "Or get them in the {app} app: subscribe to a topic there and enter the same topic here.",
+    "ntfyTopic": "ntfy topic",
+    "ntfyHint": "Anyone who knows the topic can read it, so pick one that's hard to guess. Server: {server}",
+    "ntfyGenerate": "Make up a topic",
+    "test": "Send a test",
+    "testSent": "Sent. It should arrive in a few seconds.",
+    "testNothing": "Nothing to send to yet: turn on notifications on this device, or set an ntfy topic."
+  },
+  "signIn": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "busy": "Signing in…",
+    "noAccount": "No account? Ask whoever runs this server to add you."
+  },
+  "setup": {
+    "pageTitle": "Set up Learnarr",
+    "steps": "Setup steps",
+    "stepNames": {
+      "account": "Account",
+      "media": "Media server",
+      "ai": "AI",
+      "languages": "Languages"
+    },
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "saving": "Saving…",
+    "finish": "Finish",
+    "account": {
+      "title": "Welcome to Learnarr",
+      "intro": "Create the admin account for this server. You'll add the rest of your household later.",
+      "name": "Name",
+      "passwordHint": "At least 8 characters",
+      "create": "Create account",
+      "creating": "Creating…"
+    },
+    "media": {
+      "title": "Connect your media server",
+      "intro": "Learnarr reads your library and the subtitles that come with it. Everyone here shares it."
+    },
+    "ai": {
+      "title": "Pick an AI provider",
+      "intro": "It suggests the words worth learning and translates them. Use a cloud model or run one yourself."
+    },
+    "languages": {
+      "title": "Your languages",
+      "intro": "Everyone in the household picks their own; these are yours."
+    },
+    "done": {
+      "title": "You're set",
+      "intro": "Pick a show from your library, see how much of it you know, and choose its words to learn.",
+      "library": "Open the library",
+      "household": "Add household members"
+    }
+  },
+  "welcome": {
+    "pageTitle": "Welcome",
+    "title": "Welcome, {name}",
+    "intro": "Tell Learnarr what you're learning, so it can show how much of each episode you know and suggest the right words.",
+    "later": "You can change these any time in Settings → Account.",
+    "start": "Start learning"
+  },
+  "users": {
+    "title": "Users",
+    "intro": "Everyone in the household gets their own account: their own words, cards and OpenSubtitles account. They share the media server and the AI provider. Sign-up is closed, so add people here.",
+    "name": "Name",
+    "actions": "Actions",
+    "admin": "admin",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "delete": "Delete",
+    "deleteNamed": "Delete {name}",
+    "add": "Add someone",
+    "emailHint": "What they sign in with. Nothing is emailed.",
+    "passwordHint": "At least 8 characters. Tell them it; they can't change it yet.",
+    "addButton": "Add",
+    "added": "Added {email}.",
+    "confirmDelete": "Delete {name}? Their cards and progress go too."
+  },
+  "settingsMenu": {
+    "account": "Languages, OpenSubtitles, Anki",
+    "notifications": "Reminders and \"before you watch\"",
+    "mediaServer": "Plex or Jellyfin",
+    "ai": "The provider that suggests words",
+    "users": "Your household",
+    "status": "System status",
+    "statusHint": "Connections and health"
+  },
+  "aiSettings": {
+    "title": "AI provider",
+    "intro": "Suggests the words worth learning and translates them. Subtitle text is sent to this provider for that and nothing else."
+  },
+  "mediaSettings": {
+    "intro": "The household's Plex or Jellyfin. Everyone on this Learnarr browses it and gets subtitles from it."
+  },
+  "webhooks": {
+    "title": "Notifications when someone presses play",
+    "intro": "Learnarr can offer an episode's words the moment someone starts it. Paste this address into your media server; each person sets their media server user name in Settings → Notifications.",
+    "plexSteps": "Plex Web → Settings → Webhooks → Add Webhook (needs Plex Pass).",
+    "jellyfinSteps": "Install the Webhook plugin, add a Generic destination with this address, tick \"Playback Start\" and \"Send All Properties\".",
+    "secret": "The address works like a password: anyone who knows it can send Learnarr plays, so don't share it."
+  },
+  "mediaForm": {
+    "fromEnv": "This server's media server is set by environment variables.",
+    "connectedTo": "Connected · {name}",
+    "plexHint": "Sign in with your Plex account",
+    "jellyfinHint": "Server address and an API key",
+    "waitingForPlex": "Waiting for Plex…",
+    "signInWithPlex": "Sign in with Plex",
+    "approveInPlex": "Approve Learnarr in the Plex tab that opened, then come back here.",
+    "shared": "Shared with you",
+    "local": "Local network",
+    "relay": "Plex relay",
+    "remote": "Remote",
+    "pickAddress": "Pick the address this machine can reach. Local network is fastest when Learnarr runs next to Plex.",
+    "manual": "Enter the address and a token instead",
+    "address": "Server address",
+    "plexToken": "Plex token",
+    "savedToken": "Saved (leave empty to keep it)",
+    "connect": "Connect",
+    "connecting": "Connecting…",
+    "apiKey": "API key",
+    "apiKeyWhere": "Dashboard → API keys",
+    "connected": "Connected to {name} ({version})."
+  },
+  "aiForm": {
+    "fromEnv": "This server's AI provider is set by environment variables.",
+    "local": "On your own hardware",
+    "anthropic": "Anthropic's API",
+    "openaiCompatible": "OpenAI-compatible",
+    "address": "Address",
+    "keyHint": "Stored encrypted on this server. It never comes back to the browser.",
+    "model": "Model",
+    "modelPlaceholder": "Pick or type a model",
+    "loadList": "Load list",
+    "modelCount": "{count} model available. | {count} models available.",
+    "loadHint": "Load the provider's list, or type a name.",
+    "test": "Test",
+    "testing": "Testing…",
+    "testRunning": "Suggesting words from a short sample…",
+    "testHint": "Test suggests words from a short sample, so you can see what you get and how long it takes.",
+    "testWorks": "Works · {count} word in {seconds} s | Works · {count} words in {seconds} s",
+    "localWarning": "Small local models (under about 8B parameters) pick odd words and translate badly. 14B or larger works well.",
+    "keyNotNeeded": "Not needed",
+    "keyPaste": "Paste your API key"
+  },
+  "library": {
+    "libraries": "Libraries",
+    "search": "Search this library",
+    "searchPlaceholder": "Search",
+    "noMatch": "Nothing here matches \"{search}\".",
+    "empty": "Nothing here.",
+    "loadMore": "Load more",
+    "noServer": "No media server yet",
+    "noServerAdmin": "Connect Plex or Jellyfin to browse your library.",
+    "noServerMember": "Ask whoever runs this server to connect Plex or Jellyfin.",
+    "connect": "Connect a media server"
+  },
+  "upload": {
+    "button": "Upload a file",
+    "replace": "Use another subtitle file",
+    "busy": "Uploading…"
+  },
+  "episode": {
+    "getSubtitle": {
+      "title": "Get the subtitle",
+      "button": "Get subtitle",
+      "busy": "Getting it…",
+      "onServer": "Your media server has a {language} subtitle for this.",
+      "fromOpenSubtitles": "No {language} subtitle on the media server; Learnarr will download one from OpenSubtitles.com with your account.",
+      "connectOpenSubtitles": "No {language} subtitle on the media server. Connect OpenSubtitles.com in Settings → Account to download one, or upload a file."
+    },
+    "overview": {
+      "words": "Words",
+      "new": "New to you",
+      "done": "Share of the words in this episode you know, counting every time a word is said.",
+      "working": "Finding each word's dictionary form so it can be scored…",
+      "downloading": "Downloading the {language} language model. This happens once.",
+      "downloadingPercent": "Downloading the {language} language model ({percent}%). This happens once.",
+      "unsupported": "There's no language model for {language} yet, so words are split on spaces and there's no score.",
+      "noEngine": "The lemmatiser (UDPipe) isn't installed on this server, so there's no score. See System → Status."
+    },
+    "suggest": {
+      "title": "Suggested words",
+      "intro": "Your AI provider reads the whole subtitle and suggests the words worth learning at your level. Or tap words yourself below.",
+      "introMore": "Your AI provider reads the whole subtitle and suggests the next words worth learning at your level.",
+      "howMany": "How many words",
+      "button": "Suggest words",
+      "more": "Suggest more",
+      "busy": "Suggesting words…",
+      "wait": "This can take a minute, longer with a local model. You can leave this page.",
+      "added": "{count} new word to go through. | {count} new words to go through.",
+      "none": "No new words: you have them all already."
+    },
+    "next": "Next: {episode} · {title}",
+    "tabsLabel": "This episode",
+    "tabs": {
+      "words": "Words",
+      "transcript": "Transcript",
+      "cards": "Cards ({count})"
+    },
+    "noCards": "No cards from this yet. Learn suggested words, or tap a word to make one.",
+    "loading": "Loading the subtitle…"
+  },
+  "suggestions": {
+    "title": "{count} suggested word | {count} suggested words",
+    "learnAll": "Learn all",
+    "intro": "Learn the ones you want to study. Words you already know are marked known and won't be suggested again.",
+    "learn": "Learn",
+    "know": "I know it",
+    "skip": "Skip",
+    "skipNamed": "Skip {term}"
+  },
+  "words": {
+    "show": "Show words",
+    "filters": {
+      "new": "New",
+      "learning": "Learning",
+      "known": "Known"
+    },
+    "hints": {
+      "new": "Most common first. Tick the ones you know; tap a word to see it in its line or make a card.",
+      "learning": "Words you have cards for.",
+      "known": "Words you know, including the common ones counted as known for your level."
+    },
+    "uses": "{count}×",
+    "knownNamed": "Known: {word}",
+    "markKnownNamed": "Mark as known: {word}",
+    "nothing": "Nothing here.",
+    "showMore": "Show more ({count} left)",
+    "bands": {
+      "top": "Very common",
+      "common": "Common",
+      "less": "Less common",
+      "rare": "Rare"
+    },
+    "rank": "{band} · #{rank}"
+  },
+  "transcript": {
+    "allKnown": "No lines with new words. You know everything here.",
+    "showMore": "Show more lines ({count} left)",
+    "highlight": "Highlight new words",
+    "onlyNew": "Only lines with new words"
+  },
+  "wordSheet": {
+    "label": "The word {word}",
+    "from": "from {word}",
+    "state": {
+      "new": "New to you",
+      "learning": "Learning",
+      "known": "Known"
+    },
+    "usesHere": "{count}× here",
+    "inCards": "In your cards.",
+    "inCardsAs": "In your cards as “{term}”.",
+    "dictionary": "Dictionary",
+    "dictionaryOffline": "Wiktionary couldn't be reached.",
+    "dictionaryNothing": "Wiktionary has nothing for this word.",
+    "formOf": "a form of {word}",
+    "known": "Known",
+    "iKnow": "I know this",
+    "asking": "Asking the AI…",
+    "makeCard": "Make a card"
+  },
+  "show": {
+    "started": "{started} of {total} episodes started this season",
+    "seasons": "Seasons",
+    "loading": "Loading episodes…",
+    "cards": "{count} card | {count} cards",
+    "notStarted": "Not started",
+    "noEpisodes": "No episodes in this season.",
+    "specials": "Specials",
+    "season": "Season {number}"
+  },
+  "cardsPage": {
+    "export": "Export for Anki",
+    "sending": "Sending…",
+    "sendToAnki": "Send {count} to Anki",
+    "search": "Search cards",
+    "searchPlaceholder": "Search words or translations",
+    "show": "Show",
+    "filters": {
+      "all": "All",
+      "new": "New",
+      "learning": "Learning",
+      "review": "Review",
+      "suspended": "Suspended"
+    },
+    "inAnki": "in Anki",
+    "suspend": "Suspend",
+    "resume": "Resume",
+    "suspendNamed": "Suspend {term}",
+    "resumeNamed": "Resume {term}",
+    "deleteNamed": "Delete {term}",
+    "noMatch": "No cards match.",
+    "empty": "No cards yet. Open an episode in the library and learn some of its words.",
+    "confirmDelete": "Delete \"{term}\"?",
+    "sent": "Sent {count} card to the \"{deck}\" deck. | Sent {count} cards to the \"{deck}\" deck."
+  },
+  "study": {
+    "progress": "{left} left · {done} done",
+    "newWord": "New word",
+    "review": "Review",
+    "question": "What does “{word}” mean here?",
+    "showAnswer": "Show answer",
+    "howWell": "How well did you know it?",
+    "ratings": {
+      "again": "Again",
+      "hard": "Hard",
+      "good": "Good",
+      "easy": "Easy"
+    },
+    "intervals": {
+      "minute": "{count} min",
+      "hour": "{count} h",
+      "day": "{count} d",
+      "month": "{count} mo",
+      "year": "{count} y"
+    },
+    "doneTitle": "Done for now",
+    "emptyTitle": "Nothing to study",
+    "doneText": "Cards you just learned come back in a few minutes; the rest when they're due.",
+    "emptyText": "Learn words from an episode in the library to make cards.",
+    "checkAgain": "Check again",
+    "undo": "Undo"
+  },
+  "today": {
+    "learning": "Learning {language} · {level}",
+    "toStudy": "{count} card to study | {count} cards to study",
+    "caughtUp": "All caught up",
+    "dueAndNew": "{due} due · {fresh} new",
+    "reviewedToday": "{count} reviewed today. Cards come back when they're due. | {count} reviewed today. Cards come back when they're due.",
+    "nothingYet": "Learn words from an episode to make cards.",
+    "streak": "Streak",
+    "days": "{count} day | {count} days",
+    "longest": "Longest: {count} day | Longest: {count} days",
+    "wordsKnown": "Words known",
+    "reviewedTodayLabel": "Reviewed today",
+    "continue": "Continue",
+    "upNext": "Up next",
+    "start": "Start",
+    "firstTitle": "Start with something you watch",
+    "firstSteps": {
+      "open": "Open the library and pick a film or an episode.",
+      "subtitle": "Get its subtitle in {language}.",
+      "words": "Tick the words you know, then let the AI suggest the ones worth learning, or tap words yourself.",
+      "study": "Study the cards here every day."
+    }
+  },
+  "activity": {
+    "caption": "{count} review in the last 12 weeks | {count} reviews in the last 12 weeks",
+    "label": "{count} reviews over the last {days} days",
+    "day": "{date}: {count}"
+  },
+  "status": {
+    "checking": "Checking…",
+    "checkAgain": "Check again",
+    "checkingLong": "Checking the media server and AI provider…",
+    "health": "Health",
+    "fix": "Fix",
+    "states": {
+      "ok": "OK",
+      "warning": "Warning",
+      "error": "Error"
+    },
+    "checks": {
+      "media": {
+        "name": "Media server",
+        "ok": "{name} {version}",
+        "error": "Not connected."
+      },
+      "ai": {
+        "name": "AI provider",
+        "ok": "{model} at {address}",
+        "error": "Not set up."
+      },
+      "opensubtitles": {
+        "name": "OpenSubtitles accounts",
+        "ok": "Everyone has connected one.",
+        "warning": "{count} person hasn't connected an account, so they only get subtitles the media server has. | {count} people haven't connected an account, so they only get subtitles the media server has."
+      },
+      "lemmatiser": {
+        "name": "Lemmatiser · UDPipe",
+        "ok": "Installed at {path}",
+        "warning": "Not installed (looked for {path}), so there's no \"% you know\". The Docker image has it; outside Docker, run scripts/fetch-udpipe.sh."
+      }
+    },
+    "learners": "{count} learner | {count} learners",
+    "wordList": "word list included",
+    "noWordList": "no word list",
+    "download": "Download",
+    "model": {
+      "installed": "model installed",
+      "downloading": "downloading the model",
+      "downloadingPercent": "downloading the model ({percent}%)",
+      "missing": "model downloads when first needed",
+      "unsupported": "no model yet, so no “% you know”"
+    },
+    "about": "About",
+    "version": "Version",
+    "runningOn": "Running on",
+    "dataFolder": "Data folder",
+    "database": "Database",
+    "megabytes": "{size} MB",
+    "usersAndCards": "Users · cards",
+    "uptime": "Uptime",
+    "uptimeDays": "{days} d {hours} h",
+    "uptimeHours": "{hours} h {minutes} min",
+    "uptimeMinutes": "{minutes} min",
+    "languageData": "Language data",
+    "credits": "Word lists from {frequency} (CC BY-SA 4.0). Lemmas by {udpipe} with the {models} models (CC BY-NC-SA 4.0). Definitions from {wiktionary} (CC BY-SA 4.0)."
   }
 }

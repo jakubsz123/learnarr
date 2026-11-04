@@ -1,43 +1,42 @@
 <template>
   <div class="page">
-    <h1 class="page-title">Settings</h1>
-    <nav class="menu" aria-label="Settings">
-      <NuxtLink v-for="item in items" :key="item.to" :to="item.to" class="menu-row">
-        <span class="stack" style="gap: 2px">
-          <span>{{ item.label }}</span>
-          <span class="hint">{{ item.hint }}</span>
-        </span>
-        <AppIcon name="next" :size="18" />
-      </NuxtLink>
+    <h1 class="page-title">{{ $t("nav.settings") }}</h1>
+    <nav :aria-label="$t('nav.settings')">
+      <ul class="list-box">
+        <li v-for="item in items" :key="item.to">
+          <NuxtLink :to="item.to" class="menu-row">
+            <span class="stack-tight">
+              <span>{{ item.label }}</span>
+              <span class="hint">{{ item.hint }}</span>
+            </span>
+            <AppIcon name="next" :size="18" />
+          </NuxtLink>
+        </li>
+      </ul>
     </nav>
   </div>
 </template>
 
 <script setup lang="ts">
-useHead({ title: "Settings · Learnarr" });
+/** On a phone, the Settings tab opens this list; the sidebar shows the same pages on a wide screen. */
+const { t } = useI18n();
+useHead({ title: () => `${t("nav.settings")} · Learnarr` });
 const { me } = useMe();
 const items = computed(() => [
-  { label: "Account", to: "/settings/account", hint: "Languages, OpenSubtitles, Anki" },
+  { label: t("nav.account"), to: "/settings/account", hint: t("settingsMenu.account") },
+  { label: t("nav.notifications"), to: "/settings/notifications", hint: t("settingsMenu.notifications") },
   ...(me.value?.isAdmin
     ? [
-        { label: "Media server", to: "/settings/media-server", hint: "Plex or Jellyfin" },
-        { label: "AI", to: "/settings/ai", hint: "The provider that picks words" },
-        { label: "Users", to: "/settings/users", hint: "Your household" },
-        { label: "System status", to: "/system/status", hint: "Connections and health" },
+        { label: t("nav.mediaServer"), to: "/settings/media-server", hint: t("settingsMenu.mediaServer") },
+        { label: t("nav.ai"), to: "/settings/ai", hint: t("settingsMenu.ai") },
+        { label: t("nav.users"), to: "/settings/users", hint: t("settingsMenu.users") },
+        { label: t("settingsMenu.status"), to: "/system/status", hint: t("settingsMenu.statusHint") },
       ]
     : []),
 ]);
 </script>
 
 <style scoped>
-.menu {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
 .menu-row {
   display: flex;
   align-items: center;
@@ -45,11 +44,6 @@ const items = computed(() => [
   gap: 12px;
   min-height: 60px;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
   text-decoration: none;
-}
-
-.menu-row:last-child {
-  border-bottom: 0;
 }
 </style>

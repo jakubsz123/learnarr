@@ -1,21 +1,27 @@
 <template>
   <div class="shell">
     <header class="topbar">
-      <NuxtLink to="/" class="topbar-brand" aria-label="Learnarr home">
+      <NuxtLink to="/" class="topbar-brand" :aria-label="$t('nav.home')">
         <BrandMark />
       </NuxtLink>
       <div class="topbar-actions">
         <button type="button" class="icon-btn" :aria-label="themeLabel" :title="themeLabel" @click="cycle">
           <AppIcon :name="choice === 'dark' ? 'moon' : choice === 'light' ? 'sun' : 'auto'" />
         </button>
-        <button type="button" class="icon-btn" aria-label="Sign out" title="Sign out" @click="signOut">
+        <button
+          type="button"
+          class="icon-btn"
+          :aria-label="$t('nav.signOut')"
+          :title="$t('nav.signOut')"
+          @click="signOut"
+        >
           <AppIcon name="logout" />
         </button>
       </div>
     </header>
 
     <div class="body">
-      <nav class="sidebar" aria-label="Main">
+      <nav class="sidebar" :aria-label="$t('nav.main')">
         <template v-for="item in nav" :key="item.to">
           <NuxtLink
             :to="item.to"
@@ -47,7 +53,7 @@
       </main>
     </div>
 
-    <nav class="tabbar" aria-label="Main">
+    <nav class="tabbar" :aria-label="$t('nav.main')">
       <NuxtLink
         v-for="item in tabs"
         :key="item.to"
@@ -67,25 +73,22 @@
 </template>
 
 <script setup lang="ts">
+import type { IconName } from "~/utils/icons";
+
+const { t } = useI18n();
 const route = useRoute();
 const { me } = useMe();
 const { choice, cycle } = useTheme();
 const { count: dueCount, refresh: refreshDue } = useDueCount();
 
-const themeLabel = computed(() =>
-  choice.value === "system"
-    ? "Theme: system (switch to dark)"
-    : choice.value === "dark"
-      ? "Theme: dark (switch to light)"
-      : "Theme: light (follow the system)",
-);
+const themeLabel = computed(() => t(`nav.theme.${choice.value}`));
 
 onMounted(refreshDue);
 watch(() => route.path, refreshDue);
 
 interface NavItem {
   label: string;
-  icon: string;
+  icon: IconName;
   to: string;
   active: boolean;
   badge?: number | null;
@@ -97,22 +100,34 @@ const under = (prefix: string) => route.path === prefix || route.path.startsWith
 const nav = computed<NavItem[]>(() => {
   const admin = me.value?.isAdmin === true;
   const settingsChildren = [
-    { label: "Account", to: "/settings/account" },
+    { label: t("nav.account"), to: "/settings/account" },
+    { label: t("nav.notifications"), to: "/settings/notifications" },
     ...(admin
       ? [
-          { label: "Media server", to: "/settings/media-server" },
-          { label: "AI", to: "/settings/ai" },
-          { label: "Users", to: "/settings/users" },
+          { label: t("nav.mediaServer"), to: "/settings/media-server" },
+          { label: t("nav.ai"), to: "/settings/ai" },
+          { label: t("nav.users"), to: "/settings/users" },
         ]
       : []),
   ];
   return [
-    { label: "Today", icon: "home", to: "/", active: route.path === "/" },
-    { label: "Library", icon: "library", to: "/library", active: under("/library") || under("/media") },
-    { label: "Study", icon: "study", to: "/study", active: under("/study"), badge: dueCount.value || null },
-    { label: "Cards", icon: "cards", to: "/cards", active: under("/cards") },
+    { label: t("nav.today"), icon: "home", to: "/", active: route.path === "/" },
     {
-      label: "Settings",
+      label: t("nav.library"),
+      icon: "library",
+      to: "/library",
+      active: under("/library") || under("/media"),
+    },
+    {
+      label: t("nav.study"),
+      icon: "study",
+      to: "/study",
+      active: under("/study"),
+      badge: dueCount.value || null,
+    },
+    { label: t("nav.cards"), icon: "cards", to: "/cards", active: under("/cards") },
+    {
+      label: t("nav.settings"),
       icon: "settings",
       to: "/settings/account",
       active: under("/settings"),
@@ -121,20 +136,25 @@ const nav = computed<NavItem[]>(() => {
     ...(admin
       ? [
           {
-            label: "System",
-            icon: "system",
+            label: t("nav.system"),
+            icon: "system" as const,
             to: "/system/status",
             active: under("/system"),
-            children: [{ label: "Status", to: "/system/status" }],
+            children: [{ label: t("nav.status"), to: "/system/status" }],
           },
         ]
       : []),
   ];
 });
 
-const tabs = computed(() => [
+const tabs = computed<NavItem[]>(() => [
   ...nav.value.slice(0, 4),
-  { label: "Settings", icon: "settings", to: "/settings", active: under("/settings") || under("/system") },
+  {
+    label: t("nav.settings"),
+    icon: "settings",
+    to: "/settings",
+    active: under("/settings") || under("/system"),
+  },
 ]);
 
 async function signOut() {
@@ -217,7 +237,7 @@ async function signOut() {
   height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--chrome);
-  border-top: 1px solid #000;
+  border-top: 1px solid var(--chrome-edge);
 }
 
 .tab {
@@ -226,7 +246,7 @@ async function signOut() {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  color: #a6abb5;
+  color: var(--chrome-muted);
   font-size: 12px;
   text-decoration: none;
 }
@@ -275,7 +295,7 @@ async function signOut() {
   .nav-item.is-active {
     background: var(--sidebar-active);
     border-left-color: var(--accent);
-    color: #fff;
+    color: var(--chrome-strong);
     font-weight: 500;
   }
 
@@ -296,7 +316,7 @@ async function signOut() {
 
   /* Lighter than the accent: plain coral on the sidebar falls short of AA contrast. */
   .nav-child.is-active {
-    color: #ffa58f;
+    color: var(--chrome-accent);
     font-weight: 500;
   }
 

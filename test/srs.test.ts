@@ -56,6 +56,11 @@ describe("schedule", () => {
 
 describe("previewIntervals", () => {
   it("labels what each button would do", () => {
-    expect(previewIntervals(fresh, 0)).toEqual({ 1: "1 min", 2: "2 min", 3: "10 min", 4: "4 d" });
+    expect(previewIntervals(fresh, 0)).toEqual({
+      1: { value: 1, unit: "minute" },
+      2: { value: 2, unit: "minute" },
+      3: { value: 10, unit: "minute" },
+      4: { value: 4, unit: "day" },
+    });
   });
 });

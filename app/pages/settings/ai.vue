@@ -1,37 +1,37 @@
 <template>
   <div class="page">
     <div class="section">
-      <h1 class="page-title">AI provider</h1>
-      <p class="muted">
-        Picks the words worth learning and translates them. Subtitle text is sent to this provider for that
-        and nothing else.
-      </p>
+      <h1 class="page-title">{{ $t("aiSettings.title") }}</h1>
+      <p class="muted">{{ $t("aiSettings.intro") }}</p>
     </div>
     <AiProviderForm ref="form" />
     <div class="row">
-      <button type="button" class="btn btn-primary" :disabled="saving" @click="save">
-        {{ saving ? "Saving…" : "Save" }}
+      <button type="button" class="btn btn-primary" :disabled="feedback.busy.value" @click="save">
+        {{ feedback.busy.value ? $t("setup.saving") : $t("common.save") }}
       </button>
-      <span v-if="message" :class="ok ? 'ok' : 'danger'" role="status">{{ message }}</span>
+      <Feedback :text="feedback.text.value" :ok="feedback.ok.value" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ admin: true });
-useHead({ title: "AI · Settings · Learnarr" });
+const { t } = useI18n();
+useHead({ title: () => `${t("nav.ai")} · ${t("nav.settings")} · Learnarr` });
 
 const form = ref<{ save: () => Promise<string | null> } | null>(null);
-const saving = ref(false);
-const message = ref("");
-const ok = ref(false);
+const feedback = useFeedback();
 
 async function save() {
   if (!form.value) return;
-  saving.value = true;
+  feedback.busy.value = true;
   const error = await form.value.save();
-  saving.value = false;
-  message.value = error ?? "Saved.";
-  ok.value = !error;
+  feedback.busy.value = false;
+  if (error) {
+    feedback.text.value = error;
+    feedback.ok.value = false;
+  } else {
+    feedback.succeed(t("common.saved"));
+  }
 }
 </script>

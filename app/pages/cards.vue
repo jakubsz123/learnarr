@@ -1,50 +1,71 @@
 <template>
   <div class="page">
-    <div class="row" style="justify-content: space-between">
-      <h1 class="page-title">Cards</h1>
-      <button v-if="pending.length" type="button" class="btn" :disabled="sending" @click="sendToAnki">
-        <AppIcon name="anki" :size="18" />
-        {{ sending ? "Sending…" : `Send ${pending.length} to Anki` }}
-      </button>
+    <div class="row-between">
+      <h1 class="page-title">{{ $t("nav.cards") }}</h1>
+      <div class="row">
+        <a class="btn" href="/api/cards/export" download>
+          <AppIcon name="download" :size="18" /> {{ $t("cardsPage.export") }}
+        </a>
+        <button
+          v-if="pending.length"
+          type="button"
+          class="btn"
+          :disabled="anki.busy.value"
+          @click="sendToAnki"
+        >
+          <AppIcon name="anki" :size="18" />
+          {{
+            anki.busy.value ? $t("cardsPage.sending") : $t("cardsPage.sendToAnki", { count: pending.length })
+          }}
+        </button>
+      </div>
     </div>
-    <p v-if="ankiMessage" :class="ankiOk ? 'ok' : 'danger'" role="status">{{ ankiMessage }}</p>
+    <Feedback :text="anki.text.value" :ok="anki.ok.value" />
 
     <div class="section">
-      <label class="search">
-        <span class="sr-only">Search cards</span>
-        <AppIcon name="search" :size="18" />
-        <input v-model="search" class="input" type="search" placeholder="Search words or translations" />
-      </label>
-      <div class="filters" role="group" aria-label="Show">
+      <SearchField
+        v-model="search"
+        :label="$t('cardsPage.search')"
+        :placeholder="$t('cardsPage.searchPlaceholder')"
+      />
+      <div class="pills" role="group" :aria-label="$t('cardsPage.show')">
         <button
-          v-for="f in FILTERS"
-          :key="f.value"
+          v-for="f in CARD_FILTERS"
+          :key="f"
           type="button"
-          class="filter"
-          :aria-pressed="filter === f.value ? 'true' : 'false'"
-          @click="filter = f.value"
+          class="pill"
+          :aria-pressed="filter === f ? 'true' : 'false'"
+          @click="filter = f"
         >
-          {{ f.label }}
+          {{ $t(`cardsPage.filters.${f}`) }}
         </button>
       </div>
     </div>
 
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
-    <ul v-if="cards.length" class="list">
+    <ul v-if="cards.length" class="list-box">
       <li v-for="card in cards" :key="card.id">
         <CardItem :card="card" @updated="(c) => Object.assign(card, c)">
           <div class="item-foot">
             <span class="hint">
-              <template v-if="card.source">{{ sourceLabel(card.source) }}</template>
-              <template v-if="card.ankiNoteId"> · in Anki</template>
+              <NuxtLink
+                v-if="card.source?.serverItemId"
+                :to="`/media/${card.source.serverItemId}`"
+                class="plain-link"
+              >
+                {{ sourceTitle(card.source) }}
+              </NuxtLink>
+              <template v-if="card.ankiNoteId"> · {{ $t("cardsPage.inAnki") }}</template>
             </span>
-            <span class="item-actions">
+            <span class="row">
               <button
                 type="button"
                 class="icon-btn"
-                :aria-label="card.suspended ? `Resume ${card.term}` : `Suspend ${card.term}`"
-                :title="card.suspended ? 'Resume' : 'Suspend'"
+                :aria-label="
+                  $t(card.suspended ? 'cardsPage.resumeNamed' : 'cardsPage.suspendNamed', { term: card.term })
+                "
+                :title="$t(card.suspended ? 'cardsPage.resume' : 'cardsPage.suspend')"
                 @click="toggleSuspend(card)"
               >
                 <AppIcon :name="card.suspended ? 'play' : 'pause'" :size="18" />
@@ -52,8 +73,8 @@
               <button
                 type="button"
                 class="icon-btn danger"
-                :aria-label="`Delete ${card.term}`"
-                title="Delete"
+                :aria-label="$t('cardsPage.deleteNamed', { term: card.term })"
+                :title="$t('users.delete')"
                 @click="remove(card)"
               >
                 <AppIcon name="trash" :size="18" />
@@ -64,168 +85,86 @@
       </li>
     </ul>
     <p v-else-if="!loading" class="muted">
-      {{
-        search || filter !== "all"
-          ? "No cards match."
-          : "No cards yet. Pick words from an episode in the library."
-      }}
+      {{ search || filter !== "all" ? $t("cardsPage.noMatch") : $t("cardsPage.empty") }}
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { AnkiCard } from "~/composables/useAnki";
-import type { Card as ApiCard } from "~/utils/api";
+import { CARD_FILTERS } from "#shared/srs";
+import type { AnkiCard, ListedCard } from "~/utils/api";
 
-useHead({ title: "Cards · Learnarr" });
+const SEARCH_DELAY_MS = 300;
 
-type Card = ApiCard & {
-  ankiNoteId: number | null;
-  source: {
-    title: string;
-    showTitle: string | null;
-    seasonNumber: number | null;
-    episodeNumber: number | null;
-  } | null;
-};
-
-const FILTERS = [
-  { value: "all", label: "All" },
-  { value: "new", label: "New" },
-  { value: "learning", label: "Learning" },
-  { value: "review", label: "Review" },
-  { value: "suspended", label: "Suspended" },
-] as const;
+const { t } = useI18n();
+useHead({ title: () => `${t("nav.cards")} · Learnarr` });
 
 const { me } = useMe();
-const cards = ref<Card[]>([]);
+const { errorText } = useErrorMessage();
+const cards = ref<ListedCard[]>([]);
 const search = ref("");
-const filter = ref<(typeof FILTERS)[number]["value"]>("all");
+const filter = ref<(typeof CARD_FILTERS)[number]>("all");
 const loading = ref(true);
 const error = ref("");
 const pending = ref<AnkiCard[]>([]);
-const sending = ref(false);
-const ankiMessage = ref("");
-const ankiOk = ref(false);
-
-function sourceLabel(source: NonNullable<Card["source"]>) {
-  return source.showTitle ? `${source.showTitle} · ${episodeLabel(source)}` : source.title;
-}
+const anki = useFeedback();
 
 async function load() {
   loading.value = true;
   try {
     const query = { search: search.value || undefined, filter: filter.value };
-    cards.value = (await $fetch<{ cards: Card[] }>("/api/cards", { query })).cards;
-    pending.value = (await $fetch<{ cards: AnkiCard[] }>("/api/cards/anki")).cards;
+    cards.value = (await api<{ cards: ListedCard[] }>("/api/cards", { query })).cards;
+    pending.value = (await api<{ cards: AnkiCard[] }>("/api/cards/anki")).cards;
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   } finally {
     loading.value = false;
   }
 }
 
-async function toggleSuspend(card: Card) {
+async function toggleSuspend(card: ListedCard) {
   try {
-    await $fetch(`/api/cards/${card.id}`, { method: "PATCH", body: { suspended: !card.suspended } });
+    await api(`/api/cards/${card.id}`, { method: "PATCH", body: { suspended: !card.suspended } });
     card.suspended = !card.suspended;
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   }
 }
 
-async function remove(card: Card) {
-  if (!window.confirm(`Delete "${card.term}"?`)) return;
+async function remove(card: ListedCard) {
+  if (!window.confirm(t("cardsPage.confirmDelete", { term: card.term }))) return;
   try {
-    await $fetch(`/api/cards/${card.id}`, { method: "DELETE" });
+    await api(`/api/cards/${card.id}`, { method: "DELETE" });
     cards.value = cards.value.filter((c) => c.id !== card.id);
     pending.value = pending.value.filter((c) => c.id !== card.id);
   } catch (e) {
-    error.value = errorMessage(e);
+    error.value = errorText(e);
   }
 }
 
-async function sendToAnki() {
-  if (!me.value) return;
-  sending.value = true;
-  ankiMessage.value = "";
-  try {
-    const added = await useAnki().push(me.value.anki.url, me.value.anki.deck, pending.value);
-    ankiMessage.value = `Sent ${added} ${added === 1 ? "card" : "cards"} to the "${me.value.anki.deck}" deck.`;
-    ankiOk.value = true;
-    await load();
-  } catch (e) {
-    ankiMessage.value = errorMessage(e);
-    ankiOk.value = false;
-  } finally {
-    sending.value = false;
-  }
+function sendToAnki() {
+  const settings = me.value?.anki;
+  if (!settings) return;
+  return anki.run(
+    async () => {
+      const added = await useAnki().push(settings.url, settings.deck, pending.value);
+      await load();
+      return added;
+    },
+    (added) => t("cardsPage.sent", { count: added, deck: settings.deck }),
+  );
 }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
 watch(search, () => {
   clearTimeout(timer);
-  timer = setTimeout(load, 300);
+  timer = setTimeout(load, SEARCH_DELAY_MS);
 });
 watch(filter, load);
 onMounted(load);
 </script>
 
 <style scoped>
-.search {
-  position: relative;
-  display: flex;
-  align-items: center;
-  max-width: 420px;
-  color: var(--muted);
-}
-
-.search svg {
-  position: absolute;
-  left: 12px;
-}
-
-.search .input {
-  padding-left: 38px;
-}
-
-.filters {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.filter {
-  flex: none;
-  min-height: 40px;
-  padding: 0 14px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-}
-
-.filter[aria-pressed="true"] {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
-  font-weight: 500;
-}
-
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
-.list > li + li {
-  border-top: 1px solid var(--border);
-}
-
 .item-foot {
   display: flex;
   align-items: center;
@@ -234,24 +173,7 @@ onMounted(load);
   margin: -4px -8px -8px 0;
 }
 
-.item-actions {
-  display: flex;
-}
-
-.icon-btn {
-  width: var(--tap);
-  height: var(--tap);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.icon-btn.danger {
-  color: var(--danger);
+.plain-link {
+  color: inherit;
 }
 </style>
