@@ -1,0 +1,15 @@
+name: A language
+description: A language that's missing, or whose words, lemmas or "% you know" look wrong.
+labels: [language]
+body:
+  - type: input
+    attributes:
+      label: Language
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What's wrong or missing
+      description: For wrong lemmas, a few example words with what Learnarr shows and what's right.
+    validations:
+      required: true

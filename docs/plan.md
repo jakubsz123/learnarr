@@ -17,9 +17,25 @@ Ships as one Docker image with a `/config` volume and runs with no environment v
 - Frequency lists.
 - A Today page, show and episode browsing, a transcript you can tap words in, and undo in study.
 
+## v0.3
+
+- Lemmatisation for every language with a UDPipe model (52), frequency lists for 50.
+- Notifications: web push and ntfy, practice reminders, "before you watch" from Plex and Jellyfin plays.
+- Wiktionary definitions, subtitle upload, Anki export, streak and activity on Today.
+- A translatable interface, a first-sign-in step for household members, and a wiki on the website.
+
+See [comparison.md](comparison.md) for how this lines up with Sub-Optimal.
+
+## Next
+
+- Follow along live: the current line on your phone while Plex or Jellyfin plays.
+- A library view sorted by "% you know", to find what you can watch.
+- Translate a whole line with the AI.
+- Decks per show; minutes watched and per-show progress.
+
 ## Later, maybe
 
-Bazarr/Sonarr/Radarr, subtitle folders on disk, `.apkg` export, songs, books, notifications.
+Bazarr/Sonarr/Radarr, subtitle folders on disk, embedded tracks through ffmpeg, `.apkg` export, songs, books.
 
 ## Decisions
 
@@ -29,3 +45,7 @@ Bazarr/Sonarr/Radarr, subtitle folders on disk, `.apkg` export, songs, books, no
 - Each user connects their own OpenSubtitles account. Learnarr's API key ships in the code.
 - No YouTube, Whisper or browser extension.
 - Ported code comes from `jakubsz123/learnarr-legacy`, the old Sub-Optimal fork, rewritten to this repo's style.
+- Notifications need no third-party account: web push signs with keys made on the server, and ntfy can be
+  self-hosted.
+- The interface is translated with @nuxtjs/i18n; the server sends message keys with its errors, so one
+  catalog serves both. English first; other languages come from contributors.

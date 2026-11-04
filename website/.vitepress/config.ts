@@ -7,7 +7,8 @@ export default defineConfig({
   base,
   title: "Learnarr",
   description: "Learn a language from the shows and films on your Plex or Jellyfin server.",
-  cleanUrls: true,
+  // Plain .html addresses work on any static host, with no rewrite rules.
+  cleanUrls: false,
   lastUpdated: true,
   appearance: "dark",
   head: [

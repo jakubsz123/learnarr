@@ -23,7 +23,8 @@ asks the AI provider you choose for the words worth learning. You go through the
 ones you want, and study them as flashcards built around the real lines you'll hear. Study in the app on
 your phone, or send the cards to Anki.
 
-> **Status:** early (v0.2). It works end to end, and there will be rough edges.
+> **Status:** early (v0.3). It works end to end, and there will be rough edges.
+> The [wiki](https://learnarr.rushandhurry.us/wiki/) covers install, setup and how it all works.
 
 ## Features
 
@@ -34,7 +35,11 @@ your phone, or send the cards to Anki.
 - **Words worth learning, not every word.** Your AI provider suggests words for your level. Learn them, mark
   the ones you already know, or skip them. Or tap any word in the transcript.
 - **Real sentences.** Every card uses the line from the episode where the word came up.
-- **Spaced repetition** that fits a phone, with undo. Push cards to Anki through AnkiConnect if you prefer.
+- **Spaced repetition** that fits a phone, with undo. Push cards to Anki through AnkiConnect, or export a
+  file Anki imports.
+- **Tap any word** for its dictionary form, how common it is and its Wiktionary definitions.
+- **Notifications** by web push or ntfy: a reminder when cards are waiting, and the episode's words when you
+  press play on Plex or Jellyfin.
 - **Bring your own AI.** Anything OpenAI-compatible (OpenAI, Ollama, LM Studio, OpenRouter, Groq, Mistral,
   Gemini) or Anthropic's Claude. Run a local model and nothing leaves your network.
 - **For the whole household.** The first account is the admin; everyone else gets their own account,
@@ -106,6 +111,9 @@ Everything can be set in the app. These environment variables are optional:
 | `MEDIA_SERVER`, `MEDIA_SERVER_URL`, `MEDIA_SERVER_TOKEN` | Pin the media server (`plex` or `jellyfin`) instead of setting it in the app.                                   |
 | `AI_PROVIDER`, `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`   | Pin the AI provider (`openai-compatible` or `anthropic`).                                                       |
 | `AUTH_SECRET`, `ENCRYPTION_KEY`                          | Use your own keys instead of the ones generated in `/config` on first start.                                    |
+| `TZ`                                                     | Your time zone, for "today" in study limits, streaks and reminders. Default UTC.                                |
+| `NTFY_URL`, `NTFY_TOKEN`                                 | A self-hosted ntfy server (default `https://ntfy.sh`) and its access token.                                     |
+| `REMINDER_HOUR`                                          | The hour practice reminders go out. Default 18.                                                                 |
 
 A setting pinned by an environment variable can't be changed in the app.
 
@@ -118,8 +126,8 @@ sent only to the provider you set up.
 ### Languages
 
 Learnarr works with any language your subtitles are in. "% you know" uses a lemmatiser model, available for
-Czech, Danish, Dutch, English, French, German, Italian, Polish, Portuguese, Spanish and Swedish. Each model
-downloads the first time someone learns that language. See [docs/languages.md](docs/languages.md).
+52 languages; each downloads the first time someone learns that language. See
+[docs/languages.md](docs/languages.md).
 
 ### Anki
 
@@ -135,8 +143,15 @@ npm run dev               # http://localhost:3000
 npm test
 ```
 
-Nuxt 4, SQLite with Drizzle, better-auth. See [CONTRIBUTING.md](CONTRIBUTING.md) for how the code is
-organised and what a pull request needs.
+Nuxt 4, SQLite with Drizzle, better-auth. [docs/architecture.md](docs/architecture.md) is the map of the
+code; [CONTRIBUTING.md](CONTRIBUTING.md) says what a pull request needs. To translate the interface, see the
+[translating guide](https://learnarr.rushandhurry.us/wiki/translating.html).
+
+## Support
+
+Learnarr is free and stays that way. If it helps you learn, see
+[how to support it](https://learnarr.rushandhurry.us/wiki/support.html): a coffee, a translation, a bug report or a
+star all help.
 
 ## Credits
 
@@ -146,6 +161,7 @@ they built together. See [AUTHORS](AUTHORS).
 - Subtitles provided by [OpenSubtitles.com](https://www.opensubtitles.com).
 - Lemmatisation by [UDPipe](https://github.com/ufal/udpipe), with models from LINDAT/CLARIAH-CZ.
 - Word frequencies from Hermit Dave's [FrequencyWords](https://github.com/hermitdave/FrequencyWords).
+- Definitions from [Wiktionary](https://en.wiktionary.org).
 
 Learnarr isn't affiliated with Sonarr, Radarr, Plex, Jellyfin or OpenSubtitles.
 
