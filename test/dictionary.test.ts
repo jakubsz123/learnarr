@@ -57,6 +57,18 @@ describe("Wiktionary definitions", () => {
     expect(asked).toHaveLength(2);
   });
 
+  it("doesn't remember an outage as 'no definition'", async () => {
+    const db = testDb();
+    let status = 503;
+    const fetchFn = (async () =>
+      status === 503
+        ? new Response("busy", { status })
+        : new Response(JSON.stringify(GATO))) as unknown as typeof fetch;
+    expect(await define(db, "es", ["gato"], fetchFn)).toBeNull();
+    status = 200;
+    expect((await define(db, "es", ["gato"], fetchFn))?.entries).toHaveLength(1);
+  });
+
   it("says when Wiktionary can't be reached, rather than that it has nothing", async () => {
     const failing = (async () => {
       throw new Error("offline");

@@ -30,7 +30,7 @@ export interface CatalogueDeps {
   ): Promise<string>;
 }
 
-export const liveCatalogue: CatalogueDeps = {
+const liveCatalogue: CatalogueDeps = {
   search: (search) => searchSubtitles(search),
   async download(fileId, userId, credentials) {
     const attempt = (session: OpenSubtitlesSession) => downloadSubtitle(fileId, session);
@@ -46,7 +46,7 @@ export const liveCatalogue: CatalogueDeps = {
 };
 
 /** Store (or refresh) what Learnarr knows about a film or episode. */
-export function upsertMediaItem(db: Db, server: MediaServer, item: MediaDetail) {
+function upsertMediaItem(db: Db, server: MediaServer, item: MediaDetail) {
   const values = {
     server: server.kind,
     serverItemId: item.id,
@@ -179,7 +179,7 @@ export async function uploadSubtitle(opts: {
   });
 }
 
-export function findSubtitle(db: Db, userId: string, mediaItemId: number, language: string) {
+function findSubtitle(db: Db, userId: string, mediaItemId: number, language: string) {
   return db
     .select()
     .from(schema.subtitles)
@@ -197,7 +197,7 @@ export function findSubtitle(db: Db, userId: string, mediaItemId: number, langua
  * Store a subtitle for a learner, cleaned up and as SRT. If one was saved in
  * the meantime (two taps at once), that one is kept.
  */
-export function saveSubtitle(
+function saveSubtitle(
   db: Db,
   input: { userId: string; mediaItemId: number; language: string; source: SubtitleSource; raw: string },
 ) {

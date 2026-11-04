@@ -161,7 +161,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
   gap: 12px;
   max-height: 70vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgb(0 0 0 / 30%);
+  box-shadow: var(--shadow-raised);
 }
 
 @media (min-width: 900px) {

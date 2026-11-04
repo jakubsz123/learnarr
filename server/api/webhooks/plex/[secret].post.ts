@@ -1,15 +1,17 @@
-import { defineEventHandler, getRouterParam, readMultipartFormData } from "h3";
+import { z } from "zod";
+import { defineEventHandler, readMultipartFormData } from "h3";
 import { useDb } from "~~/server/db";
 import { AppError } from "~~/server/utils/errors";
 import { onPlay, plexPlay } from "~~/server/utils/notifications/playback";
 import { useSettings } from "~~/server/utils/settings";
+import { validParams } from "~~/server/utils/validate";
 import { isWebhookSecret } from "~~/server/utils/webhooks";
 
 /** Plex posts every play here (Settings → Webhooks in Plex, with Plex Pass). */
 export default defineEventHandler(async (event) => {
-  if (!isWebhookSecret(useSettings(), getRouterParam(event, "secret") ?? "")) {
-    throw new AppError(404, "errors.unknown");
-  }
+  // A wrong secret looks like an address that doesn't exist.
+  const { secret } = validParams(event, z.object({ secret: z.string().max(200) }));
+  if (!isWebhookSecret(useSettings(), secret)) throw new AppError(404, "errors.notFound");
   const form = await readMultipartFormData(event).catch(() => undefined);
   const field = form?.find((part) => part.name === "payload");
   let payload: unknown;

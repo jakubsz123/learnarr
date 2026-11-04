@@ -69,7 +69,10 @@ async function fetchEntries(
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(8000),
     });
-    return response.ok ? response.json() : null;
+    if (response.status === 404) return null;
+    // Anything else (rate limits, outages) isn't an answer, and mustn't be cached as one.
+    if (!response.ok) throw new Error(`Wiktionary answered ${response.status}`);
+    return response.json();
   };
   const first = parseDefinitions(await get(word), language);
   // "plural of gato" is no help: show gato's definitions, saying where they're from.

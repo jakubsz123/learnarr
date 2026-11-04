@@ -11,7 +11,7 @@ export function splitAround(sentence: string, word: string | null | undefined) {
   };
 }
 
-const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+export const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** The line as HTML with the word in bold, for Anki. */
 export function sentenceHtml(sentence: string, word: string | null | undefined): string {

@@ -84,11 +84,17 @@ export function studyQueue(db: Db, userId: string, language: string, now = Date.
   return { due, fresh, total: due.length + fresh.length };
 }
 
-export function cardsNotInAnki(db: Db, userId: string): Card[] {
+export function cardsNotInAnki(db: Db, userId: string, language: string): Card[] {
   return db
     .select()
     .from(schema.cards)
-    .where(and(eq(schema.cards.userId, userId), isNull(schema.cards.ankiNoteId)))
+    .where(
+      and(
+        eq(schema.cards.userId, userId),
+        eq(schema.cards.language, language),
+        isNull(schema.cards.ankiNoteId),
+      ),
+    )
     .orderBy(asc(schema.cards.id))
     .all();
 }

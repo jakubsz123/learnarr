@@ -50,7 +50,7 @@ export function useJob() {
     );
     if (job.state === "failed") {
       const reason = (job.result as { error?: Parameters<typeof reasonText>[0] } | null)?.error;
-      throw new Error(reasonText(reason, job.message ?? t("errors.unknown")));
+      throw new ShownError(reasonText(reason, job.message ?? t("errors.unknown")));
     }
     return job.result;
   };

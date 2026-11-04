@@ -58,9 +58,8 @@
       </dl>
 
       <ActivityChart
-        v-if="today.stats.activity.some((n) => n > 0)"
+        v-if="today.stats.activity.some((day) => day.count > 0)"
         :activity="today.stats.activity"
-        :since="today.stats.since"
       />
 
       <section v-if="today.recent.length" class="section">

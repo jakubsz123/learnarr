@@ -1,4 +1,4 @@
-import { ANKI_FIELDS, sentenceHtml } from "#shared/sentence";
+import { ANKI_FIELDS, escapeHtml, sentenceHtml } from "#shared/sentence";
 import type { AnkiCard } from "~/utils/api";
 
 /**
@@ -8,8 +8,6 @@ import type { AnkiCard } from "~/utils/api";
  */
 
 const MODEL = "Learnarr";
-
-const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 async function call<T>(url: string, action: string, params: object = {}): Promise<T> {
   let response: Response;

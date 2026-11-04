@@ -185,6 +185,31 @@ describe("lemmatising subtitles", () => {
     expect(calls).toBe(0);
   });
 
+  it("doesn't keep lemmas of a text that was replaced while UDPipe worked on it", async () => {
+    fs.writeFileSync(path.join(dir, modelEntry("es")!.file), "");
+    let replace = true;
+    const lemmas = createLemmas({
+      db,
+      lemmatizer: () => async (lines: string[]) => {
+        if (replace) {
+          // An upload lands mid-run.
+          replace = false;
+          db.update(schema.subtitles)
+            .set({ content: srtWith(4, () => "Otra cosa") })
+            .run();
+        }
+        return lemmatizer(lines);
+      },
+      modelDir: dir,
+    });
+    const sub = subtitle("es");
+    lemmas.queue(sub.id);
+    await lemmas.idle();
+    await lemmas.idle();
+    const stored = db.select().from(schema.subtitleLemmas).get();
+    expect(stored?.tokens).toHaveLength(4);
+  });
+
   it("records a failure from the engine", async () => {
     fs.writeFileSync(path.join(dir, modelEntry("es")!.file), "");
     const lemmas = createLemmas({

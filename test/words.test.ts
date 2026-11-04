@@ -168,7 +168,7 @@ describe("review streak", () => {
     const stats = learningStats(db, user.id, "es", now);
     expect(stats.streak).toEqual({ current: 3, longest: 3 });
     expect(stats.reviewedToday).toBe(0);
-    expect(stats.activity.at(-2)).toBe(1);
+    expect(stats.activity.at(-2)).toEqual({ date: "2026-10-20", count: 1 });
     expect(
       streaks(
         new Map([

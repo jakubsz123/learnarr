@@ -54,7 +54,7 @@
                 :to="`/media/${card.source.serverItemId}`"
                 class="plain-link"
               >
-                {{ sourceTitle(card.source) }}
+                {{ mediaTitle(card.source) }}
               </NuxtLink>
               <template v-if="card.ankiNoteId"> · {{ $t("cardsPage.inAnki") }}</template>
             </span>

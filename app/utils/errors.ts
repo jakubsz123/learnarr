@@ -13,6 +13,11 @@ export class LocalError extends Error {
   }
 }
 
+/** A failure whose message is already in the reader's language, such as a background job's reason. */
+export class ShownError extends Error {
+  override name = "ShownError";
+}
+
 /**
  * The message to show for a failed request, in the reader's language. The
  * server sends a message key with every error it means a person to read (see
@@ -29,15 +34,15 @@ export function errorMessage(error: unknown, t: Translate, languageName?: (code:
     message?: string;
   };
   if (error instanceof LocalError) return t(error.key, error.params);
+  if (error instanceof ShownError) return error.message;
   const key = e?.data?.data?.key;
   if (key) {
     const params = { ...e.data?.data?.params };
     if (typeof params.language === "string" && languageName) params.language = languageName(params.language);
     return t(key, params);
   }
-  if (e?.data?.message) return e.data.message;
-  if (e?.statusCode === undefined && e instanceof TypeError) return t("errors.network");
-  return e?.message || t("errors.unknown");
+  // Without a key the message is ofetch's or the server's internals; say something useful instead.
+  return e?.statusCode === undefined ? t("errors.network") : t("errors.unknown");
 }
 
 /** better-auth's error codes that a person can act on, by their message key. */

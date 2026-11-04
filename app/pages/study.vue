@@ -29,7 +29,7 @@
         </p>
       </div>
       <NuxtLink v-if="card.source" :to="`/media/${card.source.serverItemId}`" class="source hint">
-        {{ sourceTitle(card.source) }}
+        {{ mediaTitle(card.source) }}
       </NuxtLink>
     </article>
 

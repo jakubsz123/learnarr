@@ -33,10 +33,11 @@ export interface Check {
 const TIMEOUT_MS = 8000;
 
 function within<T>(promise: Promise<T>): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new AppError(504, "errors.timedOut")), TIMEOUT_MS)),
-  ]);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new AppError(504, "errors.timedOut")), TIMEOUT_MS);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 function failure(error: unknown): Check["error"] {
