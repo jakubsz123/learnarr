@@ -1,12 +1,15 @@
 name: Pin UDPipe models
 
-# Run by hand when adding languages: it downloads every model and prints the
-# pins for server/utils/lemmas/models.ts (see scripts/pin-udpipe-models.mjs).
+# Run by hand to refresh server/utils/lemmas/udpipe-models.json: it downloads
+# every model, checks it, and commits the pins to the branch it ran on.
 on:
   workflow_dispatch:
   push:
     branches: [claude/v0.3]
     paths: [scripts/pin-udpipe-models.mjs]
+
+permissions:
+  contents: write
 
 jobs:
   pin:
@@ -17,11 +20,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node scripts/pin-udpipe-models.mjs > pins.jsonl
-      - run: cat pins.jsonl
-        if: always()
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: udpipe-pins
-          path: pins.jsonl
+      - run: node scripts/pin-udpipe-models.mjs
+      - name: Commit the pins
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/utils/lemmas/udpipe-models.json
+          git diff --cached --quiet || git commit -m "Pin the UDPipe models from LINDAT" && git push

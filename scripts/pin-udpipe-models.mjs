@@ -1,15 +1,15 @@
 // Takes the pins for every UDPipe 1 model in the Universal Dependencies 2.5
 // release (hdl:11234/1-3131): each file's LINDAT bitstream id and the sha256 of
 // a real download, after checking the download against the MD5 that LINDAT
-// publishes for it. Prints JSON lines to paste from into
-// server/utils/lemmas/models.ts; it writes nothing itself.
+// publishes for it. Writes them to server/utils/lemmas/udpipe-models.json,
+// which server/utils/lemmas/models.ts reads.
 //
-//   node scripts/pin-udpipe-models.mjs                 every model
-//   node scripts/pin-udpipe-models.mjs german-hdt      models whose name contains a filter
+//   node scripts/pin-udpipe-models.mjs
 //
 // lindat.mff.cuni.cz must be reachable. CI can run it: see .github/workflows/pin-models.yml.
 
 import { createHash } from "node:crypto";
+import { writeFile } from "node:fs/promises";
 
 const API = "https://lindat.mff.cuni.cz/repository/server/api";
 const HANDLE = "11234/1-3131";
@@ -34,10 +34,9 @@ async function bitstreams() {
   return all;
 }
 
-const filters = process.argv.slice(2);
-const models = (await bitstreams()).filter(
-  (b) => b.name.endsWith(".udpipe") && (!filters.length || filters.some((f) => b.name.includes(f))),
-);
+const OUT = new URL("../server/utils/lemmas/udpipe-models.json", import.meta.url);
+const models = (await bitstreams()).filter((b) => b.name.endsWith(".udpipe"));
+const pins = [];
 let failed = 0;
 for (const model of models) {
   const res = await fetch(`${API}/core/bitstreams/${model.uuid}/content`);
@@ -54,7 +53,9 @@ for (const model of models) {
     continue;
   }
   const sha256 = createHash("sha256").update(bytes).digest("hex");
-  console.log(JSON.stringify({ file: model.name, uuid: model.uuid, sha256, bytes: bytes.length }));
+  pins.push({ file: model.name, uuid: model.uuid, sha256, bytes: bytes.length });
 }
-console.error(`${models.length - failed} of ${models.length} models pinned`);
+pins.sort((a, b) => a.file.localeCompare(b.file));
+await writeFile(OUT, `${JSON.stringify(pins, null, 2)}\n`);
+console.log(`${pins.length} of ${models.length} models pinned`);
 if (failed) process.exitCode = 1;
