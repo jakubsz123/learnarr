@@ -81,5 +81,21 @@
       "pushNotConfigured": "Push notifications aren't available on this server.",
       "ntfyFailed": "The ntfy server answered with an error (HTTP {status})."
     }
+  },
+  "notifications": {
+    "practice": {
+      "title": "Time to study",
+      "body": "1 card is waiting for you. | {count} cards are waiting for you."
+    },
+    "beforeYouWatch": {
+      "title": "Before you watch {title}",
+      "suggestions": "1 suggested word to go through. | {count} suggested words to go through.",
+      "words": "Tap to see its words before you press play.",
+      "noSubtitle": "Tap to see how much of it you'll understand, and learn its words first."
+    },
+    "test": {
+      "title": "Notifications work",
+      "body": "This is how Learnarr will tell you when cards are waiting."
+    }
   }
 }

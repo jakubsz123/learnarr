@@ -137,6 +137,48 @@ export async function getSubtitle(opts: {
 
 export type SubtitleSource = (typeof schema.subtitles.$inferInsert)["source"];
 
+/** Largest subtitle file accepted; a long film's SRT is well under 300 kB. */
+export const MAX_SUBTITLE_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Use a subtitle file the learner uploaded for a film or episode. It replaces
+ * the one they had, keeping its cards, and is analysed again.
+ */
+export async function uploadSubtitle(opts: {
+  db: Db;
+  server: MediaServer;
+  user: AppUser;
+  serverItemId: string;
+  raw: string;
+}) {
+  const { db, server, user } = opts;
+  const item = await server.item(opts.serverItemId);
+  if (item.type !== "movie" && item.type !== "episode")
+    throw new AppError(400, "errors.subtitles.notPlayable");
+  const cues = withoutSoundDescriptions(parseSubtitle(opts.raw));
+  if (!cues.length) throw new AppError(400, "errors.subtitles.unreadable");
+  const mediaItem = upsertMediaItem(db, server, item);
+  const existing = findSubtitle(db, user.id, mediaItem.id, user.learningLanguage);
+  if (!existing) {
+    return saveSubtitle(db, {
+      userId: user.id,
+      mediaItemId: mediaItem.id,
+      language: user.learningLanguage,
+      source: "upload",
+      raw: opts.raw,
+    });
+  }
+  return db.transaction((tx) => {
+    tx.delete(schema.subtitleLemmas).where(eq(schema.subtitleLemmas.subtitleId, existing.id)).run();
+    return tx
+      .update(schema.subtitles)
+      .set({ source: "upload", content: toSrt(cues), cueCount: cues.length, updatedAt: new Date() })
+      .where(eq(schema.subtitles.id, existing.id))
+      .returning()
+      .get();
+  });
+}
+
 export function findSubtitle(db: Db, userId: string, mediaItemId: number, language: string) {
   return db
     .select()

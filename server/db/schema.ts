@@ -30,6 +30,15 @@ export const user = sqliteTable("user", {
   ankiDeck: text("anki_deck"),
   /** When the person answered the first-sign-in questions (languages, level); null until then. */
   onboardedAt: integer("onboarded_at", { mode: "timestamp_ms" }),
+  /** The interface language, for what the server writes: notifications. */
+  locale: text("locale").notNull().default("en"),
+  // Notifications (server/utils/notifications)
+  ntfyTopic: text("ntfy_topic"),
+  practiceReminders: integer("practice_reminders", { mode: "boolean" }).notNull().default(true),
+  watchReminders: integer("watch_reminders", { mode: "boolean" }).notNull().default(true),
+  /** The person's user name on the media server, to tell whose plays are theirs. */
+  mediaServerUser: text("media_server_user"),
+  lastRemindedAt: integer("last_reminded_at", { mode: "timestamp_ms" }),
   ...timestamps,
 });
 
@@ -122,7 +131,7 @@ export const subtitles = sqliteTable(
       .notNull()
       .references(() => mediaItems.id, { onDelete: "cascade" }),
     language: text("language").notNull(),
-    source: text("source", { enum: ["plex", "jellyfin", "opensubtitles"] }).notNull(),
+    source: text("source", { enum: ["plex", "jellyfin", "opensubtitles", "upload"] }).notNull(),
     content: text("content").notNull(),
     cueCount: integer("cue_count").notNull(),
     wordsPickedAt: integer("words_picked_at", { mode: "timestamp_ms" }),
@@ -268,6 +277,44 @@ export const subtitleLemmas = sqliteTable("subtitle_lemmas", {
 });
 
 export type LemmaToken = [cue: number, start: number, end: number, lemma: string | null, upos: string];
+
+/** A browser or phone the person turned push notifications on in. */
+export const pushSubscriptions = sqliteTable(
+  "push_subscriptions",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("push_subscriptions_user_idx").on(t.userId)],
+);
+
+/**
+ * Wiktionary definitions, kept so a word is looked up once a month at most.
+ * A null `entries` remembers that Wiktionary has nothing for the word.
+ */
+export const dictionaryEntries = sqliteTable(
+  "dictionary_entries",
+  {
+    language: text("language").notNull(),
+    word: text("word").notNull(),
+    entries: text("entries", { mode: "json" }).$type<DictionaryEntry[] | null>(),
+    fetchedAt: integer("fetched_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.language, t.word] })],
+);
+
+export interface DictionaryEntry {
+  partOfSpeech: string;
+  definitions: string[];
+  /** Set when the word looked up is a form of another (a plural, a conjugation), defined here instead. */
+  formOf?: string;
+}
 
 export type CardSchedule = Pick<
   typeof cards.$inferSelect,
