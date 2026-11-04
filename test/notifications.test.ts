@@ -2,7 +2,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
-import { eq } from "drizzle-orm";
 import { translate } from "#shared/messages";
 import { addUser, testDb } from "./helpers";
 import { schema, type Db } from "../server/db";
@@ -113,10 +112,12 @@ describe("notifying people", () => {
   });
 
   it("offers the words of what someone just started watching, once", async () => {
-    const user = addUser(db, { mediaServerUser: "Jakub" });
-    db.insert(schema.pushSubscriptions)
-      .values({ userId: user.id, endpoint: "https://p/1", p256dh: "k", auth: "a" })
-      .run();
+    addUser(db, { mediaServerUser: "Jakub" });
+    const sentTo: { title: string; body: string }[] = [];
+    const notify = async (_db: Db, _userId: string, message: { title: string; body: string }) => {
+      sentTo.push(message);
+      return true;
+    };
     const play = {
       account: "jakub",
       itemId: "42",
@@ -126,21 +127,38 @@ describe("notifying people", () => {
       seasonNumber: 1,
       episodeNumber: 3,
     };
-    // No device answers in a test, so nothing counts as sent; the dedupe still applies.
-    expect(await onPlay(db, play)).toEqual([]);
-    db.update(schema.user).set({ ntfyTopic: "t" }).where(eq(schema.user.id, user.id)).run();
-    expect(await onPlay(db, play)).toEqual([]);
-    expect(await onPlay(db, { ...play, account: "someone else", itemId: "43" })).toEqual([]);
+    expect(await onPlay(db, play, 0, notify)).toHaveLength(1);
+    expect(sentTo[0]?.title).toBe("Before you watch Élite · S1 E3");
+    // A pause and resume a minute later doesn't notify again; someone else's play never does.
+    expect(await onPlay(db, play, 60_000, notify)).toEqual([]);
+    expect(await onPlay(db, { ...play, account: "someone else", itemId: "43" }, 0, notify)).toEqual([]);
+  });
+
+  it("tries again later when nothing could be sent", async () => {
+    addUser(db, { mediaServerUser: "Jakub" });
+    const play = {
+      account: "Jakub",
+      itemId: "7",
+      kind: "movie" as const,
+      title: "Roma",
+      showTitle: null,
+      seasonNumber: null,
+      episodeNumber: null,
+    };
+    expect(await onPlay(db, play, 0, async () => false)).toEqual([]);
+    expect(await onPlay(db, play, 1000, async () => true)).toHaveLength(1);
   });
 });
+
+const alwaysSent = async () => true;
 
 describe("practice reminders", () => {
   it("skips people with nothing due, and those who studied today", async () => {
     const db = testDb();
     addUser(db, { ntfyTopic: "t" });
     const evening = new Date(2026, 10, 4, 20).getTime();
-    expect(await sendPracticeReminders(db, evening)).toEqual([]);
+    expect(await sendPracticeReminders(db, evening, alwaysSent)).toEqual([]);
     const morning = new Date(2026, 10, 4, 7).getTime();
-    expect(await sendPracticeReminders(db, morning)).toEqual([]);
+    expect(await sendPracticeReminders(db, morning, alwaysSent)).toEqual([]);
   });
 });
