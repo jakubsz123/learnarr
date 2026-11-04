@@ -1,3 +1,6 @@
+import type { ErrorKey, MessageParams } from "#shared/messages";
+import { AppError } from "../errors";
+
 export type MediaServerKind = "plex" | "jellyfin";
 
 export interface Library {
@@ -59,12 +62,14 @@ export interface MediaServer {
   subtitle(item: MediaDetail, track: SubtitleTrack): Promise<string | null>;
 }
 
-export class MediaServerError extends Error {
-  constructor(
-    message: string,
-    readonly status = 502,
-  ) {
-    super(message);
+/**
+ * The media server failed or refused. `server` in the message is "Plex" or
+ * "Jellyfin". It answers 502 (the media server's fault) unless a status says
+ * otherwise: 404 for an item it doesn't have, 400 while connecting.
+ */
+export class MediaServerError extends AppError {
+  constructor(key: ErrorKey, params: MessageParams = {}, statusCode = 502) {
+    super(statusCode, key, params);
     this.name = "MediaServerError";
   }
 }

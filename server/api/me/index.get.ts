@@ -1,3 +1,8 @@
+import { defineEventHandler } from "h3";
+import { ANKI_DEFAULTS } from "#shared/anki";
+import { requireUser } from "~~/server/utils/auth";
+
+/** The signed-in person: who they are, what they learn, and their connections. */
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   return {
@@ -8,7 +13,8 @@ export default defineEventHandler(async (event) => {
     learningLanguage: user.learningLanguage,
     nativeLanguage: user.nativeLanguage,
     level: user.level,
+    onboarded: user.onboardedAt !== null,
     opensubtitles: { connected: Boolean(user.opensubtitlesPassword), username: user.opensubtitlesUsername },
-    anki: { url: user.ankiUrl ?? "http://127.0.0.1:8765", deck: user.ankiDeck ?? "Learnarr" },
+    anki: { url: user.ankiUrl ?? ANKI_DEFAULTS.url, deck: user.ankiDeck ?? ANKI_DEFAULTS.deck },
   };
 });

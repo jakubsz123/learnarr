@@ -1,4 +1,6 @@
 import type { AiProvider } from "#shared/aiProviders";
+import type { ErrorKey, MessageParams } from "#shared/messages";
+import { AppError } from "../errors";
 
 export interface AiConfig {
   provider: AiProvider;
@@ -7,9 +9,10 @@ export interface AiConfig {
   model: string;
 }
 
-export class AiError extends Error {
-  constructor(message: string) {
-    super(message);
+/** The AI provider failed or gave an answer Learnarr can't use; the provider is to blame, hence 502. */
+export class AiError extends AppError {
+  constructor(key: ErrorKey, params: MessageParams = {}) {
+    super(502, key, params);
     this.name = "AiError";
   }
 }
@@ -68,17 +71,20 @@ async function request(
       signal: AbortSignal.timeout(timeoutMs(config)),
     });
   } catch (error) {
-    if ((error as Error).name === "TimeoutError") throw new AiError(`${where} took too long to answer.`);
-    throw new AiError(`Couldn't reach ${where}. Check the address and that the server is running.`);
+    throw new AiError(
+      (error as Error).name === "TimeoutError" ? "errors.ai.timeout" : "errors.ai.unreachable",
+      {
+        where,
+      },
+    );
   }
-  if (response.status === 401 || response.status === 403) throw new AiError(`${where} rejected the API key.`);
-  if (response.status === 404)
-    throw new AiError(`${where} doesn't know that model, or the address is wrong.`);
-  if (response.status === 429)
-    throw new AiError(`${where} is rate-limiting requests. Try again in a moment.`);
+  if (response.status === 401 || response.status === 403)
+    throw new AiError("errors.ai.rejectedKey", { where });
+  if (response.status === 404) throw new AiError("errors.ai.unknownModel", { where });
+  if (response.status === 429) throw new AiError("errors.ai.rateLimited", { where });
   if (!response.ok) {
     const detail = (await response.text().catch(() => "")).slice(0, 300);
-    throw new AiError(`${where} returned an error (HTTP ${response.status})${detail ? `: ${detail}` : ""}`);
+    throw new AiError("errors.ai.httpError", { where, status: response.status, detail });
   }
   return response.json();
 }
@@ -109,10 +115,7 @@ export async function complete(
       .filter((b) => b.type === "text")
       .map((b) => b.text ?? "")
       .join("");
-    if (!text)
-      throw new AiError(
-        data.stop_reason === "refusal" ? "The model declined." : "The model returned nothing.",
-      );
+    if (!text) throw new AiError(data.stop_reason === "refusal" ? "errors.ai.declined" : "errors.ai.empty");
     return text;
   }
 
@@ -134,11 +137,7 @@ export async function complete(
   const choice = data.choices?.[0];
   const text = choice?.message?.content;
   if (!text) {
-    throw new AiError(
-      choice?.finish_reason === "length"
-        ? "The model ran out of room before answering. Try a model that isn't a reasoning model."
-        : "The model returned nothing.",
-    );
+    throw new AiError(choice?.finish_reason === "length" ? "errors.ai.outOfRoom" : "errors.ai.empty");
   }
   return text;
 }

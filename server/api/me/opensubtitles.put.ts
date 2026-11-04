@@ -1,6 +1,11 @@
 import { eq } from "drizzle-orm";
+import { defineEventHandler } from "h3";
 import { z } from "zod";
 import { schema, useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { openSubtitlesLogin, openSubtitlesSessions } from "~~/server/utils/opensubtitles";
+import { encryptSecret } from "~~/server/utils/secrets";
+import { validBody } from "~~/server/utils/validate";
 
 const body = z.object({
   username: z.string().trim().min(1).max(100),
@@ -11,14 +16,7 @@ const body = z.object({
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { username, password } = await validBody(event, body);
-  let account;
-  try {
-    ({ account } = await login(username, password));
-  } catch (error) {
-    if (error instanceof OpenSubtitlesError)
-      throw createError({ statusCode: error.status, statusMessage: error.message });
-    throw error;
-  }
+  const { account } = await openSubtitlesLogin(username, password);
   useDb()
     .update(schema.user)
     .set({

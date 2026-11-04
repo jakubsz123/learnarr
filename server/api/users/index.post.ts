@@ -1,5 +1,10 @@
 import { APIError } from "better-auth/api";
+import { defineEventHandler } from "h3";
 import { z } from "zod";
+import { requireAdmin, useAuth } from "~~/server/utils/auth";
+import { AppError } from "~~/server/utils/errors";
+import { asAdminCreatingAccount } from "~~/server/utils/userAccess";
+import { validBody } from "~~/server/utils/validate";
 
 const body = z.object({
   name: z.string().trim().min(1).max(100),
@@ -21,8 +26,9 @@ export default defineEventHandler(async (event) => {
     );
     return { id: user.id, name: user.name, email: user.email };
   } catch (error) {
-    if (error instanceof APIError)
-      throw createError({ statusCode: 400, statusMessage: error.message || "Couldn't add that account." });
-    throw error;
+    if (!(error instanceof APIError)) throw error;
+    if (error.body?.code?.startsWith("USER_ALREADY_EXISTS"))
+      throw new AppError(400, "errors.users.emailTaken");
+    throw new AppError(400, "errors.users.couldNotAdd", { reason: error.message });
   }
 });

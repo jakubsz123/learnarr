@@ -147,6 +147,7 @@ describe("lemmatising subtitles", () => {
     fs.writeFileSync(path.join(dir, modelEntry("es")!.file), "");
     const lemmas = createLemmas({ db, lemmatizer: () => lemmatizer, modelDir: dir });
     const sub = subtitle("es");
+    lemmas.ensure(sub);
     expect(lemmas.status(sub)).toEqual({ state: "working" });
     await lemmas.idle();
     expect(lemmas.status(sub)).toEqual({ state: "done" });

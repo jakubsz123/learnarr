@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { languageName } from "#shared/languages";
 import type { Cue } from "#shared/subtitles";
+import { extractJson, wordFields } from "./answer";
 import { AiError, complete, type AiConfig } from "./client";
 
 export interface PickedWord {
@@ -47,12 +48,9 @@ export function buildPrompt(req: PickRequest): { system: string; user: string } 
     `Pick the ${req.count} words or short phrases most worth learning for ${LEVEL_HINT[req.level] ?? LEVEL_HINT.intermediate}.`,
     "Skip names, places, numbers, interjections and sound descriptions. Never pick something from the already-learning list.",
     "For each one give:",
-    '- "term": the dictionary form (infinitive for verbs, singular for nouns, masculine singular for adjectives where the language has gender);',
+    ...wordFields(native),
     '- "form": the exact text as it appears in the line;',
-    `- "translation": a short ${native} meaning, as used in that line;`,
-    '- "partOfSpeech": one of noun, verb, adjective, adverb, phrase, other;',
-    '- "line": the number of the line where it is used;',
-    `- "note": an optional short ${native} usage note (under 80 characters), or "".`,
+    '- "line": the number of the line where it is used.',
     'Answer with JSON only, no other text: {"words": [{"term": "", "form": "", "translation": "", "partOfSpeech": "", "line": 1, "note": ""}]}',
   ].join("\n");
 
@@ -77,19 +75,6 @@ const answerSchema = z.object({
   ),
 });
 
-/** The JSON object in a model's answer, tolerating code fences and chatter around it. */
-export function extractJson(text: string): unknown {
-  const unfenced = text.replace(/```(?:json)?/gi, "");
-  const start = unfenced.indexOf("{");
-  const end = unfenced.lastIndexOf("}");
-  if (start === -1 || end <= start) throw new AiError("The model didn't answer with JSON.");
-  try {
-    return JSON.parse(unfenced.slice(start, end + 1));
-  } catch {
-    throw new AiError("The model's answer wasn't valid JSON.");
-  }
-}
-
 const fold = (s: string) => s.toLocaleLowerCase().normalize("NFKC");
 
 /**
@@ -99,7 +84,7 @@ const fold = (s: string) => s.toLocaleLowerCase().normalize("NFKC");
  */
 export function parseAnswer(text: string, req: Pick<PickRequest, "cues" | "known" | "count">): PickedWord[] {
   const parsed = answerSchema.safeParse(extractJson(text));
-  if (!parsed.success) throw new AiError("The model's answer didn't have the expected shape.");
+  if (!parsed.success) throw new AiError("errors.ai.wrongShape");
 
   const byNumber = new Map(req.cues.map((cue) => [cue.index + 1, cue]));
   const seen = new Set(req.known.map(fold));
@@ -134,7 +119,6 @@ export async function pickWords(
   const { system, user } = buildPrompt(req);
   const answer = await complete(config, system, user, fetchImpl);
   const words = parseAnswer(answer, req);
-  if (words.length === 0)
-    throw new AiError("The model's words didn't match any subtitle line. Try another model.");
+  if (words.length === 0) throw new AiError("errors.ai.noMatchingLines");
   return words;
 }

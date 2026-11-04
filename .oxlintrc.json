@@ -5,6 +5,8 @@
   "rules": {
     "no-underscore-dangle": ["warn", { "allow": ["_embedded", "_links"] }]
   },
-  "overrides": [{ "files": ["website/.vitepress/theme/*.ts"], "rules": { "import/no-unassigned-import": "off" } }],
+  "overrides": [
+    { "files": ["website/.vitepress/theme/*.ts"], "rules": { "import/no-unassigned-import": "off" } }
+  ],
   "ignorePatterns": [".nuxt", ".output", "node_modules", "server/db/migrations", "website/.vitepress/cache"]
 }

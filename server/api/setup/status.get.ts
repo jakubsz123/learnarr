@@ -1,14 +1,16 @@
-import { useDb } from "../../db";
-import { countUsers } from "../../utils/userAccess";
+import { defineEventHandler } from "h3";
+import { useDb } from "~~/server/db";
+import { resolveAiConfig } from "~~/server/utils/ai/config";
+import { mediaServerSettings } from "~~/server/utils/media";
+import { useSettings } from "~~/server/utils/settings";
+import { countUsers } from "~~/server/utils/userAccess";
 
 /** Public: tells the app whether to show the setup wizard. Booleans only. */
 export default defineEventHandler(() => {
   const settings = useSettings();
   return {
     needsAccount: countUsers(useDb()) === 0,
-    mediaServer: Boolean(
-      settings.get("media.kind") && settings.get("media.url") && settings.get("media.token"),
-    ),
-    ai: Boolean(settings.get("ai.provider") && settings.get("ai.model")),
+    mediaServer: mediaServerSettings(settings) !== null,
+    ai: resolveAiConfig(settings) !== null,
   };
 });

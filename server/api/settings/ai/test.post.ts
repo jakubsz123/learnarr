@@ -1,7 +1,11 @@
+import { defineEventHandler } from "h3";
 import { parseSubtitle } from "#shared/subtitles";
-import { AiError } from "~~/server/utils/ai/client";
 import { aiInput, candidateConfig } from "~~/server/utils/ai/input";
 import { pickWords } from "~~/server/utils/ai/pickWords";
+import { requireAdmin } from "~~/server/utils/auth";
+import { AppError } from "~~/server/utils/errors";
+import { useSettings } from "~~/server/utils/settings";
+import { validBody } from "~~/server/utils/validate";
 
 const SAMPLE = `1
 00:00:01,000 --> 00:00:03,000
@@ -27,24 +31,18 @@ Más te vale, el jefe ya sospecha algo.`;
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
   const config = candidateConfig(await validBody(event, aiInput), useSettings());
-  if (!config.model) return { ok: false, error: "Pick a model first." };
+  if (!config.model) throw new AppError(400, "errors.ai.pickModel");
   const started = Date.now();
-  try {
-    const words = await pickWords(config, {
-      cues: parseSubtitle(SAMPLE),
-      language: "es",
-      nativeLanguage: "en",
-      level: "intermediate",
-      count: 5,
-      known: [],
-    });
-    return {
-      ok: true,
-      ms: Date.now() - started,
-      words: words.map((w) => ({ term: w.term, translation: w.translation })),
-    };
-  } catch (error) {
-    if (error instanceof AiError) return { ok: false, error: error.message };
-    throw error;
-  }
+  const words = await pickWords(config, {
+    cues: parseSubtitle(SAMPLE),
+    language: "es",
+    nativeLanguage: "en",
+    level: "intermediate",
+    count: 5,
+    known: [],
+  });
+  return {
+    ms: Date.now() - started,
+    words: words.map((w) => ({ term: w.term, translation: w.translation })),
+  };
 });

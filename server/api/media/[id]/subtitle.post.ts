@@ -1,22 +1,16 @@
-import { z } from "zod";
+import { defineEventHandler } from "h3";
 import { useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
 import { useLemmas } from "~~/server/utils/lemmas";
 import { useMediaServer } from "~~/server/utils/media";
-import { MediaServerError } from "~~/server/utils/media/types";
-
-const params = z.object({ id: z.string().min(1).max(100) });
+import { getSubtitle } from "~~/server/utils/subtitleSource";
+import { mediaIdParam, validParams } from "~~/server/utils/validate";
 
 /** Get this film or episode's subtitle in the user's learning language. */
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const { id } = validParams(event, params);
-  try {
-    const subtitle = await getSubtitle({ db: useDb(), server: useMediaServer(), user, serverItemId: id });
-    useLemmas().queue(subtitle.id);
-    return { id: subtitle.id, source: subtitle.source, cueCount: subtitle.cueCount };
-  } catch (error) {
-    if (error instanceof MediaServerError)
-      throw createError({ statusCode: 502, statusMessage: error.message });
-    throw error;
-  }
+  const { id } = validParams(event, mediaIdParam);
+  const subtitle = await getSubtitle({ db: useDb(), server: useMediaServer(), user, serverItemId: id });
+  useLemmas().queue(subtitle.id);
+  return { id: subtitle.id, source: subtitle.source, cueCount: subtitle.cueCount };
 });

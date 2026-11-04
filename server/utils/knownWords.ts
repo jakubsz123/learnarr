@@ -1,4 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
+import type { Level } from "#shared/languages";
+import { MATURE_DAYS } from "#shared/srs";
 import { wordKey } from "#shared/words";
 import { schema, type Db } from "../db";
 import { frequencyRanks } from "./frequency";
@@ -8,10 +10,7 @@ import { frequencyRanks } from "./frequency";
  * before the learner has marked anything. Rough on purpose: it only has to make
  * "% you know" start near the truth, and marking words corrects it from there.
  */
-export const SEED_SIZE: Record<string, number> = { beginner: 100, intermediate: 1500, advanced: 4000 };
-
-/** A card reviewed out to three weeks is a word the learner knows. */
-export const MATURE_DAYS = 21;
+export const SEED_SIZE: Record<Level, number> = { beginner: 100, intermediate: 1500, advanced: 4000 };
 
 export type WordState = "known" | "learning";
 
@@ -25,7 +24,7 @@ export async function seedKnownWords(db: Db, user: { id: string; level: string }
   if (seeded?.level === user.level) return;
 
   const ranks = await frequencyRanks(language);
-  const words = ranks ? [...ranks.keys()].slice(0, SEED_SIZE[user.level] ?? 0) : [];
+  const words = ranks ? [...ranks.keys()].slice(0, SEED_SIZE[user.level as Level] ?? 0) : [];
   db.transaction((tx) => {
     tx.delete(schema.knownWords)
       .where(

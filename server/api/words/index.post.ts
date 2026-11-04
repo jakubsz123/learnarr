@@ -1,6 +1,10 @@
+import { defineEventHandler } from "h3";
 import { z } from "zod";
 import { LANGUAGE_CODES } from "#shared/languages";
 import { useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { setKnown } from "~~/server/utils/knownWords";
+import { validBody } from "~~/server/utils/validate";
 
 const body = z.object({
   word: z.string().trim().min(1).max(80),

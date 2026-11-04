@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
+import { englishMessage } from "#shared/messages";
 import { schema, type Db } from "../db";
+import { AppError } from "./errors";
 
 type Job = typeof schema.jobs.$inferSelect;
 
@@ -44,7 +46,12 @@ export function createJobRunner(db: Db, concurrency = 2) {
         try {
           update(job.id, { state: "done", result: (await work()) ?? null });
         } catch (error) {
-          update(job.id, { state: "failed", message: (error as Error).message || "Something went wrong." });
+          // An AppError keeps its key, so the browser can show the reason in the reader's language.
+          update(job.id, {
+            state: "failed",
+            message: (error as Error).message || englishMessage("errors.unknown"),
+            result: error instanceof AppError ? { error: error.data } : null,
+          });
         }
       });
       return job;
@@ -80,7 +87,8 @@ export function createJobRunner(db: Db, concurrency = 2) {
         .update(schema.jobs)
         .set({
           state: "failed",
-          message: "Interrupted by a server restart. Try again.",
+          message: englishMessage("errors.jobs.interrupted"),
+          result: { error: { key: "errors.jobs.interrupted", params: {} } },
           updatedAt: new Date(),
         })
         .where(inArray(schema.jobs.state, ["queued", "running"]))

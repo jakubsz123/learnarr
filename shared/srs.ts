@@ -6,9 +6,17 @@
 
 export const RATINGS = { again: 1, hard: 2, good: 3, easy: 4 } as const;
 export type Rating = (typeof RATINGS)[keyof typeof RATINGS];
+export const RATING_VALUES = Object.values(RATINGS) as Rating[];
+
+/** A card's place in learning: never studied, in its short learning steps, or on growing intervals. */
+export const CARD_STATES = ["new", "learning", "review"] as const;
+export type CardState = (typeof CARD_STATES)[number];
+
+/** A card reviewed out to three weeks counts as a word the learner knows. */
+export const MATURE_DAYS = 21;
 
 export interface SrsState {
-  state: "new" | "learning" | "review";
+  state: CardState;
   step: number;
   intervalDays: number;
   ease: number;

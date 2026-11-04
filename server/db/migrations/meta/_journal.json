@@ -29,6 +29,13 @@
       "when": 1793199110767,
       "tag": "0003_suggestions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793784808264,
+      "tag": "0004_onboarding",
+      "breakpoints": true
     }
   ]
 }

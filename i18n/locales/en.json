@@ -1,0 +1,85 @@
+{
+  "errors": {
+    "unknown": "Something went wrong.",
+    "network": "Couldn't reach Learnarr. Check your connection.",
+    "invalidRequest": "That request isn't valid: {detail}",
+    "crossSite": "This request came from another site.",
+    "auth": {
+      "signInFirst": "Sign in first.",
+      "adminOnly": "Only the admin can do that.",
+      "signUpClosed": "Sign-up is closed on this server. Ask its admin to add you."
+    },
+    "media": {
+      "notConnected": "No media server is connected yet. The admin sets one up in Settings.",
+      "fromEnv": "The media server is set by environment variables on this server.",
+      "needPlexToken": "Sign in with Plex or paste a token.",
+      "needApiKey": "Paste an API key.",
+      "unreachable": "{server} couldn't be reached. Check the address and that it's running.",
+      "timeout": "{server} didn't answer in time. Check the address and that it's running.",
+      "rejected": "{server} rejected the token or API key.",
+      "noItem": "{server} doesn't have that item.",
+      "httpError": "{server} answered with an error (HTTP {status}).",
+      "noPoster": "There's no poster for this.",
+      "plexPin": "plex.tv didn't answer. Try again, or paste a token instead."
+    },
+    "ai": {
+      "notConfigured": "No AI provider is set up yet. The admin sets one up in Settings.",
+      "fromEnv": "The AI provider is set by environment variables on this server.",
+      "pickModel": "Pick a model.",
+      "unreachable": "Couldn't reach {where}. Check the address and that the server is running.",
+      "timeout": "{where} took too long to answer.",
+      "rejectedKey": "{where} rejected the API key.",
+      "unknownModel": "{where} doesn't know that model, or the address is wrong.",
+      "rateLimited": "{where} is rate-limiting requests. Try again in a moment.",
+      "httpError": "{where} returned an error (HTTP {status}): {detail}",
+      "declined": "The model declined.",
+      "empty": "The model returned nothing.",
+      "outOfRoom": "The model ran out of room before answering. Try a model that isn't a reasoning model.",
+      "notJson": "The model didn't answer with JSON. Try a larger model.",
+      "wrongShape": "The model's answer didn't have the expected shape. Try a larger model.",
+      "noMatchingLines": "The model's words didn't match any subtitle line. Try another model."
+    },
+    "opensubtitles": {
+      "unreachable": "OpenSubtitles.com couldn't be reached. Try again in a moment.",
+      "badLogin": "OpenSubtitles.com didn't accept that username and password.",
+      "loginLimited": "OpenSubtitles.com is limiting logins right now. Try again in a minute.",
+      "searchLimited": "OpenSubtitles.com is limiting searches right now. Try again in a minute.",
+      "sessionExpired": "Your OpenSubtitles.com session expired. Try again.",
+      "noDownloadsLeft": "Your OpenSubtitles.com account has no downloads left today.",
+      "httpError": "OpenSubtitles.com answered with an error (HTTP {status}).",
+      "badAnswer": "OpenSubtitles.com gave an answer Learnarr couldn't use. Try again later."
+    },
+    "subtitles": {
+      "notInLibrary": "That subtitle isn't in your library.",
+      "notPlayable": "Pick a film or an episode.",
+      "noneOnServer": "Your media server has no {language} subtitle for this. Connect your OpenSubtitles.com account in Settings → Account to download one, or upload a file.",
+      "noneAnywhere": "Neither your media server nor OpenSubtitles.com has a {language} subtitle for this. You can upload a file.",
+      "wordNotFound": "That word isn't in this subtitle.",
+      "unreadable": "That file has no subtitle lines Learnarr can read. Use an .srt, .vtt or .ass file.",
+      "tooLarge": "That file is too large for a subtitle."
+    },
+    "models": {
+      "unreachable": "Couldn't reach lindat.mff.cuni.cz to download the {language} model ({cause}).",
+      "httpError": "lindat.mff.cuni.cz answered {status} for the {language} model.",
+      "checksum": "The {language} model from LINDAT doesn't match its checksum, so it wasn't used."
+    },
+    "cards": {
+      "notFound": "That card doesn't exist.",
+      "nothingToUndo": "There's no answer to undo."
+    },
+    "jobs": {
+      "notFound": "That job doesn't exist.",
+      "interrupted": "Interrupted by a server restart. Try again."
+    },
+    "users": {
+      "notFound": "That account doesn't exist.",
+      "notYourself": "You can't delete your own account.",
+      "emailTaken": "There's already an account with that email.",
+      "couldNotAdd": "Couldn't add that account: {reason}"
+    },
+    "notifications": {
+      "pushNotConfigured": "Push notifications aren't available on this server.",
+      "ntfyFailed": "The ntfy server answered with an error (HTTP {status})."
+    }
+  }
+}

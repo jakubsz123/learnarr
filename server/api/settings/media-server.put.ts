@@ -1,6 +1,11 @@
+import { defineEventHandler } from "h3";
 import { z } from "zod";
+import { requireAdmin } from "~~/server/utils/auth";
+import { AppError } from "~~/server/utils/errors";
 import { createMediaServer } from "~~/server/utils/media";
 import { MediaServerError } from "~~/server/utils/media/types";
+import { useSettings } from "~~/server/utils/settings";
+import { validBody } from "~~/server/utils/validate";
 
 const body = z.object({
   kind: z.enum(["plex", "jellyfin"]),
@@ -13,33 +18,20 @@ const body = z.object({
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
   const settings = useSettings();
-  if (
-    settings.isFromEnv("media.kind") ||
-    settings.isFromEnv("media.url") ||
-    settings.isFromEnv("media.token")
-  ) {
-    throw createError({
-      statusCode: 409,
-      statusMessage: "The media server is set by environment variables on this server.",
-    });
-  }
+  if (settings.isPinned("media")) throw new AppError(409, "errors.media.fromEnv");
   const { kind, url, token: newToken } = await validBody(event, body);
   const token = newToken ?? (settings.get("media.kind") === kind ? settings.get("media.token") : null);
   if (!token) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: kind === "plex" ? "Sign in with Plex or paste a token." : "Paste an API key.",
-    });
+    throw new AppError(400, kind === "plex" ? "errors.media.needPlexToken" : "errors.media.needApiKey");
   }
   const cleanUrl = url.replace(/\/+$/, "");
-  let identity;
-  try {
-    identity = await createMediaServer(kind, cleanUrl, token).identify();
-  } catch (error) {
-    if (error instanceof MediaServerError)
-      throw createError({ statusCode: 400, statusMessage: error.message });
-    throw error;
-  }
+  const identity = await createMediaServer(kind, cleanUrl, token)
+    .identify()
+    .catch((error) => {
+      // While connecting, a server that can't be reached is a problem with what was typed.
+      if (error instanceof MediaServerError) error.statusCode = 400;
+      throw error;
+    });
   settings.set("media.kind", kind);
   settings.set("media.url", cleanUrl);
   settings.set("media.token", token);

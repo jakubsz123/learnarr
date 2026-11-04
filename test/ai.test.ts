@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { complete, listModels, type AiConfig } from "../server/utils/ai/client";
-import { buildPrompt, extractJson, parseAnswer, sampleCues } from "../server/utils/ai/pickWords";
+import { extractJson } from "../server/utils/ai/answer";
+import { buildPrompt, parseAnswer, sampleCues } from "../server/utils/ai/pickWords";
 import { buildWordPrompt, explainWord } from "../server/utils/ai/explainWord";
 import type { Cue } from "../shared/subtitles";
 

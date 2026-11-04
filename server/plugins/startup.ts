@@ -1,3 +1,4 @@
+import { defineNitroPlugin } from "nitropack/runtime";
 import { useDb } from "../db";
 import { useJobs } from "../utils/jobs";
 import { useLemmas } from "../utils/lemmas";

@@ -1,6 +1,9 @@
 import { asc } from "drizzle-orm";
+import { defineEventHandler } from "h3";
 import { schema, useDb } from "~~/server/db";
+import { requireAdmin } from "~~/server/utils/auth";
 
+/** Everyone with an account on this server. */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
   const users = useDb()

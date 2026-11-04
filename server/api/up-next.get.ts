@@ -1,55 +1,37 @@
-import { and, desc, eq, isNotNull } from "drizzle-orm";
-import { schema, useDb } from "~~/server/db";
-import { useMediaServer } from "~~/server/utils/media";
+import { defineEventHandler } from "h3";
+import { useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { mediaServerSettings, useMediaServer } from "~~/server/utils/media";
 import { nextEpisode, type MediaSummary } from "~~/server/utils/media/types";
+import { recentItems } from "~~/server/utils/mediaItems";
+import { progressOf } from "~~/server/utils/progress";
+import { useSettings } from "~~/server/utils/settings";
 
 const SHOWS = 4;
 
 /**
- * The episode after the latest one you studied, for each of your recent shows.
- * Separate from Today because it asks the media server, which can be slow.
+ * The episode after the furthest one you've studied, for each of your recent
+ * shows. Separate from Today because it asks the media server, which can be slow.
  */
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
+  if (!mediaServerSettings(useSettings())) return { items: [] };
   const db = useDb();
-  let server;
-  try {
-    server = useMediaServer();
-  } catch {
-    return { items: [] };
-  }
-  const latest = db
-    .select({
-      serverItemId: schema.mediaItems.serverItemId,
-      showTitle: schema.mediaItems.showTitle,
-      seasonNumber: schema.mediaItems.seasonNumber,
-      episodeNumber: schema.mediaItems.episodeNumber,
-    })
-    .from(schema.subtitles)
-    .innerJoin(schema.mediaItems, eq(schema.subtitles.mediaItemId, schema.mediaItems.id))
-    .where(
-      and(
-        eq(schema.subtitles.userId, user.id),
-        eq(schema.subtitles.language, user.learningLanguage),
-        eq(schema.mediaItems.server, server.kind),
-        isNotNull(schema.mediaItems.showTitle),
-      ),
-    )
-    .orderBy(desc(schema.subtitles.updatedAt))
-    .all();
+  const server = useMediaServer();
 
-  // The furthest episode of each show, shows touched most recently first.
-  const place = (row: (typeof latest)[number]) => (row.seasonNumber ?? 0) * 10_000 + (row.episodeNumber ?? 0);
-  const furthest = new Map<string, (typeof latest)[number]>();
-  for (const row of latest) {
-    const best = furthest.get(row.showTitle!);
-    if (!best || place(row) > place(best)) furthest.set(row.showTitle!, row);
+  type Row = ReturnType<typeof recentItems>[number];
+  const place = (row: Row) => (row.seasonNumber ?? 0) * 10_000 + (row.episodeNumber ?? 0);
+  const furthest = new Map<string, Row>();
+  for (const row of recentItems(db, user.id, user.learningLanguage, 200)) {
+    if (row.server !== server.kind || row.kind !== "episode" || !row.showTitle) continue;
+    const best = furthest.get(row.showTitle);
+    if (!best || place(row) > place(best)) furthest.set(row.showTitle, row);
   }
-  const candidates = [...furthest.values()].slice(0, SHOWS * 2).map((row) => row.serverItemId);
 
   const found = await Promise.all(
-    candidates.map(async (id) => {
-      const item = await server.item(id).catch(() => null);
+    [...furthest.values()].slice(0, SHOWS * 2).map(async (row) => {
+      // A show that's gone from the server, or a hiccup, just leaves it out.
+      const item = await server.item(row.serverItemId).catch(() => null);
       return item ? nextEpisode(server, item).catch(() => null) : null;
     }),
   );

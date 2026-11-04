@@ -1,16 +1,16 @@
+import { defineEventHandler } from "h3";
 import { aiInput, candidateConfig } from "~~/server/utils/ai/input";
+import { requireAdmin } from "~~/server/utils/auth";
+import { AppError } from "~~/server/utils/errors";
+import { useSettings } from "~~/server/utils/settings";
+import { validBody } from "~~/server/utils/validate";
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
   const settings = useSettings();
-  if ((["ai.provider", "ai.baseUrl", "ai.apiKey", "ai.model"] as const).some((k) => settings.isFromEnv(k))) {
-    throw createError({
-      statusCode: 409,
-      statusMessage: "The AI provider is set by environment variables on this server.",
-    });
-  }
+  if (settings.isPinned("ai")) throw new AppError(409, "errors.ai.fromEnv");
   const input = await validBody(event, aiInput);
-  if (!input.model) throw createError({ statusCode: 400, statusMessage: "Pick a model." });
+  if (!input.model) throw new AppError(400, "errors.ai.pickModel");
   const config = candidateConfig(input, settings);
   settings.set("ai.provider", config.provider);
   settings.set("ai.baseUrl", config.baseUrl);

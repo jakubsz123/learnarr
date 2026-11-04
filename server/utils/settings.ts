@@ -20,10 +20,18 @@ export const SETTINGS = {
 
 export type SettingKey = keyof typeof SETTINGS;
 
+/** The settings that are saved together, from one form. */
+export const SETTING_GROUPS = {
+  media: ["media.kind", "media.url", "media.token", "media.name"],
+  ai: ["ai.provider", "ai.baseUrl", "ai.apiKey", "ai.model"],
+} as const satisfies Record<string, readonly SettingKey[]>;
+
 export interface Settings {
   get(key: SettingKey): string | null;
   set(key: SettingKey, value: string | null): void;
   isFromEnv(key: SettingKey): boolean;
+  /** Whether any setting of the group is pinned by an environment variable, so the app can't change it. */
+  isPinned(group: keyof typeof SETTING_GROUPS): boolean;
 }
 
 export function createSettings(db: Db, env: NodeJS.ProcessEnv = process.env): Settings {
@@ -52,6 +60,9 @@ export function createSettings(db: Db, env: NodeJS.ProcessEnv = process.env): Se
     },
     isFromEnv(key) {
       return envValue(key) !== null;
+    },
+    isPinned(group) {
+      return SETTING_GROUPS[group].some((key) => envValue(key) !== null);
     },
   };
 }

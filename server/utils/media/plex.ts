@@ -1,7 +1,14 @@
 import { toLanguageCode } from "#shared/languages";
 import { parseSubtitle } from "#shared/subtitles";
 import { mediaFetch, mediaJson, mediaText } from "./http";
-import type { Library, MediaDetail, MediaServer, MediaSummary, SubtitleTrack } from "./types";
+import {
+  MediaServerError,
+  type Library,
+  type MediaDetail,
+  type MediaServer,
+  type MediaSummary,
+  type SubtitleTrack,
+} from "./types";
 
 export const PLEX_CLIENT_ID = "learnarr";
 export const PLEX_PRODUCT = "Learnarr";
@@ -89,7 +96,7 @@ export function createPlex(url: string, token: string, fetchImpl: typeof fetch =
       includeGuids: 1,
     });
     const raw = data.Metadata?.[0];
-    if (!raw) throw new Error("Plex returned no item");
+    if (!raw) throw new MediaServerError("errors.media.noItem", { server: "Plex" }, 404);
     return mapPlexDetail(raw);
   }
 

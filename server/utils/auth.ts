@@ -1,9 +1,11 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
-import { createError, type H3Event } from "h3";
+import type { H3Event } from "h3";
+import { englishMessage } from "#shared/messages";
 import { eq } from "drizzle-orm";
 import { useDb, schema, type Db } from "../db";
+import { AppError } from "./errors";
 import { getOrCreateKey } from "./secrets";
 import { trustedOrigins, useSecureCookies } from "./authOrigins";
 import { ensureAdmin, signUpAllowed } from "./userAccess";
@@ -42,7 +44,8 @@ export function createAuth(db: Db) {
           before: async (user) => {
             if (!signUpAllowed(db)) {
               throw new APIError("FORBIDDEN", {
-                message: "Sign-up is closed on this server. Ask its admin to add you.",
+                message: englishMessage("errors.auth.signUpClosed"),
+                code: "SIGN_UP_CLOSED",
               });
             }
             return { data: user };
@@ -69,12 +72,12 @@ export type AppUser = typeof schema.user.$inferSelect;
 export async function requireUser(event: H3Event): Promise<AppUser> {
   const session = await useAuth().api.getSession({ headers: event.headers });
   const row = session && useDb().select().from(schema.user).where(eq(schema.user.id, session.user.id)).get();
-  if (!row) throw createError({ statusCode: 401, statusMessage: "Sign in first." });
+  if (!row) throw new AppError(401, "errors.auth.signInFirst");
   return row;
 }
 
 export async function requireAdmin(event: H3Event): Promise<AppUser> {
   const user = await requireUser(event);
-  if (!user.isAdmin) throw createError({ statusCode: 403, statusMessage: "Only the admin can do that." });
+  if (!user.isAdmin) throw new AppError(403, "errors.auth.adminOnly");
   return user;
 }

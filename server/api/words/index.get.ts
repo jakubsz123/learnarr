@@ -1,4 +1,7 @@
+import { defineEventHandler } from "h3";
 import { useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { markedWords } from "~~/server/utils/knownWords";
 
 /** The words the user has marked as known in the language they're learning. */
 export default defineEventHandler(async (event) => {

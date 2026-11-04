@@ -1,6 +1,9 @@
+import { defineEventHandler } from "h3";
 import { z } from "zod";
 import { useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
 import { DECISIONS, decideSuggestions } from "~~/server/utils/suggestions";
+import { validBody } from "~~/server/utils/validate";
 
 const body = z.object({
   ids: z.array(z.number().int().positive()).min(1).max(200),

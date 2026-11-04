@@ -7,11 +7,16 @@ export function rankTable(list: string): Map<string, number> {
 
 export type FrequencyLoader = (language: string) => Promise<string | null>;
 
-/** Read from the lists bundled into the server build (scripts/build-frequency.mjs writes them). */
-const bundled: FrequencyLoader = async (language) =>
-  /^[a-z]{2}$/.test(language)
-    ? ((await useStorage("assets:server").getItem<string>(`frequency/${language}.txt`)) ?? null)
-    : null;
+/**
+ * Read from the lists bundled into the server build (scripts/build-frequency.mjs
+ * writes them). Nitro's storage is imported when first needed, so this module
+ * also loads outside a server, in tests.
+ */
+const bundled: FrequencyLoader = async (language) => {
+  if (!/^[a-z]{2}$/.test(language)) return null;
+  const { useStorage } = await import("nitropack/runtime");
+  return (await useStorage("assets:server").getItem<string>(`frequency/${language}.txt`)) ?? null;
+};
 
 let loader = bundled;
 const cache = new Map<string, Promise<Map<string, number> | null>>();
