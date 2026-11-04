@@ -29,7 +29,10 @@ export function coverageOfVocab(vocab: { count: number; state: string | null }[]
   return total ? known / total : null;
 }
 
-/** Rounded down, so 99.6% never shows as everything. */
-export function formatCoverage(coverage: number | null | undefined): string {
-  return coverage === null || coverage === undefined ? "—" : `${Math.floor(coverage * 100)}%`;
+/** As a percentage in the reader's language, rounded down so 99.6% never shows as everything. */
+export function formatCoverage(coverage: number | null | undefined, locale = "en"): string {
+  if (coverage === null || coverage === undefined) return "—";
+  return new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(
+    Math.floor(coverage * 100) / 100,
+  );
 }

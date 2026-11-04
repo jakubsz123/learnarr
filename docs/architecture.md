@@ -14,8 +14,8 @@ Take "make a card from a tapped word":
    drift.
 3. `server/middleware/origin.ts` checks that the write comes from Learnarr's own page.
 4. `server/api/subtitles/[id]/cards.post.ts` is the route. Routes are thin: they check who's asking
-   (`requireUser`), read their input through a zod schema (`validParams`, `validBody`), and call one function
-   in `server/utils`.
+   (`requireUser`), read their input through a zod schema (`validParams`, `validBody`), and either run one
+   simple query or, like this one, call a function in `server/utils`.
 5. `server/utils/wordCards.ts` does the work: finds the line, asks the AI (`server/utils/ai/explainWord.ts`),
    saves the card (`createCard` in `server/utils/cards.ts`).
 6. Anything that goes wrong is an `AppError` (`server/utils/errors.ts`) with a message key. It reaches the

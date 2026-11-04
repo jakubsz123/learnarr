@@ -125,7 +125,9 @@ function save() {
 
 function suggestTopic() {
   // A topic is public to whoever knows its name, so it should be hard to guess.
-  form.ntfyTopic = `learnarr-${crypto.randomUUID().slice(0, 13)}`;
+  // getRandomValues works over plain HTTP too, unlike randomUUID.
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  form.ntfyTopic = `learnarr-${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
   save();
 }
 

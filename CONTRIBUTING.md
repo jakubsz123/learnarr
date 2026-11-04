@@ -28,8 +28,9 @@ CI runs the same, then builds the Docker image and runs it.
 - **Layout.** `app/` for the browser, `server/` for the API, `shared/` for code both use. Small modules with
   plain names; if a file needs a table of contents, split it.
 - **Routes are thin.** A route checks who's asking (`requireUser`/`requireAdmin`), reads its input through a
-  zod schema (`validParams`, `validQuery`, `validBody`, with `idParam` and `mediaIdParam` for ids), and calls a
-  function in `server/utils`. The work, and its tests, live there.
+  zod schema (`validParams`, `validQuery`, `validBody`, with `idParam` and `mediaIdParam` for ids), and then
+  either runs one simple query or calls a function in `server/utils`. Anything with rules worth testing lives
+  in `server/utils`, with its tests.
 - **Errors** a person may see are `AppError`s with a key from `i18n/locales/en.json`
   (`throw new AppError(404, "errors.cards.notFound")`). Don't catch and re-map them in routes; h3 sends them.
 - **Imports are explicit** on the server (auto-imports are off). In `app/`, Nuxt's auto-imports for

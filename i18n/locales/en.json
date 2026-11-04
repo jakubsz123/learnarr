@@ -20,7 +20,6 @@
       "noItem": "{server} doesn't have that item.",
       "httpError": "{server} answered with an error (HTTP {status}).",
       "noPoster": "There's no poster for this.",
-      "plexPin": "plex.tv didn't answer. Try again, or paste a token instead.",
       "noPlexServers": "That Plex account can't reach any servers."
     },
     "ai": {
@@ -79,7 +78,6 @@
       "couldNotAdd": "Couldn't add that account: {reason}"
     },
     "notifications": {
-      "pushNotConfigured": "Push notifications aren't available on this server.",
       "ntfyFailed": "The ntfy server answered with an error (HTTP {status})."
     },
     "anki": {
@@ -95,7 +93,8 @@
       "wrongPassword": "That email and password don't match an account.",
       "passwordTooShort": "Use at least 8 characters for the password."
     },
-    "timedOut": "This is taking too long. Try again."
+    "timedOut": "This is taking too long. Try again.",
+    "notFound": "There's nothing here."
   },
   "notifications": {
     "practice": {
@@ -142,11 +141,7 @@
     "loading": "Loading…",
     "tryAgain": "Try again",
     "back": "Back",
-    "saved": "Saved.",
-    "remove": "Remove",
-    "yes": "Yes",
-    "no": "No",
-    "comingSoon": "Coming soon"
+    "saved": "Saved."
   },
   "cards": {
     "translation": "Translation",

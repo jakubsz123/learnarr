@@ -1,16 +1,5 @@
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { schema, type Db } from "../db";
-
-type MediaItem = Pick<
-  typeof schema.mediaItems.$inferSelect,
-  "kind" | "title" | "showTitle" | "seasonNumber" | "episodeNumber"
->;
-
-/** "Show S1 E2" for an episode, the title for a film: how a card says where it came from, outside the app. */
-export function sourceLabel(item: MediaItem): string {
-  if (item.kind !== "episode") return item.title;
-  return `${item.showTitle ?? item.title} S${item.seasonNumber ?? "?"} E${item.episodeNumber ?? "?"}`;
-}
 
 /**
  * The films and episodes a learner has a subtitle for in a language, most
@@ -37,4 +26,13 @@ export function recentItems(db: Db, userId: string, language: string, limit: num
     .orderBy(desc(sql`max(${schema.subtitles.updatedAt}, coalesce(max(${schema.cards.updatedAt}), 0))`))
     .limit(limit)
     .all();
+}
+
+/** The media items of these cards (or anything with a mediaItemId), by id: to say where each is from. */
+export function mediaItemsOf(db: Db, rows: { mediaItemId: number | null }[]) {
+  const ids = [...new Set(rows.map((r) => r.mediaItemId).filter((id): id is number => id !== null))];
+  const items = ids.length
+    ? db.select().from(schema.mediaItems).where(inArray(schema.mediaItems.id, ids)).all()
+    : [];
+  return new Map(items.map((item) => [item.id, item]));
 }

@@ -13,7 +13,7 @@
         transform="rotate(-90 18 18)"
       />
     </svg>
-    <span class="value" aria-hidden="true">{{ formatCoverage(coverage) }}</span>
+    <span class="value" aria-hidden="true">{{ percent }}</span>
     <span v-if="size === 'lg'" class="label" aria-hidden="true">{{ label }}</span>
     <span class="sr-only">{{ title }}</span>
   </span>
@@ -31,7 +31,8 @@ const props = withDefaults(
   },
 );
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const percent = computed(() => formatCoverage(props.coverage, locale.value));
 const tier = computed(() => coverageTier(props.coverage));
 const px = computed(() => (props.size === "lg" ? 44 : 22));
 const dash = computed(() => Math.floor((props.coverage ?? 0) * 100));
@@ -41,7 +42,7 @@ const label = computed(() =>
 const title = computed(() =>
   props.coverage === null
     ? t("coverage.titleEmpty", { reason: label.value })
-    : t("coverage.title", { percent: formatCoverage(props.coverage), tier: label.value }),
+    : t("coverage.title", { percent: percent.value, tier: label.value }),
 );
 </script>
 

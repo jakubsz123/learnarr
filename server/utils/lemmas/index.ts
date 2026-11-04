@@ -34,7 +34,7 @@ export interface Failure {
 function failureOf(error: unknown): Failure {
   return error instanceof AppError
     ? { message: error.message, error: error.data }
-    : { message: (error as Error).message || "The download failed." };
+    : { message: (error as Error).message, error: { key: "errors.unknown", params: {} } };
 }
 
 interface Options {
@@ -55,6 +55,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
   const downloads = new Map<string, Promise<string>>();
   const progress = new Map<string, number | null>();
   const failures = new Map<string, Failure>();
+  const stale = new Set<number>();
   let chain: Promise<void> = Promise.resolve();
 
   function model(language: string): Promise<string> {
@@ -97,12 +98,24 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
     } catch {
       return; // the language's failure is what status reports, for every subtitle in it
     }
-    const save = (values: Omit<typeof schema.subtitleLemmas.$inferInsert, "subtitleId">) =>
-      db
-        .insert(schema.subtitleLemmas)
+    // An upload can replace the text while UDPipe works on the old one; then
+    // nothing is saved and the subtitle is queued again for its new text.
+    const save = (values: Omit<typeof schema.subtitleLemmas.$inferInsert, "subtitleId">) => {
+      const now = db
+        .select({ content: schema.subtitles.content })
+        .from(schema.subtitles)
+        .where(eq(schema.subtitles.id, subtitleId))
+        .get();
+      if (!now) return;
+      if (now.content !== subtitle.content) {
+        stale.add(subtitleId);
+        return;
+      }
+      db.insert(schema.subtitleLemmas)
         .values({ subtitleId, ...values })
         .onConflictDoNothing()
         .run();
+    };
     try {
       const tokens = await run(
         parseSubtitle(subtitle.content).map((cue) => cue.text),
@@ -122,7 +135,10 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
       chain = chain
         .then(() => lemmatize(subtitleId))
         .catch((error) => console.error("[learnarr] lemmatising failed", error))
-        .finally(() => pending.delete(subtitleId));
+        .finally(() => {
+          pending.delete(subtitleId);
+          if (stale.delete(subtitleId)) this.queue(subtitleId);
+        });
     },
 
     /** Queue every subtitle that has no lemmas yet, in the languages there is a model for. */

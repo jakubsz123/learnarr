@@ -45,6 +45,7 @@
   --warn: #9a5b00;
   --danger: #b42318;
   --shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  --shadow-raised: 0 8px 32px rgb(0 0 0 / 30%);
   color-scheme: light;
 }
 

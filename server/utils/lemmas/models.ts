@@ -95,7 +95,7 @@ export const MODELS: readonly ModelEntry[] = Object.entries(TREEBANKS).map(([lan
   return { language, ...pin };
 });
 
-export const LINDAT = "https://lindat.mff.cuni.cz/repository/server/api/core/bitstreams";
+const LINDAT = "https://lindat.mff.cuni.cz/repository/server/api/core/bitstreams";
 
 export const modelEntry = (language: string) => MODELS.find((m) => m.language === language);
 

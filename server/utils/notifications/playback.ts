@@ -1,4 +1,5 @@
 import { and, count, eq } from "drizzle-orm";
+import { mediaTitle } from "#shared/mediaLabels";
 import { translate } from "#shared/messages";
 import { schema, type Db } from "../../db";
 import { notifyUser } from "./index";
@@ -33,12 +34,6 @@ function playersOf(db: Db, account: string | null) {
   return total === 1 && people.length === 1 && !people[0]!.mediaServerUser ? people : [];
 }
 
-function displayTitle(play: PlayEvent): string {
-  return play.kind === "episode" && play.showTitle
-    ? `${play.showTitle} S${play.seasonNumber ?? "?"} E${play.episodeNumber ?? "?"}`
-    : play.title;
-}
-
 /**
  * Someone pressed play: offer them the episode's words before they watch. If
  * they have its subtitle, say how many suggested words wait; if not, offer to
@@ -49,7 +44,6 @@ export async function onPlay(db: Db, play: PlayEvent, now = Date.now()): Promise
   for (const user of playersOf(db, play.account)) {
     const key = `${user.id}:${play.itemId}`;
     if (now - (recent.get(key) ?? 0) < REPEAT_WINDOW_MS) continue;
-    recent.set(key, now);
 
     const subtitle = db
       .select({ id: schema.subtitles.id })
@@ -76,12 +70,18 @@ export async function onPlay(db: Db, play: PlayEvent, now = Date.now()): Promise
         ? translate(user.locale, "notifications.beforeYouWatch.suggestions", { count: suggestions })
         : translate(user.locale, "notifications.beforeYouWatch.words");
     const sent = await notifyUser(db, user.id, {
-      title: translate(user.locale, "notifications.beforeYouWatch.title", { title: displayTitle(play) }),
+      title: translate(user.locale, "notifications.beforeYouWatch.title", {
+        title: play.kind === "episode" ? mediaTitle(play) : play.title,
+      }),
       body,
       url: `/media/${encodeURIComponent(play.itemId)}`,
     });
-    if (sent) notified.push(user.id);
+    if (sent) {
+      recent.set(key, now);
+      notified.push(user.id);
+    }
   }
+  for (const [key, at] of recent) if (now - at >= REPEAT_WINDOW_MS) recent.delete(key);
   return notified;
 }
 

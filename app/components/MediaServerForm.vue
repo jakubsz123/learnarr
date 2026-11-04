@@ -161,7 +161,6 @@ async function signInWithPlex() {
       if (tab) tab.location.href = pin.authUrl;
       else window.location.assign(pin.authUrl);
       waiting.value = true;
-      type Pin = Get<"/api/plex/pin/:id">;
       const result = await poll(
         () => api<PlexPinStatus>(`/api/plex/pin/${pin.id}`),
         (r) => r.approved,

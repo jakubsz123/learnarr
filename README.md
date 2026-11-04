@@ -111,9 +111,13 @@ Everything can be set in the app. These environment variables are optional:
 | `MEDIA_SERVER`, `MEDIA_SERVER_URL`, `MEDIA_SERVER_TOKEN` | Pin the media server (`plex` or `jellyfin`) instead of setting it in the app.                                   |
 | `AI_PROVIDER`, `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`   | Pin the AI provider (`openai-compatible` or `anthropic`).                                                       |
 | `AUTH_SECRET`, `ENCRYPTION_KEY`                          | Use your own keys instead of the ones generated in `/config` on first start.                                    |
+| `PORT`                                                   | The port inside the container. Default `7979`.                                                                  |
+| `TRUSTED_ORIGINS`                                        | Extra addresses Learnarr is reached at, comma-separated, if sign-in fails with an origin error.                 |
+| `OPENSUBTITLES_API_KEY`                                  | Your own OpenSubtitles.com API key instead of Learnarr's.                                                       |
+| `UDPIPE_BIN`                                             | Where the lemmatiser binary is. Default `/opt/udpipe/udpipe` in the image.                                      |
 | `TZ`                                                     | Your time zone, for "today" in study limits, streaks and reminders. Default UTC.                                |
 | `NTFY_URL`, `NTFY_TOKEN`                                 | A self-hosted ntfy server (default `https://ntfy.sh`) and its access token.                                     |
-| `REMINDER_HOUR`                                          | The hour practice reminders go out. Default 18.                                                                 |
+| `REMINDER_HOUR`                                          | The hour (in `TZ`) practice reminders go out. Default 18.                                                       |
 
 A setting pinned by an environment variable can't be changed in the app.
 

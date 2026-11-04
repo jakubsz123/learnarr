@@ -1,12 +1,13 @@
 import { and, asc, eq } from "drizzle-orm";
 import { defineEventHandler, setResponseHeaders } from "h3";
-import { ANKI_FIELDS, sentenceHtml } from "#shared/sentence";
+import { ANKI_FIELDS, escapeHtml, sentenceHtml } from "#shared/sentence";
 import { schema, useDb } from "~~/server/db";
 import { requireUser } from "~~/server/utils/auth";
-import { sourceLabel } from "~~/server/utils/mediaItems";
+import { mediaTitle } from "#shared/mediaLabels";
 
-/** A field can't hold the file's own separators. */
-const field = (value: string | null) => (value ?? "").replace(/[\t\r\n]+/g, " ");
+/** A field can't hold the file's own separators, and the file is read as HTML. */
+const text = (value: string | null) => escapeHtml(value ?? "").replace(/[\t\r\n]+/g, " ");
+const html = (value: string) => value.replace(/[\t\r\n]+/g, " ");
 
 /**
  * The learner's cards as a file Anki imports (File → Import), in the same
@@ -28,11 +29,11 @@ export default defineEventHandler(async (event) => {
     `#columns:${ANKI_FIELDS.join("\t")}`,
     ...rows.map(({ card, item }) =>
       [
-        field(card.term),
-        field(card.translation),
-        field(sentenceHtml(card.sentence, card.form)),
-        field([card.partOfSpeech, card.note].filter(Boolean).join(" · ")),
-        field(item ? sourceLabel(item) : ""),
+        text(card.term),
+        text(card.translation),
+        html(sentenceHtml(card.sentence, card.form)),
+        text([card.partOfSpeech, card.note].filter(Boolean).join(" · ")),
+        text(item ? mediaTitle(item) : ""),
       ].join("\t"),
     ),
   ];

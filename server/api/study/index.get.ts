@@ -1,9 +1,9 @@
-import { inArray } from "drizzle-orm";
 import { defineEventHandler } from "h3";
 import { previewIntervals } from "#shared/srs";
-import { schema, useDb } from "~~/server/db";
+import { useDb } from "~~/server/db";
 import { requireUser } from "~~/server/utils/auth";
 import { studyQueue } from "~~/server/utils/cards";
+import { mediaItemsOf } from "~~/server/utils/mediaItems";
 
 /** The cards to study now, each with what its answer buttons would do and where it came from. */
 export default defineEventHandler(async (event) => {
@@ -12,13 +12,7 @@ export default defineEventHandler(async (event) => {
   const now = Date.now();
   const { due, fresh } = studyQueue(db, user.id, user.learningLanguage, now);
   const cards = [...due, ...fresh];
-  const ids = [...new Set(cards.map((c) => c.mediaItemId).filter((id): id is number => id !== null))];
-  const sources = new Map(
-    (ids.length
-      ? db.select().from(schema.mediaItems).where(inArray(schema.mediaItems.id, ids)).all()
-      : []
-    ).map((m) => [m.id, m]),
-  );
+  const sources = mediaItemsOf(db, cards);
   return {
     cards: cards.map((card) => {
       const source = card.mediaItemId ? sources.get(card.mediaItemId) : undefined;

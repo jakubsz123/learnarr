@@ -38,6 +38,6 @@ export function asAdminCreatingAccount<T>(fn: () => Promise<T>): Promise<T> {
   return adminCreation.run(true, fn);
 }
 
-export function isAdminCreatingAccount(): boolean {
+function isAdminCreatingAccount(): boolean {
   return adminCreation.getStore() === true;
 }
