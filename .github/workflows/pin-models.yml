@@ -1,0 +1,27 @@
+name: Pin UDPipe models
+
+# Run by hand when adding languages: it downloads every model and prints the
+# pins for server/utils/lemmas/models.ts (see scripts/pin-udpipe-models.mjs).
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/v0.3]
+    paths: [scripts/pin-udpipe-models.mjs]
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/pin-udpipe-models.mjs > pins.jsonl
+      - run: cat pins.jsonl
+        if: always()
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: udpipe-pins
+          path: pins.jsonl
