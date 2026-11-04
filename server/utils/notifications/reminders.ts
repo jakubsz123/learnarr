@@ -15,7 +15,11 @@ export function reminderHour(env: NodeJS.ProcessEnv = process.env): number {
  * Remind everyone who has cards waiting and hasn't studied today, once a day,
  * from the reminder hour on. Called every few minutes; returns who was reminded.
  */
-export async function sendPracticeReminders(db: Db, now = Date.now()): Promise<string[]> {
+export async function sendPracticeReminders(
+  db: Db,
+  now = Date.now(),
+  notify = notifyUser,
+): Promise<string[]> {
   if (new Date(now).getHours() < reminderHour()) return [];
   const today = new Date(startOfDay(now));
   const reminded: string[] = [];
@@ -29,7 +33,7 @@ export async function sendPracticeReminders(db: Db, now = Date.now()): Promise<s
         .get()?.n ?? 0) > 0;
     const waiting = studyQueue(db, user.id, user.learningLanguage, now).total;
     if (studiedToday || waiting === 0) continue;
-    const sent = await notifyUser(db, user.id, {
+    const sent = await notify(db, user.id, {
       title: translate(user.locale, "notifications.practice.title"),
       body: translate(user.locale, "notifications.practice.body", { count: waiting }),
       url: "/study",

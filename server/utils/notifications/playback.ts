@@ -39,11 +39,17 @@ function playersOf(db: Db, account: string | null) {
  * they have its subtitle, say how many suggested words wait; if not, offer to
  * get it. Returns who was notified.
  */
-export async function onPlay(db: Db, play: PlayEvent, now = Date.now()): Promise<string[]> {
+export async function onPlay(
+  db: Db,
+  play: PlayEvent,
+  now = Date.now(),
+  notify = notifyUser,
+): Promise<string[]> {
   const notified: string[] = [];
   for (const user of playersOf(db, play.account)) {
     const key = `${user.id}:${play.itemId}`;
-    if (now - (recent.get(key) ?? 0) < REPEAT_WINDOW_MS) continue;
+    const last = recent.get(key);
+    if (last !== undefined && now - last < REPEAT_WINDOW_MS) continue;
 
     const subtitle = db
       .select({ id: schema.subtitles.id })
@@ -69,7 +75,7 @@ export async function onPlay(db: Db, play: PlayEvent, now = Date.now()): Promise
       : suggestions
         ? translate(user.locale, "notifications.beforeYouWatch.suggestions", { count: suggestions })
         : translate(user.locale, "notifications.beforeYouWatch.words");
-    const sent = await notifyUser(db, user.id, {
+    const sent = await notify(db, user.id, {
       title: translate(user.locale, "notifications.beforeYouWatch.title", {
         title: play.kind === "episode" ? mediaTitle(play) : play.title,
       }),
