@@ -3,7 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { languageName } from "#shared/languages";
+import type { ErrorKey, MessageParams } from "#shared/messages";
+import { AppError } from "../errors";
 import { DATA_DIR } from "../dataDir";
 import pins from "./udpipe-models.json";
 
@@ -102,8 +103,11 @@ export const modelEntry = (language: string) => MODELS.find((m) => m.language ==
 export const UDPIPE_BIN = process.env.UDPIPE_BIN || path.join(DATA_DIR, "udpipe", "udpipe");
 export const MODEL_DIR = path.join(DATA_DIR, "udpipe", "models");
 
-export class ModelError extends Error {
-  override name = "ModelError";
+export class ModelError extends AppError {
+  constructor(key: ErrorKey, params: MessageParams) {
+    super(502, key, params);
+    this.name = "ModelError";
+  }
 }
 
 /**
@@ -119,15 +123,15 @@ export async function downloadModel(
   fs.mkdirSync(dir, { recursive: true });
   const target = path.join(dir, entry.file);
   const partial = `${target}.part`;
-  const name = languageName(entry.language);
+  const language = entry.language;
   const res = await fetchFn(`${LINDAT}/${entry.uuid}/content`, {
     signal: AbortSignal.timeout(20 * 60 * 1000),
   }).catch((error: Error) => {
     const cause = (error.cause as Error | undefined)?.message ?? error.message;
-    throw new ModelError(`Couldn't reach lindat.mff.cuni.cz to download the ${name} model (${cause}).`);
+    throw new ModelError("errors.models.unreachable", { language, cause });
   });
   if (!res.ok || !res.body) {
-    throw new ModelError(`lindat.mff.cuni.cz answered ${res.status} for the ${name} model.`);
+    throw new ModelError("errors.models.httpError", { language, status: res.status });
   }
 
   const total = Number(res.headers.get("content-length")) || entry.bytes;
@@ -145,7 +149,7 @@ export async function downloadModel(
     await pipeline(Readable.fromWeb(res.body as never), count, fs.createWriteStream(partial));
     const sha256 = hash.digest("hex");
     if (sha256 !== entry.sha256) {
-      throw new ModelError(`The ${name} model from LINDAT doesn't match its checksum, so it wasn't used.`);
+      throw new ModelError("errors.models.checksum", { language });
     }
     fs.renameSync(partial, target);
     return target;

@@ -1,10 +1,9 @@
 import { and, count, eq, gte, sql } from "drizzle-orm";
+import { dayNumber, startOfDay } from "#shared/days";
 import { schema, type Db } from "../db";
-import { MATURE_DAYS } from "./knownWords";
+import { MATURE_DAYS } from "#shared/srs";
 
 const DAY = 24 * 60 * 60 * 1000;
-
-const dayOf = (ms: number) => Math.floor((ms - new Date(ms).getTimezoneOffset() * 60_000) / DAY);
 
 /** Days in a row with at least one review, ending today (or yesterday, if today has none yet). */
 export function reviewStreak(db: Db, userId: string, now = Date.now()): number {
@@ -16,9 +15,9 @@ export function reviewStreak(db: Db, userId: string, now = Date.now()): number {
         and(eq(schema.reviews.userId, userId), gte(schema.reviews.reviewedAt, new Date(now - 400 * DAY))),
       )
       .all()
-      .map((r) => dayOf(r.at.getTime())),
+      .map((r) => dayNumber(r.at.getTime())),
   );
-  let day = dayOf(now);
+  let day = dayNumber(now);
   if (!days.has(day)) day--;
   let streak = 0;
   while (days.has(day)) {
@@ -38,8 +37,7 @@ export function learningStats(db: Db, userId: string, language: string, now = Da
     .from(schema.cards)
     .where(and(eq(schema.cards.userId, userId), eq(schema.cards.language, language)))
     .get();
-  const midnight = new Date(now);
-  midnight.setHours(0, 0, 0, 0);
+  const midnight = new Date(startOfDay(now));
   const reviewedToday =
     db
       .select({ n: count() })

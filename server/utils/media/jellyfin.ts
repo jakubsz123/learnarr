@@ -1,7 +1,14 @@
 import { toLanguageCode } from "#shared/languages";
 import { parseSubtitle } from "#shared/subtitles";
 import { mediaFetch, mediaJson, mediaText } from "./http";
-import type { Library, MediaDetail, MediaServer, MediaSummary, SubtitleTrack } from "./types";
+import {
+  MediaServerError,
+  type Library,
+  type MediaDetail,
+  type MediaServer,
+  type MediaSummary,
+  type SubtitleTrack,
+} from "./types";
 import { VERSION } from "#shared/version";
 
 // Jellyfin's JSON is untyped; the mappers below are where it becomes ours.
@@ -69,7 +76,7 @@ export function createJellyfin(url: string, apiKey: string, fetchImpl: typeof fe
       Fields: "MediaStreams,MediaSources,ProviderIds",
     });
     const raw = data.Items?.[0];
-    if (!raw) throw new Error("Jellyfin returned no item");
+    if (!raw) throw new MediaServerError("errors.media.noItem", { server: "Jellyfin" }, 404);
     return mapJellyfinDetail(raw);
   }
 

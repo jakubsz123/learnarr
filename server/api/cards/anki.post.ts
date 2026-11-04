@@ -1,6 +1,9 @@
 import { and, eq } from "drizzle-orm";
+import { defineEventHandler } from "h3";
 import { z } from "zod";
 import { schema, useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { validBody } from "~~/server/utils/validate";
 
 const body = z.object({
   links: z
@@ -12,8 +15,7 @@ const body = z.object({
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { links } = await validBody(event, body);
-  const db = useDb();
-  db.transaction((tx) => {
+  useDb().transaction((tx) => {
     for (const { cardId, noteId } of links) {
       tx.update(schema.cards)
         .set({ ankiNoteId: noteId, updatedAt: new Date() })

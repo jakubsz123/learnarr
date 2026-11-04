@@ -1,16 +1,17 @@
 import { and, eq } from "drizzle-orm";
-import { z } from "zod";
+import { defineEventHandler } from "h3";
 import { schema, useDb } from "~~/server/db";
-
-const params = z.object({ id: z.coerce.number().int().positive() });
+import { requireUser } from "~~/server/utils/auth";
+import { AppError } from "~~/server/utils/errors";
+import { idParam, validParams } from "~~/server/utils/validate";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const { id } = validParams(event, params);
+  const { id } = validParams(event, idParam);
   const result = useDb()
     .delete(schema.cards)
     .where(and(eq(schema.cards.id, id), eq(schema.cards.userId, user.id)))
     .run();
-  if (!result.changes) throw createError({ statusCode: 404, statusMessage: "No such card." });
+  if (!result.changes) throw new AppError(404, "errors.cards.notFound");
   return { deleted: true };
 });

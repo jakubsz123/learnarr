@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { createSessionCache, downloadSubtitle, login, searchSubtitles } from "../server/utils/opensubtitles";
+import {
+  createSessionCache,
+  downloadSubtitle,
+  openSubtitlesLogin,
+  searchSubtitles,
+} from "../server/utils/opensubtitles";
 
 function fakeFetch(handler: (url: string, init?: RequestInit) => Response) {
   const calls: { url: string; init?: RequestInit }[] = [];
@@ -58,14 +63,14 @@ describe("login and download", () => {
     const fake = fakeFetch(() =>
       json({ token: "t", base_url: "vip-api.opensubtitles.com", user: { allowed_downloads: 20 } }),
     );
-    const { session, account } = await login("me", "pw", fake.fn);
+    const { session, account } = await openSubtitlesLogin("me", "pw", fake.fn);
     expect(session.apiBase).toBe("https://vip-api.opensubtitles.com/api/v1");
     expect(account.allowedDownloads).toBe(20);
   });
 
   it("says when the account details are wrong", async () => {
     const fake = fakeFetch(() => json({}, 401));
-    await expect(login("me", "bad", fake.fn)).rejects.toThrow(/didn't accept/);
+    await expect(openSubtitlesLogin("me", "bad", fake.fn)).rejects.toThrow(/didn't accept/);
   });
 
   it("downloads through the link, and reports an empty daily quota", async () => {

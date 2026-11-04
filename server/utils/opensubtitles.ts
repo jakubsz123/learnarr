@@ -1,3 +1,7 @@
+import type { ErrorKey, MessageParams } from "#shared/messages";
+import { VERSION } from "#shared/version";
+import { AppError } from "./errors";
+
 /**
  * OpenSubtitles.com, used only when the media server has no subtitle in the
  * language. Learnarr identifies itself with its own API key, as the API's terms
@@ -7,16 +11,13 @@
 
 const API = "https://api.opensubtitles.com/api/v1";
 const LEARNARR_API_KEY = "hxBVpTnU6WpxQlqhkqMIQxmjj2eV3Hss";
-const USER_AGENT = "Learnarr v0.1.0";
+const USER_AGENT = `Learnarr v${VERSION}`;
 // Tokens last a day; renew a little early rather than fail a download.
 const SESSION_TTL_MS = 23 * 60 * 60 * 1000;
 
-export class OpenSubtitlesError extends Error {
-  constructor(
-    message: string,
-    readonly status = 502,
-  ) {
-    super(message);
+export class OpenSubtitlesError extends AppError {
+  constructor(key: ErrorKey, statusCode = 502, params: MessageParams = {}) {
+    super(statusCode, key, params);
     this.name = "OpenSubtitlesError";
   }
 }
@@ -35,7 +36,7 @@ async function call(url: string, init: RequestInit, fetchImpl: typeof fetch): Pr
   try {
     return await fetchImpl(url, { ...init, signal: AbortSignal.timeout(20_000) });
   } catch {
-    throw new OpenSubtitlesError("OpenSubtitles.com couldn't be reached. Try again in a moment.");
+    throw new OpenSubtitlesError("errors.opensubtitles.unreachable");
   }
 }
 
@@ -50,7 +51,7 @@ export interface OpenSubtitlesAccount {
   vip: boolean;
 }
 
-export async function login(
+export async function openSubtitlesLogin(
   username: string,
   password: string,
   fetchImpl: typeof fetch = fetch,
@@ -61,21 +62,19 @@ export async function login(
     fetchImpl,
   );
   if (response.status === 400 || response.status === 401 || response.status === 403) {
-    throw new OpenSubtitlesError("OpenSubtitles.com didn't accept that username and password.", 400);
+    throw new OpenSubtitlesError("errors.opensubtitles.badLogin", 400);
   }
   if (response.status === 429) {
-    throw new OpenSubtitlesError(
-      "OpenSubtitles.com is limiting logins right now. Try again in a minute.",
-      429,
-    );
+    throw new OpenSubtitlesError("errors.opensubtitles.loginLimited", 429);
   }
-  if (!response.ok) throw new OpenSubtitlesError(`OpenSubtitles.com login failed (HTTP ${response.status}).`);
+  if (!response.ok)
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: response.status });
   const data = (await response.json()) as {
     token?: string;
     base_url?: string;
     user?: { allowed_downloads?: number; vip?: boolean };
   };
-  if (!data.token) throw new OpenSubtitlesError("OpenSubtitles.com returned no login token.");
+  if (!data.token) throw new OpenSubtitlesError("errors.opensubtitles.badAnswer");
   // The login answer names the host this account's further calls should use.
   const apiBase = data.base_url ? `https://${data.base_url.replace(/^https?:\/\//, "")}/api/v1` : API;
   return {
@@ -126,13 +125,10 @@ export async function searchSubtitles(
 
   const response = await call(`${API}/subtitles?${params}`, { headers: headers() }, fetchImpl);
   if (response.status === 429) {
-    throw new OpenSubtitlesError(
-      "OpenSubtitles.com is limiting searches right now. Try again in a minute.",
-      429,
-    );
+    throw new OpenSubtitlesError("errors.opensubtitles.searchLimited", 429);
   }
   if (!response.ok)
-    throw new OpenSubtitlesError(`OpenSubtitles.com search failed (HTTP ${response.status}).`);
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: response.status });
   const data = (await response.json()) as { data?: { attributes: Record<string, any> }[] };
 
   return (data.data ?? [])
@@ -158,16 +154,16 @@ export async function downloadSubtitle(
     { method: "POST", headers: headers(session.token), body: JSON.stringify({ file_id: fileId }) },
     fetchImpl,
   );
-  if (response.status === 401) throw new OpenSubtitlesError("OpenSubtitles.com session expired.", 401);
+  if (response.status === 401) throw new OpenSubtitlesError("errors.opensubtitles.sessionExpired", 401);
   if (response.status === 406 || response.status === 429) {
-    throw new OpenSubtitlesError("Your OpenSubtitles.com account has no downloads left today.", 429);
+    throw new OpenSubtitlesError("errors.opensubtitles.noDownloadsLeft", 429);
   }
   if (!response.ok)
-    throw new OpenSubtitlesError(`OpenSubtitles.com download failed (HTTP ${response.status}).`);
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: response.status });
   const { link } = (await response.json()) as { link?: string };
-  if (!link) throw new OpenSubtitlesError("OpenSubtitles.com returned no download link.");
+  if (!link) throw new OpenSubtitlesError("errors.opensubtitles.badAnswer");
   const file = await call(link, {}, fetchImpl);
-  if (!file.ok) throw new OpenSubtitlesError(`Downloading the subtitle file failed (HTTP ${file.status}).`);
+  if (!file.ok) throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: file.status });
   return file.text();
 }
 
@@ -191,4 +187,6 @@ export function createSessionCache(
   };
 }
 
-export const openSubtitlesSessions = createSessionCache(async (u, p) => (await login(u, p)).session);
+export const openSubtitlesSessions = createSessionCache(
+  async (u, p) => (await openSubtitlesLogin(u, p)).session,
+);

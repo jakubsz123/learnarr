@@ -1,5 +1,8 @@
-import { AI_PRESETS } from "#shared/aiProviders";
+import { defineEventHandler } from "h3";
+import { requireAdmin } from "~~/server/utils/auth";
+import { useSettings } from "~~/server/utils/settings";
 
+/** The household's AI provider. The key itself never leaves the server. */
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
   const settings = useSettings();
@@ -8,9 +11,6 @@ export default defineEventHandler(async (event) => {
     baseUrl: settings.get("ai.baseUrl"),
     model: settings.get("ai.model"),
     hasApiKey: Boolean(settings.get("ai.apiKey")),
-    fromEnv: (["ai.provider", "ai.baseUrl", "ai.apiKey", "ai.model"] as const).some((k) =>
-      settings.isFromEnv(k),
-    ),
-    presets: AI_PRESETS,
+    fromEnv: settings.isPinned("ai"),
   };
 });

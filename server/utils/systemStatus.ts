@@ -5,7 +5,7 @@ import { schema, type Db } from "../db";
 import { DATA_DIR } from "./dataDir";
 import { listModels } from "./ai/client";
 import { resolveAiConfig } from "./ai/config";
-import { createMediaServer } from "./media";
+import { createMediaServer, mediaServerSettings } from "./media";
 import type { Settings } from "./settings";
 import { languageName } from "#shared/languages";
 import { frequencyRanks } from "./frequency";
@@ -33,15 +33,15 @@ function within<T>(promise: Promise<T>): Promise<T> {
 }
 
 async function mediaCheck(settings: Settings): Promise<Check> {
-  const kind = settings.get("media.kind");
-  const url = settings.get("media.url");
-  const token = settings.get("media.token");
-  if ((kind !== "plex" && kind !== "jellyfin") || !url || !token) {
+  const connection = mediaServerSettings(settings);
+  if (!connection) {
     return { name: "Media server", state: "error", detail: "Not connected.", fix: "/settings/media-server" };
   }
-  const label = kind === "plex" ? "Plex" : "Jellyfin";
+  const label = connection.kind === "plex" ? "Plex" : "Jellyfin";
   try {
-    const { name, version } = await within(createMediaServer(kind, url, token).identify());
+    const { name, version } = await within(
+      createMediaServer(connection.kind, connection.url, connection.token).identify(),
+    );
     return { name: `Media server · ${label}`, state: "ok", detail: `${name} ${version}` };
   } catch (error) {
     return {

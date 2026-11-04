@@ -1,6 +1,9 @@
 import { inArray } from "drizzle-orm";
+import { defineEventHandler } from "h3";
 import { previewIntervals } from "#shared/srs";
 import { schema, useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { studyQueue } from "~~/server/utils/cards";
 
 /** The cards to study now, each with what its answer buttons would do and where it came from. */
 export default defineEventHandler(async (event) => {
@@ -25,6 +28,7 @@ export default defineEventHandler(async (event) => {
         source: source
           ? {
               serverItemId: source.serverItemId,
+              kind: source.kind,
               title: source.title,
               showTitle: source.showTitle,
               seasonNumber: source.seasonNumber,

@@ -1,23 +1,18 @@
+import { defineEventHandler } from "h3";
 import { z } from "zod";
+import { requireUser } from "~~/server/utils/auth";
 import { useMediaServer } from "~~/server/utils/media";
-import { MediaServerError } from "~~/server/utils/media/types";
+import { mediaIdParam, validParams, validQuery } from "~~/server/utils/validate";
 
-const params = z.object({ id: z.string().min(1).max(100) });
 const query = z.object({
   start: z.coerce.number().int().min(0).default(0),
   limit: z.coerce.number().int().min(1).max(200).default(60),
   search: z.string().trim().max(100).optional(),
 });
 
+/** A page of a library's films or shows, optionally filtered by title. */
 export default defineEventHandler(async (event) => {
   await requireUser(event);
-  const { id } = validParams(event, params);
-  const opts = validQuery(event, query);
-  try {
-    return await useMediaServer().items(id, opts);
-  } catch (error) {
-    if (error instanceof MediaServerError)
-      throw createError({ statusCode: 502, statusMessage: error.message });
-    throw error;
-  }
+  const { id } = validParams(event, mediaIdParam);
+  return useMediaServer().items(id, validQuery(event, query));
 });

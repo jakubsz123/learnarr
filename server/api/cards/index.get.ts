@@ -1,12 +1,19 @@
 import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
+import { defineEventHandler } from "h3";
 import { z } from "zod";
+import { CARD_STATES } from "#shared/srs";
 import { schema, useDb } from "~~/server/db";
+import { requireUser } from "~~/server/utils/auth";
+import { validQuery } from "~~/server/utils/validate";
+
+export const CARD_FILTERS = ["all", ...CARD_STATES, "suspended"] as const;
 
 const query = z.object({
   search: z.string().trim().max(100).optional(),
-  filter: z.enum(["all", "new", "learning", "review", "suspended"]).default("all"),
+  filter: z.enum(CARD_FILTERS).default("all"),
 });
 
+/** The learner's cards in the language they're learning, newest first, searchable. */
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { search, filter } = validQuery(event, query);
@@ -21,14 +28,17 @@ export default defineEventHandler(async (event) => {
     const pattern = `%${search.replace(/[%_]/g, "")}%`;
     conditions.push(or(like(schema.cards.term, pattern), like(schema.cards.translation, pattern))!);
   }
-  const db = useDb();
-  const cards = db
+  const rows = useDb()
     .select({
       card: schema.cards,
-      title: schema.mediaItems.title,
-      showTitle: schema.mediaItems.showTitle,
-      seasonNumber: schema.mediaItems.seasonNumber,
-      episodeNumber: schema.mediaItems.episodeNumber,
+      source: {
+        serverItemId: schema.mediaItems.serverItemId,
+        kind: schema.mediaItems.kind,
+        title: schema.mediaItems.title,
+        showTitle: schema.mediaItems.showTitle,
+        seasonNumber: schema.mediaItems.seasonNumber,
+        episodeNumber: schema.mediaItems.episodeNumber,
+      },
     })
     .from(schema.cards)
     .leftJoin(schema.mediaItems, eq(schema.cards.mediaItemId, schema.mediaItems.id))
@@ -36,7 +46,5 @@ export default defineEventHandler(async (event) => {
     .orderBy(desc(schema.cards.createdAt), desc(schema.cards.id))
     .limit(500)
     .all();
-  return {
-    cards: cards.map(({ card, ...source }) => ({ ...card, source: source.title ? source : null })),
-  };
+  return { cards: rows.map(({ card, source }) => ({ ...card, source })) };
 });

@@ -1,6 +1,9 @@
+import { defineEventHandler } from "h3";
 import { z } from "zod";
 import { LANGUAGE_CODES } from "#shared/languages";
+import { requireAdmin } from "~~/server/utils/auth";
 import { useLemmas } from "~~/server/utils/lemmas";
+import { validParams } from "~~/server/utils/validate";
 
 const params = z.object({ code: z.enum(LANGUAGE_CODES) });
 

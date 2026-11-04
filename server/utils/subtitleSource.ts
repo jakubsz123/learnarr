@@ -1,9 +1,8 @@
 import { and, eq } from "drizzle-orm";
-import { createError } from "h3";
-import { languageName } from "#shared/languages";
 import { parseSubtitle, toSrt, withoutSoundDescriptions } from "#shared/subtitles";
 import { schema, type Db } from "../db";
 import type { AppUser } from "./auth";
+import { AppError } from "./errors";
 import { candidateTracks } from "./media/tracks";
 import type { MediaDetail, MediaServer } from "./media/types";
 import {
@@ -38,7 +37,7 @@ export const liveCatalogue: CatalogueDeps = {
     try {
       return await attempt(await openSubtitlesSessions.get(userId, credentials));
     } catch (error) {
-      if (error instanceof OpenSubtitlesError && error.status === 401) {
+      if (error instanceof OpenSubtitlesError && error.statusCode === 401) {
         return attempt(await openSubtitlesSessions.get(userId, credentials, true));
       }
       throw error;
@@ -101,71 +100,78 @@ export async function getSubtitle(opts: {
 
   const item = await server.item(opts.serverItemId);
   if (item.type !== "movie" && item.type !== "episode") {
-    throw createError({ statusCode: 400, statusMessage: "Pick a film or an episode." });
+    throw new AppError(400, "errors.subtitles.notPlayable");
   }
   const mediaItem = upsertMediaItem(db, server, item);
 
-  const existing = db
-    .select()
-    .from(schema.subtitles)
-    .where(
-      and(
-        eq(schema.subtitles.userId, user.id),
-        eq(schema.subtitles.mediaItemId, mediaItem.id),
-        eq(schema.subtitles.language, language),
-      ),
-    )
-    .get();
+  const existing = findSubtitle(db, user.id, mediaItem.id, language);
   if (existing) return existing;
-
-  const save = (raw: string, source: "plex" | "jellyfin" | "opensubtitles") => {
-    const cues = withoutSoundDescriptions(parseSubtitle(raw));
-    return db
-      .insert(schema.subtitles)
-      .values({
-        userId: user.id,
-        mediaItemId: mediaItem.id,
-        language,
-        source,
-        content: toSrt(cues),
-        cueCount: cues.length,
-      })
-      .returning()
-      .get();
-  };
+  const save = (raw: string, source: SubtitleSource) =>
+    saveSubtitle(db, { userId: user.id, mediaItemId: mediaItem.id, language, source, raw });
 
   for (const track of candidateTracks(item.subtitleTracks, language)) {
-    const raw = await server.subtitle(item, track).catch(() => null);
+    const raw = await server.subtitle(item, track).catch((error: Error) => {
+      // One unreadable track isn't the end: the next one, or OpenSubtitles, may work.
+      console.warn(`[learnarr] couldn't read subtitle track ${track.id} of ${item.id}: ${error.message}`);
+      return null;
+    });
     if (usable(raw)) return save(raw, server.kind);
   }
 
-  const name = languageName(language);
   if (!user.opensubtitlesUsername || !user.opensubtitlesPassword) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: `Your media server has no ${name} subtitle for this. Connect your OpenSubtitles.com account in Settings → Account to download one.`,
-    });
+    throw new AppError(404, "errors.subtitles.noneOnServer", { language });
   }
   const credentials = {
     username: user.opensubtitlesUsername,
     password: decryptSecret(user.opensubtitlesPassword),
   };
 
-  try {
-    const files = await catalogue.search(catalogueSearch(item, language));
-    // Each download spends the person's daily quota, so stop at the first usable file.
-    for (const file of files.slice(0, 3)) {
-      const raw = await catalogue.download(file.fileId, user.id, credentials);
-      if (usable(raw)) return save(raw, "opensubtitles");
-    }
-  } catch (error) {
-    if (error instanceof OpenSubtitlesError) {
-      throw createError({ statusCode: error.status === 429 ? 429 : 502, statusMessage: error.message });
-    }
-    throw error;
+  const files = await catalogue.search(catalogueSearch(item, language));
+  // Each download spends the person's daily quota, so stop at the first usable file.
+  for (const file of files.slice(0, 3)) {
+    const raw = await catalogue.download(file.fileId, user.id, credentials);
+    if (usable(raw)) return save(raw, "opensubtitles");
   }
-  throw createError({
-    statusCode: 404,
-    statusMessage: `Neither your media server nor OpenSubtitles.com has a ${name} subtitle for this.`,
-  });
+  throw new AppError(404, "errors.subtitles.noneAnywhere", { language });
+}
+
+export type SubtitleSource = (typeof schema.subtitles.$inferInsert)["source"];
+
+export function findSubtitle(db: Db, userId: string, mediaItemId: number, language: string) {
+  return db
+    .select()
+    .from(schema.subtitles)
+    .where(
+      and(
+        eq(schema.subtitles.userId, userId),
+        eq(schema.subtitles.mediaItemId, mediaItemId),
+        eq(schema.subtitles.language, language),
+      ),
+    )
+    .get();
+}
+
+/**
+ * Store a subtitle for a learner, cleaned up and as SRT. If one was saved in
+ * the meantime (two taps at once), that one is kept.
+ */
+export function saveSubtitle(
+  db: Db,
+  input: { userId: string; mediaItemId: number; language: string; source: SubtitleSource; raw: string },
+) {
+  const cues = withoutSoundDescriptions(parseSubtitle(input.raw));
+  const saved = db
+    .insert(schema.subtitles)
+    .values({
+      userId: input.userId,
+      mediaItemId: input.mediaItemId,
+      language: input.language,
+      source: input.source,
+      content: toSrt(cues),
+      cueCount: cues.length,
+    })
+    .onConflictDoNothing()
+    .returning()
+    .get();
+  return saved ?? findSubtitle(db, input.userId, input.mediaItemId, input.language)!;
 }

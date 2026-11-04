@@ -12,15 +12,18 @@ export async function mediaFetch(
   try {
     response = await fetchImpl(url, { ...init, signal: init.signal ?? AbortSignal.timeout(TIMEOUT_MS) });
   } catch (error) {
-    const reason = (error as Error).name === "TimeoutError" ? "didn't answer in time" : "couldn't be reached";
-    throw new MediaServerError(`${init.label} ${reason}. Check the address and that it's running.`);
+    const timedOut = (error as Error).name === "TimeoutError";
+    throw new MediaServerError(timedOut ? "errors.media.timeout" : "errors.media.unreachable", {
+      server: init.label,
+    });
   }
   if (response.status === 401 || response.status === 403) {
-    throw new MediaServerError(`${init.label} rejected the token or API key.`, 401);
+    throw new MediaServerError("errors.media.rejected", { server: init.label });
   }
-  if (response.status === 404) throw new MediaServerError(`${init.label} doesn't have that item.`, 404);
-  if (!response.ok)
-    throw new MediaServerError(`${init.label} answered with an error (HTTP ${response.status}).`);
+  if (response.status === 404) throw new MediaServerError("errors.media.noItem", { server: init.label }, 404);
+  if (!response.ok) {
+    throw new MediaServerError("errors.media.httpError", { server: init.label, status: response.status });
+  }
   return response;
 }
 

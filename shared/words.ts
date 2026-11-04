@@ -29,3 +29,6 @@ export const isCounted = (token: Pick<Token, "upos">) => !NOT_COUNTED.has(token.
 
 /** A token is a word if it has a letter in it; punctuation stays plain text in the transcript. */
 export const isWordText = (text: string) => /\p{L}/u.test(text);
+
+/** How many words the AI is asked to suggest at a time. */
+export const WORD_COUNTS = [10, 20, 30] as const;

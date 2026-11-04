@@ -28,6 +28,8 @@ export const user = sqliteTable("user", {
   opensubtitlesPassword: text("opensubtitles_password"),
   ankiUrl: text("anki_url"),
   ankiDeck: text("anki_deck"),
+  /** When the person answered the first-sign-in questions (languages, level); null until then. */
+  onboardedAt: integer("onboarded_at", { mode: "timestamp_ms" }),
   ...timestamps,
 });
 
@@ -146,7 +148,7 @@ export const cards = sqliteTable(
     note: text("note"),
     sentence: text("sentence").notNull(),
     sentenceStartMs: integer("sentence_start_ms"),
-    // Spaced repetition (server/utils/srs.ts)
+    // Spaced repetition (shared/srs.ts)
     state: text("state", { enum: ["new", "learning", "review"] })
       .notNull()
       .default("new"),
