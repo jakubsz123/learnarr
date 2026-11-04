@@ -6,7 +6,7 @@ import { schema, type Db } from "../server/db";
 import { rankTable, setFrequencyLoaderForTests, wordRank } from "../server/utils/frequency";
 import { SEED_SIZE, seedKnownWords, setKnown, stateOf, wordStates } from "../server/utils/knownWords";
 import { buildTranscript, transcriptCoverage } from "../server/utils/transcript";
-import { reviewStreak } from "../server/utils/stats";
+import { learningStats, streaks } from "../server/utils/stats";
 import type { LemmaToken } from "../server/db/schema";
 
 const LIST = Array.from({ length: 5000 }, (_, i) => `w${i + 1}`);
@@ -166,6 +166,20 @@ describe("review streak", () => {
         })
         .run();
     }
-    expect(reviewStreak(db, user.id, now)).toBe(3);
+    const stats = learningStats(db, user.id, "es", now);
+    expect(stats.streak).toEqual({ current: 3, longest: 3 });
+    expect(stats.reviewedToday).toBe(0);
+    expect(stats.activity.at(-2)).toBe(1);
+    expect(
+      streaks(
+        new Map([
+          [10, 1],
+          [11, 1],
+          [12, 1],
+          [14, 2],
+        ]),
+        14,
+      ),
+    ).toEqual({ current: 1, longest: 3 });
   });
 });

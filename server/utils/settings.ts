@@ -16,6 +16,8 @@ export const SETTINGS = {
   "ai.baseUrl": { env: "AI_BASE_URL", secret: false },
   "ai.apiKey": { env: "AI_API_KEY", secret: true },
   "ai.model": { env: "AI_MODEL", secret: false },
+  /** The secret part of the webhook addresses media servers post plays to. */
+  "webhook.secret": { env: undefined, secret: false },
 } as const;
 
 export type SettingKey = keyof typeof SETTINGS;
