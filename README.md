@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="website/logo.svg" alt="" width="96" height="96">
+  <img src="website/public/logo.svg" alt="" width="96" height="96">
 </p>
 
 <h1 align="center">Learnarr</h1>

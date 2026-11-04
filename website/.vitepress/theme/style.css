@@ -1,0 +1,30 @@
+/* The wiki in Learnarr's colours: Roboto, the *arr dark chrome and the coral accent. */
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/roboto-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --vp-font-family-base: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --vp-c-brand-1: #b8432a;
+  --vp-c-brand-2: #cf553a;
+  --vp-c-brand-3: #e8674a;
+  --vp-c-brand-soft: rgb(255 122 92 / 14%);
+  --vp-button-brand-text: #1a0e0a;
+  --vp-button-brand-bg: #ff7a5c;
+  --vp-button-brand-hover-bg: #ff9277;
+  --vp-button-brand-hover-text: #1a0e0a;
+}
+
+.dark {
+  --vp-c-bg: #15171c;
+  --vp-c-bg-alt: #0f1114;
+  --vp-c-bg-elv: #20242c;
+  --vp-c-bg-soft: #20242c;
+  --vp-c-divider: #323844;
+  --vp-c-brand-1: #ff9277;
+  --vp-c-brand-2: #ff7a5c;
+  --vp-c-brand-3: #e8674a;
+}
