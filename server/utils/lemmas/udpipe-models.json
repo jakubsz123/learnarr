@@ -1,0 +1,566 @@
+[
+  {
+    "file": "afrikaans-afribooms-ud-2.5-191206.udpipe",
+    "uuid": "05f67190-b988-4e79-8cc7-564f4fb30aeb",
+    "sha256": "b0685fb8e55535cda61698a11905fdda28b2c54a46889f5f2554a617ad933598",
+    "bytes": 4901516
+  },
+  {
+    "file": "ancient_greek-perseus-ud-2.5-191206.udpipe",
+    "uuid": "872a3441-e0bb-47a4-b2fd-2ab8a1a2b362",
+    "sha256": "b85df6199730506b33cf8aa99f5a02b63bcbaaae94f78fc4c1f5f0bdd6235505",
+    "bytes": 20492125
+  },
+  {
+    "file": "ancient_greek-proiel-ud-2.5-191206.udpipe",
+    "uuid": "f7fe8e97-506c-4f8c-a36c-bc835ec486a0",
+    "sha256": "e0885e3171713613789546c81016e54eef1f92386be4a119dc1d8bc9951c386f",
+    "bytes": 22597368
+  },
+  {
+    "file": "arabic-padt-ud-2.5-191206.udpipe",
+    "uuid": "950d4077-bd61-4e5c-af05-ac9de11ddb39",
+    "sha256": "5637b73cc30ebd231ccad7ee4ee57d7c8367f6b1883aae09128e656b760e7be3",
+    "bytes": 19752087
+  },
+  {
+    "file": "armenian-armtdp-ud-2.5-191206.udpipe",
+    "uuid": "012888b7-ef84-4c6d-8847-6fcaa970af07",
+    "sha256": "b8f81bb11911230f61bd3096f4e81b822d69f9f4094654021b284f9ddd552201",
+    "bytes": 8617218
+  },
+  {
+    "file": "basque-bdt-ud-2.5-191206.udpipe",
+    "uuid": "6c585c8e-a591-46bb-81d4-4626f9f6d5d1",
+    "sha256": "52de706f85ed7f416de75e7d0d4eca59747d643992e6128ea4bb9f16ddd370c9",
+    "bytes": 13518247
+  },
+  {
+    "file": "belarusian-hse-ud-2.5-191206.udpipe",
+    "uuid": "ebcfbf88-dfcd-4c44-b16d-cd87dec35f34",
+    "sha256": "1c57b67ee873fd70a90a61178fd0548e7e5916ad60d87d1aa83dafbfaaa0d254",
+    "bytes": 3761444
+  },
+  {
+    "file": "bulgarian-btb-ud-2.5-191206.udpipe",
+    "uuid": "cda13d2d-14bb-49c6-88ee-1f0f392d950f",
+    "sha256": "4767717c76ee087172ab3c73d2f50f62903b7be5a87dab63c75ffeb3e191ffea",
+    "bytes": 14360705
+  },
+  {
+    "file": "catalan-ancora-ud-2.5-191206.udpipe",
+    "uuid": "af6b22b0-9e1f-4af8-80b9-95fa911d5987",
+    "sha256": "a706a200017c3968e2c23ee229d7680d22140d948358e5a667cdece4a997d8ad",
+    "bytes": 18142787
+  },
+  {
+    "file": "chinese-gsd-ud-2.5-191206.udpipe",
+    "uuid": "1dca5fb3-5bed-49d7-95d7-d35ba8832040",
+    "sha256": "08fdd26fcfa0634fa6b81d84eda51a7ca8ed88024dd5accf75c256c85793a001",
+    "bytes": 13863905
+  },
+  {
+    "file": "chinese-gsdsimp-ud-2.5-191206.udpipe",
+    "uuid": "63505e33-0290-488d-a3bf-256ccac973e0",
+    "sha256": "2138c2efe2426f8a48c767ad3a35629a565e0f0fd37d13c3a007903236c6736d",
+    "bytes": 11864178
+  },
+  {
+    "file": "classical_chinese-kyoto-ud-2.5-191206.udpipe",
+    "uuid": "7dc7cb94-3a90-4a88-9508-a282d43b545d",
+    "sha256": "ef0e1523a42dd83bd16971f285151aadc3bc35e4ffaad77ad55066cebacaa11b",
+    "bytes": 5346646
+  },
+  {
+    "file": "coptic-scriptorium-ud-2.5-191206.udpipe",
+    "uuid": "1b178518-a41e-495b-92d7-e2ae422aa368",
+    "sha256": "68b1fa522eedd0f0bf9b680c9dda14e51b5eab2958ac6491c8ae26f3005cdade",
+    "bytes": 3474413
+  },
+  {
+    "file": "croatian-set-ud-2.5-191206.udpipe",
+    "uuid": "d6185365-d6dd-4f7e-8612-c53eec6084cf",
+    "sha256": "b8e0ad212bdc84c57366bd7267d21810e1fd3239c4d22ca5867f94e76c6cedc7",
+    "bytes": 19236607
+  },
+  {
+    "file": "czech-cac-ud-2.5-191206.udpipe",
+    "uuid": "1e7fb9fb-50f9-4cbd-ba6e-a5ba2d6888e4",
+    "sha256": "06684f8a7a45bde57423bd354fe31ac80d69bd71e852ffd32a0f5a96b55f0370",
+    "bytes": 31350751
+  },
+  {
+    "file": "czech-cltt-ud-2.5-191206.udpipe",
+    "uuid": "cf60feef-f43a-4f0d-bcf7-55ffe7f1f606",
+    "sha256": "a01b6188114da0159727faa090ebfb6536b8540117cfe564729f5b49fbf0ed56",
+    "bytes": 4295304
+  },
+  {
+    "file": "czech-fictree-ud-2.5-191206.udpipe",
+    "uuid": "b31ae9de-dfcf-4e1c-b59e-b652e8cded1a",
+    "sha256": "cfb3899cb121e8e64f2521b6c6f30588bfe627eaac7d946db83df4388eb8b4cc",
+    "bytes": 16530527
+  },
+  {
+    "file": "czech-pdt-ud-2.5-191206.udpipe",
+    "uuid": "124d9958-240e-44e6-b522-eea8447a8de6",
+    "sha256": "8ced138bf1c2121cf03d2494f08c663a8b27b5218fb9c322064a7d943ba02266",
+    "bytes": 56093557
+  },
+  {
+    "file": "danish-ddt-ud-2.5-191206.udpipe",
+    "uuid": "a8049933-959e-4744-a25e-01ec99459867",
+    "sha256": "fe25149d355609eb551963d70b971fcd3730d35558b758f34d4eb341c6b8569c",
+    "bytes": 9505254
+  },
+  {
+    "file": "dutch-alpino-ud-2.5-191206.udpipe",
+    "uuid": "51d5eb7c-b84b-4673-a9a1-3076416bd520",
+    "sha256": "700198d252054f4625ba03f9ea29881816491077691960a0912f24814ca440d7",
+    "bytes": 17047727
+  },
+  {
+    "file": "dutch-lassysmall-ud-2.5-191206.udpipe",
+    "uuid": "7a609afd-cf16-4480-ab5b-b93d3147ae7d",
+    "sha256": "7f06dbdf5f3ed0dcc64bc16aa7f4d744ed742e067505d0284c9292d6a298e825",
+    "bytes": 9470139
+  },
+  {
+    "file": "english-ewt-ud-2.5-191206.udpipe",
+    "uuid": "8d51e3d3-1f87-47fe-8975-c197ddf7907b",
+    "sha256": "784bd0fa85e3d831fd02a55290d0acfd05c953159dc38cc33d52e1b28add9957",
+    "bytes": 16309608
+  },
+  {
+    "file": "english-gum-ud-2.5-191206.udpipe",
+    "uuid": "ecd50243-9b53-4254-b4b7-3e8480a060aa",
+    "sha256": "8023726e05c41f50033d50de23bdd2163b9838b8d7c2894f2380322c3b44c0cd",
+    "bytes": 8880020
+  },
+  {
+    "file": "english-lines-ud-2.5-191206.udpipe",
+    "uuid": "289a16bb-8cce-4c82-b2d5-a096c6a5fe0e",
+    "sha256": "914b93c7b4ac4d4ce984a107158c01e7954858a6114733a83449ba08ab0bc7e1",
+    "bytes": 6479962
+  },
+  {
+    "file": "english-partut-ud-2.5-191206.udpipe",
+    "uuid": "61edb033-aefb-41ff-9d64-43b04db69884",
+    "sha256": "f7b9b89d839c9ac2c23c596b5f59989f06fc324fcb10fe8946634f5c56766a08",
+    "bytes": 5740109
+  },
+  {
+    "file": "estonian-edt-ud-2.5-191206.udpipe",
+    "uuid": "78dbf95a-9b92-4e7f-817c-addbd61f5f54",
+    "sha256": "fb430e7b9e2a792237a4f4d0e13497c572ed5e5b29cd3a760f7dd1f18bf1fc6b",
+    "bytes": 31323471
+  },
+  {
+    "file": "estonian-ewt-ud-2.5-191206.udpipe",
+    "uuid": "ed54010a-1780-4865-ac2d-c22fa445214b",
+    "sha256": "77c4f4bbfcda8a9f4c6f70cde146ee8f166f92baefb1b65002d1e0db882bab14",
+    "bytes": 5509759
+  },
+  {
+    "file": "finnish-ftb-ud-2.5-191206.udpipe",
+    "uuid": "97ef9738-19bf-45fb-92d2-53ff88424593",
+    "sha256": "b57e6168f37e12ac85e4d6cf23e2ed031e0f301ff2ad32c1a1f28dec788c2f0f",
+    "bytes": 20538751
+  },
+  {
+    "file": "finnish-tdt-ud-2.5-191206.udpipe",
+    "uuid": "88b58d6b-e39d-4c7d-92b2-417fd5a67d74",
+    "sha256": "4593b24e7f2b807ae7d795ef1c72b11e461a5f6a9bf5eb20a3ac79849e132b0a",
+    "bytes": 21613253
+  },
+  {
+    "file": "french-gsd-ud-2.5-191206.udpipe",
+    "uuid": "75091a21-f175-4a57-8bbd-8f9a12a7d417",
+    "sha256": "3b10b4c87e7667ac4cf5b301fa075720303c6a1d101cd11a62abde670bebea30",
+    "bytes": 23811948
+  },
+  {
+    "file": "french-partut-ud-2.5-191206.udpipe",
+    "uuid": "99e439cf-c11e-46e1-989b-53076f7462cf",
+    "sha256": "c41b8569ddbc317b8ed78937b3eaf1e6f2ae2b066cdd44ac0dcd056c4a7b1465",
+    "bytes": 3887903
+  },
+  {
+    "file": "french-sequoia-ud-2.5-191206.udpipe",
+    "uuid": "b626a7e5-9930-40b7-88b4-783fa5fdbd1c",
+    "sha256": "b8ce2122483788c23fcf29eea772b0c39dcc7046f624ab18d11444878189b709",
+    "bytes": 5892415
+  },
+  {
+    "file": "french-spoken-ud-2.5-191206.udpipe",
+    "uuid": "016d9f20-bda6-4de0-b79d-8aac7afdf14c",
+    "sha256": "f2d8c73792430992c3e731071d1a79fa488f0fe60deb841a9470a1285233507f",
+    "bytes": 3209981
+  },
+  {
+    "file": "galician-ctg-ud-2.5-191206.udpipe",
+    "uuid": "5eed229c-fb04-4ba3-bd8b-a98a700637d4",
+    "sha256": "e42ec75323f5111eead77fbab26b0495b4b62992ba642abd9559dd6ee62da2f8",
+    "bytes": 8081346
+  },
+  {
+    "file": "galician-treegal-ud-2.5-191206.udpipe",
+    "uuid": "c59ad694-8afe-4e76-807f-5d2d3307cfd9",
+    "sha256": "34d379a7f9f09eab2ec1b7a9b3d670f48c9c4faa1643c868402443585202e686",
+    "bytes": 3376581
+  },
+  {
+    "file": "german-gsd-ud-2.5-191206.udpipe",
+    "uuid": "9aacee5d-a347-42ac-89cf-f509511f8592",
+    "sha256": "3a14db4ff1a7fa6eee756537d579b49c0a000e4fc9bed474b681e31e73f02274",
+    "bytes": 21301225
+  },
+  {
+    "file": "german-hdt-ud-2.5-191206.udpipe",
+    "uuid": "0d5a53e7-039b-4997-af3f-94faad001a6c",
+    "sha256": "881bda50fb1e72f88d5765ad5e670af8ceb203c8bd128a6d783ad8de7b4af43a",
+    "bytes": 62982275
+  },
+  {
+    "file": "gothic-proiel-ud-2.5-191206.udpipe",
+    "uuid": "62cf2379-b9c4-4a9c-9bb2-28e78bfc0271",
+    "sha256": "4ca21e68003ac291d4e52aa08a74c763cc08e2afd949486bb7584f09da8ee168",
+    "bytes": 6969248
+  },
+  {
+    "file": "greek-gdt-ud-2.5-191206.udpipe",
+    "uuid": "5e29fe15-8e8c-4693-9e1c-8f32b1d4aa0e",
+    "sha256": "b76aef5fc08f4df50f535c140c51852505eadbe17619ab0f233f0b979c0de8e9",
+    "bytes": 6445880
+  },
+  {
+    "file": "hebrew-htb-ud-2.5-191206.udpipe",
+    "uuid": "c7fe7f46-9a5e-4d94-90fc-5007eef0715b",
+    "sha256": "084d466313d91d004cc4e7bd10bb2410ab98bef491ad046eaa2b73b69ccb4d16",
+    "bytes": 15159463
+  },
+  {
+    "file": "hindi-hdtb-ud-2.5-191206.udpipe",
+    "uuid": "08ffe51d-1072-4884-90e1-58693a198390",
+    "sha256": "d7a77399e6eccee9103d8df9b441ec25ba6ba9f4db453eed3f4ddb77acdd7f2a",
+    "bytes": 25857814
+  },
+  {
+    "file": "hungarian-szeged-ud-2.5-191206.udpipe",
+    "uuid": "1cee0fe8-4dd6-42ef-a0b0-ed07549da5b3",
+    "sha256": "398e2427224d9fdda689f2e3337bbbf7c30a85dc523ee5e2ad8247429fc418c3",
+    "bytes": 5677069
+  },
+  {
+    "file": "indonesian-gsd-ud-2.5-191206.udpipe",
+    "uuid": "d6a628a3-bb7b-4ea3-a608-f1b2f08407f7",
+    "sha256": "a91987cf8dba83f730d9828937016c70c3539728dc0de6608ff089b075fc3e1d",
+    "bytes": 14257882
+  },
+  {
+    "file": "irish-idt-ud-2.5-191206.udpipe",
+    "uuid": "28f6f1de-2ed1-41d1-a5d0-56ebb4d25edd",
+    "sha256": "725d36e11e01a712ba1a9dec4402b14b581a8aeb14b2df07a184875814296ed1",
+    "bytes": 5817364
+  },
+  {
+    "file": "italian-isdt-ud-2.5-191206.udpipe",
+    "uuid": "ee10c62a-01c5-42cb-a8b6-b7751c5da12c",
+    "sha256": "dad54daaa01c250f39ec0ae7d29b3f3830c1eea066db4e3a92c39b41f2dd1a40",
+    "bytes": 19298761
+  },
+  {
+    "file": "italian-partut-ud-2.5-191206.udpipe",
+    "uuid": "2f812afa-6978-41b0-9d78-c604e605b328",
+    "sha256": "4d4d0f84eff271c8ee6e122cc657d4339adb58a39694189f52a6a532be6c387d",
+    "bytes": 5814605
+  },
+  {
+    "file": "italian-postwita-ud-2.5-191206.udpipe",
+    "uuid": "6203bddb-95b8-43dc-96c7-d37129ad69eb",
+    "sha256": "313cbb018ac87af3316c81ab7ae0640b8f71cbe3cbbe2d2c52876e4e994b03af",
+    "bytes": 11981922
+  },
+  {
+    "file": "italian-twittiro-ud-2.5-191206.udpipe",
+    "uuid": "6ea91f56-29c2-4cc9-9282-04e210dfff3e",
+    "sha256": "faf0570ca631f61cf5e8f5ec7cf5f6711d3d9c2f7c21e2eb9ac71067ac77d539",
+    "bytes": 4164050
+  },
+  {
+    "file": "italian-vit-ud-2.5-191206.udpipe",
+    "uuid": "f49f659e-34be-482e-b508-93aa359ea0b6",
+    "sha256": "4b257497fe9f2fbb8b15a26481a2e2a1619fc1609b1528f408111df3d68959eb",
+    "bytes": 14300144
+  },
+  {
+    "file": "japanese-gsd-ud-2.5-191206.udpipe",
+    "uuid": "8a2aa361-7a9a-4bde-849e-f662e644faee",
+    "sha256": "de56fbfb4dd43288ae09ced9e249966aad24ed987cbe183a807e4acf7c42575c",
+    "bytes": 14102334
+  },
+  {
+    "file": "korean-gsd-ud-2.5-191206.udpipe",
+    "uuid": "2ac5975a-925d-4d31-84d1-ab624e370bfc",
+    "sha256": "d4ddf54897d29a6aec5a0942fed23d35333b037307c49fc52963c57450411fb6",
+    "bytes": 16358939
+  },
+  {
+    "file": "korean-kaist-ud-2.5-191206.udpipe",
+    "uuid": "bf911ab5-54e7-4833-81ea-5e395da8fa33",
+    "sha256": "4f5f11fba8a3d3ae98308be55f3174632b3c0a32c467fe29944e686a4dbdf691",
+    "bytes": 41461296
+  },
+  {
+    "file": "latin-ittb-ud-2.5-191206.udpipe",
+    "uuid": "4b1aff44-af37-4855-b8f7-a7450f23c837",
+    "sha256": "3e0743f35102c3497ff772006ed8ff87fbba57ec7e90b19346c2a4489985fbf2",
+    "bytes": 19810306
+  },
+  {
+    "file": "latin-perseus-ud-2.5-191206.udpipe",
+    "uuid": "29074587-0c73-4ac9-9fee-b3ddf3c72686",
+    "sha256": "32e7385236b98799822eb9142551619d95d4466d37b4e70c6597770eacd027b6",
+    "bytes": 4522496
+  },
+  {
+    "file": "latin-proiel-ud-2.5-191206.udpipe",
+    "uuid": "ed8a6a71-3753-471b-9941-1d384765f89b",
+    "sha256": "5ed3f15764b8d1f811528a17498878a50dcc508561753ff06c3dfd0dd6decd69",
+    "bytes": 23839923
+  },
+  {
+    "file": "latvian-lvtb-ud-2.5-191206.udpipe",
+    "uuid": "729c5bd9-4f3f-4225-ad65-7574644a9127",
+    "sha256": "3cbb8dec132bd1a886d1a4ec0b851414edf1cb2ad8b4e79b18e5f53f42eb26eb",
+    "bytes": 21694357
+  },
+  {
+    "file": "lithuanian-alksnis-ud-2.5-191206.udpipe",
+    "uuid": "9e403fdd-d5ad-4f50-a2ca-453ba0780422",
+    "sha256": "0a8bcdfde0fda41fc1e39f627966753921405ca51f4c066c35387db2c61873d5",
+    "bytes": 8922692
+  },
+  {
+    "file": "lithuanian-hse-ud-2.5-191206.udpipe",
+    "uuid": "97b1c639-b8d8-46f5-ac32-e58b1c5225a1",
+    "sha256": "513fc2a7ce892ddcaaf138d871d4cc4f34a626cbebe89b5bac713ea83e532b0e",
+    "bytes": 2901831
+  },
+  {
+    "file": "maltese-mudt-ud-2.5-191206.udpipe",
+    "uuid": "fc9e2d2c-8f65-429f-af71-419e6b4dcfc5",
+    "sha256": "4b1a76570bd543344b863e8449527b0c51c28029ef22f52e5a9b53d11cd05071",
+    "bytes": 4340088
+  },
+  {
+    "file": "marathi-ufal-ud-2.5-191206.udpipe",
+    "uuid": "b7a1c990-cb8d-4b57-b8a3-87504d409e19",
+    "sha256": "dd794535428fd56a57c80955a36eff2ae7deb2ded2cb9aef31305ccd1e3ddbe5",
+    "bytes": 2382087
+  },
+  {
+    "file": "north_sami-giella-ud-2.5-191206.udpipe",
+    "uuid": "bd7b68e3-6e39-483a-9c4c-6d7e8f1dd264",
+    "sha256": "573fce2d4ca3bf49fdbfb568d0db6253c138d3279833b55ac45131d8302d7e60",
+    "bytes": 4493919
+  },
+  {
+    "file": "norwegian-bokmaal-ud-2.5-191206.udpipe",
+    "uuid": "f4407f5c-fd80-4b9b-b411-d229018674fc",
+    "sha256": "e2723e0e93b34202806e0b72e162b9a92d977016f3ebec1e36c274d2dcc187b2",
+    "bytes": 18535928
+  },
+  {
+    "file": "norwegian-nynorsk-ud-2.5-191206.udpipe",
+    "uuid": "fb5274ea-e5f5-40d7-ad58-26a45c638ee5",
+    "sha256": "07fb3bd2a88e9dec70c69361ce71b634de7cd232bb98b18b1261a86b16736cc0",
+    "bytes": 20835748
+  },
+  {
+    "file": "norwegian-nynorsklia-ud-2.5-191206.udpipe",
+    "uuid": "8687f190-25c0-4163-ab9c-aad3d07cc51e",
+    "sha256": "c66db2e00460a4cbc7f9ff522682649a17e08ef3ef993963095e9233ae3f3208",
+    "bytes": 4008252
+  },
+  {
+    "file": "old_church_slavonic-proiel-ud-2.5-191206.udpipe",
+    "uuid": "1a6854c5-35f8-4992-8b45-e86342fb6be4",
+    "sha256": "fa6890c3173a696978396c345f0ac7aa89c11daa78f60ddbf307455e9a14c7d2",
+    "bytes": 7447531
+  },
+  {
+    "file": "old_french-srcmf-ud-2.5-191206.udpipe",
+    "uuid": "c81f901c-ce9f-42e9-8062-22660a773766",
+    "sha256": "9603f8250dcca770a174ab3440be347e35cbd571df0aa14f1c4a5ebf76730b5d",
+    "bytes": 11242620
+  },
+  {
+    "file": "old_russian-torot-ud-2.5-191206.udpipe",
+    "uuid": "1dfcc370-df3b-46a3-aa4e-b51363a5b9fe",
+    "sha256": "d103f84786ebdd88c023cb88bdec4029de210e8cf6738112fcb4d9bab2570d9f",
+    "bytes": 18623682
+  },
+  {
+    "file": "persian-seraji-ud-2.5-191206.udpipe",
+    "uuid": "c3694916-0193-448d-8d42-856a4c241d19",
+    "sha256": "c0f1f4f694a30de1689abb2549512ec1a92d6d12cee46ce613876ad0050db7af",
+    "bytes": 11499413
+  },
+  {
+    "file": "polish-lfg-ud-2.5-191206.udpipe",
+    "uuid": "42b39656-0e61-4179-bce1-10503850e9af",
+    "sha256": "e0d15335383cd4d3e1f1fea71a2f680141cf8ac1bf831386937809b84a2fb5c8",
+    "bytes": 16554079
+  },
+  {
+    "file": "polish-pdb-ud-2.5-191206.udpipe",
+    "uuid": "3da49192-d502-483b-8592-66eb503b8e60",
+    "sha256": "ffe6ab0f604f88f82a7d8e8096d94491f99336d0d4c8e2b9700d28190f352e46",
+    "bytes": 25523919
+  },
+  {
+    "file": "portuguese-bosque-ud-2.5-191206.udpipe",
+    "uuid": "29d8c3fd-1eb3-479f-93fc-e8982b051aa2",
+    "sha256": "6d6ff79c2388347426e8dc29c61b759a437ee55789f5925fe21a6df955aac4af",
+    "bytes": 16974480
+  },
+  {
+    "file": "portuguese-gsd-ud-2.5-191206.udpipe",
+    "uuid": "ada86454-f006-4030-bd2e-58e8e09c457c",
+    "sha256": "7833139417f4ce9dca439917a6f4e411a102bc9259969a55a7dc6e86c484a79f",
+    "bytes": 14715149
+  },
+  {
+    "file": "romanian-nonstandard-ud-2.5-191206.udpipe",
+    "uuid": "da5da182-9a7f-40c4-8d5d-c9610d816f2e",
+    "sha256": "d4d3d0a3364166fecfd92ece296e33deb2ca608f19d899cd3b6ac60043f75a74",
+    "bytes": 18155700
+  },
+  {
+    "file": "romanian-rrt-ud-2.5-191206.udpipe",
+    "uuid": "c09a1cdb-29b5-485e-874e-6b1ec3b7a990",
+    "sha256": "396a0ab7fb21d0148c18049ee72e855e02248ca95897aa51ec8a7f60cd769340",
+    "bytes": 15083269
+  },
+  {
+    "file": "russian-gsd-ud-2.5-191206.udpipe",
+    "uuid": "482f2124-b980-4ec5-9510-fd04f9437a3b",
+    "sha256": "ba63e42f79f525cbcb78c8bc98dd126c2960cbada91b964a741285c15504f06a",
+    "bytes": 14034257
+  },
+  {
+    "file": "russian-syntagrus-ud-2.5-191206.udpipe",
+    "uuid": "f612687b-e000-4493-b078-b2d8fd9e008c",
+    "sha256": "16894d425ee328ace668a9d2f7ea5ff945468247d146333e8688f9200fa114e2",
+    "bytes": 45859472
+  },
+  {
+    "file": "russian-taiga-ud-2.5-191206.udpipe",
+    "uuid": "6a63cf59-05ee-4f51-a26a-12b32e1b152b",
+    "sha256": "59d8d095e1e76b9e09c7b401a718a270898dbe5d8d4739c711dfab4f56fd1878",
+    "bytes": 6993691
+  },
+  {
+    "file": "scottish_gaelic-arcosg-ud-2.5-191206.udpipe",
+    "uuid": "1a56c06c-12ce-4d0d-a54c-529695ca7f3d",
+    "sha256": "1c4a2bb269fc4072db831de1f88c5525bae70de0b8f3f3294c27299e821e7d87",
+    "bytes": 5294517
+  },
+  {
+    "file": "serbian-set-ud-2.5-191206.udpipe",
+    "uuid": "11c558e2-b3f1-4cc1-978a-fe640a59b61d",
+    "sha256": "de200d0850339f30d751122242acec1cedf46fa3f0833a14d9d8ce5f308e1590",
+    "bytes": 10387923
+  },
+  {
+    "file": "slovak-snk-ud-2.5-191206.udpipe",
+    "uuid": "1b15dbbb-7c3e-4748-b00a-83e67782520d",
+    "sha256": "115db4f9a577a9469c89ebded75a71941623a29cf6ca8fa9f041300a8bfc3163",
+    "bytes": 13510978
+  },
+  {
+    "file": "slovenian-ssj-ud-2.5-191206.udpipe",
+    "uuid": "74fa667d-a27f-4b48-ba8a-3d3872ec59c4",
+    "sha256": "2af52564ac2963dff7250c8b892cd640b8e04c1d03fb3d1b0c1ce983d1dde526",
+    "bytes": 17139288
+  },
+  {
+    "file": "slovenian-sst-ud-2.5-191206.udpipe",
+    "uuid": "87e3b26d-f868-4467-bbdb-5cc0dc2fdb81",
+    "sha256": "b60f795c6e02230d98e47c6ec746388bbf6c40dbb8a53806d66c53e0683ac4a8",
+    "bytes": 4896617
+  },
+  {
+    "file": "spanish-ancora-ud-2.5-191206.udpipe",
+    "uuid": "52474ca8-939b-4fcf-80b0-228679464582",
+    "sha256": "eb7c37977de18072d1f63740c06c588620d48b51dc0c0d0a3604a21db12600fc",
+    "bytes": 20400504
+  },
+  {
+    "file": "spanish-gsd-ud-2.5-191206.udpipe",
+    "uuid": "57283bec-66b7-4662-bfc7-c5901f14d1ba",
+    "sha256": "97d78e8331d8150e716d54d4f926281678821c1c985c6b4fcf03109d76d047c9",
+    "bytes": 29122974
+  },
+  {
+    "file": "swedish-lines-ud-2.5-191206.udpipe",
+    "uuid": "dce0fd0a-1dd4-45e3-ae99-0e0b32a4d8cb",
+    "sha256": "a5aa208b2d66487a319d8948fb501c8fd040766bc8011f4cd26c5a6cb8386af4",
+    "bytes": 8397394
+  },
+  {
+    "file": "swedish-talbanken-ud-2.5-191206.udpipe",
+    "uuid": "4da4b80f-082d-4251-8dc9-c86638bc546b",
+    "sha256": "116548cf458f4bc47426ab8fa525af704e71886c4acd69a8f84865860a7d2f57",
+    "bytes": 9440475
+  },
+  {
+    "file": "tamil-ttb-ud-2.5-191206.udpipe",
+    "uuid": "8b35bcb3-a284-4fce-93fe-118becba5018",
+    "sha256": "0d08ce5183e6385693d597b3c901769fee7a961ea8ca46ac0c4fdb2b632a3783",
+    "bytes": 3201866
+  },
+  {
+    "file": "telugu-mtg-ud-2.5-191206.udpipe",
+    "uuid": "998b4270-a70a-42fe-a292-b70d7d66d96c",
+    "sha256": "3cfdd2aab9a1c7b69f796b57f9fc7c7694d83b14211474c258cf905d1ba6a17c",
+    "bytes": 2168122
+  },
+  {
+    "file": "turkish-imst-ud-2.5-191206.udpipe",
+    "uuid": "9308edfd-6a11-4774-8dac-c64f13778d2a",
+    "sha256": "195f5646d96663c788d66ea29bb26862b17457aa7a8d95bf3d852d75522a5fed",
+    "bytes": 8396624
+  },
+  {
+    "file": "ukrainian-iu-ud-2.5-191206.udpipe",
+    "uuid": "72ba199d-b8fc-40a5-a12d-c5ea219de998",
+    "sha256": "ea48223c000cf6b6a33f981fbca63b645fdbc191d76eea0b35df286719d965cd",
+    "bytes": 16929888
+  },
+  {
+    "file": "urdu-udtb-ud-2.5-191206.udpipe",
+    "uuid": "02a75210-e44a-499e-b876-f76cf34a07a8",
+    "sha256": "3d4b5548c670dd6c3a4c1f3130f85939e329357417ca6fb2939a03ed42d3ed7b",
+    "bytes": 16057619
+  },
+  {
+    "file": "uyghur-udt-ud-2.5-191206.udpipe",
+    "uuid": "a631e9f3-fcae-4ef2-8d2c-17f85657af3d",
+    "sha256": "66d3d28bf4f9661e8a9e1aff5a17f141ad1f1536dcfd02a9c1a5f7a044b14556",
+    "bytes": 6089026
+  },
+  {
+    "file": "vietnamese-vtb-ud-2.5-191206.udpipe",
+    "uuid": "ec8bcc42-f06a-4193-9625-2e7be9fb587a",
+    "sha256": "d9c0c03c9775391ab42c37beb2f35b529b0432b0a3a94a035ece0363e3e07ee5",
+    "bytes": 4673798
+  },
+  {
+    "file": "wolof-wtb-ud-2.5-191206.udpipe",
+    "uuid": "ab2646f4-7c41-4e42-9076-a16c5ec5746a",
+    "sha256": "657b7a217420738ece1d74dfbe4f332c6ddc5fdf57060ef65319b42ad0c08c6d",
+    "bytes": 4400379
+  }
+]
