@@ -1,7 +1,9 @@
 import { AppError } from "../errors";
 import { useSettings, type Settings } from "../settings";
-import { isCatalogueId } from "#shared/catalogue";
+import { useDb } from "../../db";
+import { isCatalogueId, isUploadId } from "#shared/mediaSources";
 import { useCatalogue } from "./catalogue";
+import { createUploads } from "./uploads";
 import { createJellyfin } from "./jellyfin";
 import { createPlex } from "./plex";
 import type { MediaServer, MediaServerKind } from "./types";
@@ -26,7 +28,12 @@ export function useMediaServer(): MediaServer {
   return createMediaServer(connection.kind, connection.url, connection.token);
 }
 
-/** Where a film, show or library id lives: OpenSubtitles.com's catalogue, or the household's media server. */
-export function mediaSourceFor(id: string): MediaServer {
-  return isCatalogueId(id) ? useCatalogue() : useMediaServer();
+/**
+ * Where a film, show or library id lives: OpenSubtitles.com's catalogue, the
+ * learner's own uploads, or the household's media server.
+ */
+export function mediaSourceFor(id: string, userId: string): MediaServer {
+  if (isCatalogueId(id)) return useCatalogue();
+  if (isUploadId(id)) return createUploads(useDb(), userId);
+  return useMediaServer();
 }

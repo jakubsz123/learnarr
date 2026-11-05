@@ -2,29 +2,33 @@
   <div class="page">
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
-    <template v-else-if="libraries.length">
+    <template v-else-if="all.length">
       <div class="section">
-        <div class="pills" role="tablist" :aria-label="$t('library.libraries')">
-          <button
-            v-for="lib in libraries"
-            :key="lib.id"
-            type="button"
-            role="tab"
-            class="pill"
-            :aria-selected="lib.id === libraryId ? 'true' : 'false'"
-            @click="libraryId = lib.id"
-          >
-            {{ lib.name }}
-          </button>
+        <div class="sources">
+          <div v-if="libraries.length" class="source">
+            <h2 :id="`${uid}-server`" class="source-label">
+              {{ $t("library.onServer", { name: serverName }) }}
+            </h2>
+            <div class="pills" role="tablist" :aria-labelledby="`${uid}-server`">
+              <LibraryPill v-for="lib in libraries" :key="lib.id" v-model="libraryId" :library="lib" />
+            </div>
+          </div>
+          <div class="source">
+            <h2 :id="`${uid}-elsewhere`" class="source-label">{{ $t("library.elsewhere") }}</h2>
+            <div class="pills" role="tablist" :aria-labelledby="`${uid}-elsewhere`">
+              <LibraryPill v-for="lib in elsewhere" :key="lib.id" v-model="libraryId" :library="lib" />
+            </div>
+          </div>
         </div>
+        <p v-if="!server && me?.isAdmin" class="hint">
+          <NuxtLink to="/settings/media-server">{{ $t("library.ownLibrary") }}</NuxtLink>
+        </p>
+        <NewUpload v-if="selected?.type === 'uploads'" />
         <SearchField
           v-model="search"
           :label="isCatalogue ? $t('library.searchCatalogue') : $t('library.search')"
           :placeholder="isCatalogue ? $t('library.searchCatalogue') : $t('library.searchPlaceholder')"
         />
-        <p v-if="!server && me?.isAdmin" class="hint">
-          <NuxtLink to="/settings/media-server">{{ $t("library.ownLibrary") }}</NuxtLink>
-        </p>
       </div>
 
       <div class="grid">
@@ -34,15 +38,7 @@
           <span v-if="item.year" class="hint">{{ item.year }}</span>
         </NuxtLink>
       </div>
-      <p v-if="!loading && !items.length" class="muted">
-        {{
-          search
-            ? $t("library.noMatch", { search })
-            : isCatalogue
-              ? $t("library.catalogueHint")
-              : $t("library.empty")
-        }}
-      </p>
+      <p v-if="!loading && !items.length" class="muted">{{ emptyText }}</p>
       <button
         v-if="items.length < total"
         type="button"
@@ -63,7 +59,8 @@
 <script setup lang="ts">
 import type { Get } from "~/utils/api";
 
-type Library = Get<"/api/library">["libraries"][number];
+type Sources = Get<"/api/library">;
+type Library = Sources["libraries"][number];
 type Item = Get<"/api/library/:id/items">["items"][number];
 
 const PAGE = 60;
@@ -77,8 +74,16 @@ const { errorText } = useErrorMessage();
 const route = useRoute();
 const router = useRouter();
 
+const uid = useId();
 const libraries = ref<Library[]>([]);
-const server = ref<string | null>(null);
+const elsewhere = ref<Library[]>([]);
+const server = ref<Sources["server"]>(null);
+const all = computed(() => [...libraries.value, ...elsewhere.value]);
+const selected = computed(() => all.value.find((l) => l.id === libraryId.value));
+const serverName = computed(() => {
+  const s = server.value;
+  return s?.name || (s?.kind === "jellyfin" ? "Jellyfin" : "Plex");
+});
 const libraryId = ref(typeof route.query.lib === "string" ? route.query.lib : "");
 const search = ref("");
 const items = ref<Item[]>([]);
@@ -86,9 +91,12 @@ const total = ref(0);
 const loading = ref(true);
 const error = ref("");
 
-const isCatalogue = computed(
-  () => libraries.value.find((l) => l.id === libraryId.value)?.type === "catalogue",
-);
+const isCatalogue = computed(() => selected.value?.type === "catalogue");
+const emptyText = computed(() => {
+  if (search.value) return t("library.noMatch", { search: search.value });
+  if (isCatalogue.value) return t("library.catalogueHint");
+  return selected.value?.type === "uploads" ? t("library.uploadsEmpty") : t("library.empty");
+});
 
 async function loadItems(reset: boolean) {
   if (!libraryId.value) return;
@@ -118,11 +126,11 @@ watch(search, () => {
 
 onMounted(async () => {
   try {
-    const answer = await api<Get<"/api/library">>("/api/library");
+    const answer = await api<Sources>("/api/library");
     libraries.value = answer.libraries;
+    elsewhere.value = answer.elsewhere;
     server.value = answer.server;
-    if (!libraries.value.some((l) => l.id === libraryId.value))
-      libraryId.value = libraries.value[0]?.id ?? "";
+    if (!all.value.some((l) => l.id === libraryId.value)) libraryId.value = all.value[0]?.id ?? "";
     else await loadItems(true);
   } catch (e) {
     error.value = errorText(e);
@@ -133,6 +141,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+}
+
+.source {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.source-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));

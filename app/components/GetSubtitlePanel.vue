@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { isCatalogueId } from "#shared/catalogue";
+import { isCatalogueId } from "#shared/mediaSources";
 
 /** A film or episode without a subtitle yet: get one from the server or OpenSubtitles, or upload a file. */
 const props = defineProps<{ itemId: string; hasServerSubtitle: boolean }>();

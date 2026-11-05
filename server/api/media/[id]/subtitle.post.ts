@@ -10,7 +10,12 @@ import { mediaIdParam, validParams } from "~~/server/utils/validate";
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { id } = validParams(event, mediaIdParam);
-  const subtitle = await getSubtitle({ db: useDb(), server: mediaSourceFor(id), user, serverItemId: id });
+  const subtitle = await getSubtitle({
+    db: useDb(),
+    server: mediaSourceFor(id, user.id),
+    user,
+    serverItemId: id,
+  });
   useLemmas().queue(subtitle.id);
   return { id: subtitle.id, source: subtitle.source, cueCount: subtitle.cueCount };
 });

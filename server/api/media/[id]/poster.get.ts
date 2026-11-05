@@ -9,11 +9,11 @@ const query = z.object({ w: z.coerce.number().int().min(80).max(800).default(300
 
 /** Poster art through Learnarr, so the media server's token never reaches the browser. */
 export default defineEventHandler(async (event) => {
-  await requireUser(event);
+  const user = await requireUser(event);
   const { id } = validParams(event, mediaIdParam);
   const { w } = validQuery(event, query);
   // Any failure means the same to the page (show the placeholder), so it is one 404.
-  const response = await mediaSourceFor(id)
+  const response = await mediaSourceFor(id, user.id)
     .poster(id, w)
     .catch(() => null);
   if (!response?.body) throw new AppError(404, "errors.media.noPoster");
