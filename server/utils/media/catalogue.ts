@@ -15,6 +15,9 @@ import { MediaServerError, type MediaDetail, type MediaServer, type MediaSummary
 const CACHE_MS = 60 * 60 * 1000;
 const NAME = "OpenSubtitles.com";
 
+/** A title as people type it: lowercase, without accents ("Élite" is "elite"). */
+const plain = (title: string) => title.normalize("NFD").replace(/\p{M}/gu, "").trim().toLocaleLowerCase();
+
 const notFound = () => new MediaServerError("errors.media.noItem", { server: NAME }, 404);
 
 type Ref =
@@ -92,8 +95,8 @@ export function createCatalogue(fetchImpl: typeof fetch = fetch): MediaServer {
         searchFeatures(search, "show", fetchImpl),
       ]);
       // The catalogue puts loose matches first: an exact title comes first here, then the better known.
-      const wanted = search.trim().toLocaleLowerCase();
-      const exact = (f: Feature) => Number(f.title.toLocaleLowerCase() === wanted);
+      const wanted = plain(search);
+      const exact = (f: Feature) => Number(plain(f.title) === wanted);
       const found = [...films, ...shows].toSorted(
         (a, b) => exact(b) - exact(a) || b.subtitleCount - a.subtitleCount,
       );
