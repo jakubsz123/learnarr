@@ -1,6 +1,6 @@
 import type { AiProvider } from "#shared/aiProviders";
 import type { ErrorKey, MessageParams } from "#shared/messages";
-import { AppError } from "../errors";
+import { AppError, UPSTREAM_FAILED } from "../errors";
 
 export interface AiConfig {
   provider: AiProvider;
@@ -9,10 +9,10 @@ export interface AiConfig {
   model: string;
 }
 
-/** The AI provider failed or gave an answer Learnarr can't use; the provider is to blame, hence 502. */
+/** The AI provider failed or gave an answer Learnarr can't use. */
 export class AiError extends AppError {
   constructor(key: ErrorKey, params: MessageParams = {}) {
-    super(502, key, params);
+    super(UPSTREAM_FAILED, key, params);
     this.name = "AiError";
   }
 }

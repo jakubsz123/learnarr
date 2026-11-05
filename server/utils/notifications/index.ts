@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import { sendNtfy } from "./ntfy";
 import { sendPush, type PushMessage } from "./push";
@@ -21,4 +21,16 @@ export async function notifyUser(db: Db, userId: string, message: PushMessage): 
     }
   }
   return sent;
+}
+
+/** Whether a person has set up any way to be notified: a device with push on, or an ntfy topic. */
+export function hasNotificationChannel(db: Db, user: { id: string; ntfyTopic: string | null }): boolean {
+  if (user.ntfyTopic) return true;
+  const devices =
+    db
+      .select({ n: count() })
+      .from(schema.pushSubscriptions)
+      .where(eq(schema.pushSubscriptions.userId, user.id))
+      .get()?.n ?? 0;
+  return devices > 0;
 }

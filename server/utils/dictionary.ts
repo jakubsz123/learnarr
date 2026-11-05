@@ -1,4 +1,5 @@
 import { and, eq } from "drizzle-orm";
+import { VERSION } from "#shared/version";
 import { schema, type Db } from "../db";
 import type { DictionaryEntry } from "../db/schema";
 
@@ -10,6 +11,8 @@ import type { DictionaryEntry } from "../db/schema";
  */
 
 const API = "https://en.wiktionary.org/api/rest_v1/page/definition";
+// Wikimedia asks API clients to say who they are, and may block those that don't.
+const USER_AGENT = `Learnarr/${VERSION} (https://github.com/jakubsz123/learnarr)`;
 const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 3;
 const MAX_DEFINITIONS = 4;
@@ -66,7 +69,7 @@ async function fetchEntries(
 ): Promise<DictionaryEntry[]> {
   const get = async (w: string) => {
     const response = await fetchFn(`${API}/${encodeURIComponent(w)}`, {
-      headers: { accept: "application/json" },
+      headers: { accept: "application/json", "user-agent": USER_AGENT },
       signal: AbortSignal.timeout(8000),
     });
     if (response.status === 404) return null;

@@ -1,6 +1,6 @@
 import type { ErrorKey, MessageParams } from "#shared/messages";
 import { VERSION } from "#shared/version";
-import { AppError } from "./errors";
+import { AppError, UPSTREAM_FAILED } from "./errors";
 
 /**
  * OpenSubtitles.com, used only when the media server has no subtitle in the
@@ -16,7 +16,7 @@ const USER_AGENT = `Learnarr v${VERSION}`;
 const SESSION_TTL_MS = 23 * 60 * 60 * 1000;
 
 export class OpenSubtitlesError extends AppError {
-  constructor(key: ErrorKey, statusCode = 502, params: MessageParams = {}) {
+  constructor(key: ErrorKey, statusCode = UPSTREAM_FAILED, params: MessageParams = {}) {
     super(statusCode, key, params);
     this.name = "OpenSubtitlesError";
   }
@@ -68,7 +68,9 @@ export async function openSubtitlesLogin(
     throw new OpenSubtitlesError("errors.opensubtitles.loginLimited", 429);
   }
   if (!response.ok)
-    throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: response.status });
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", UPSTREAM_FAILED, {
+      status: response.status,
+    });
   const data = (await response.json()) as {
     token?: string;
     base_url?: string;
@@ -128,7 +130,9 @@ export async function searchSubtitles(
     throw new OpenSubtitlesError("errors.opensubtitles.searchLimited", 429);
   }
   if (!response.ok)
-    throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: response.status });
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", UPSTREAM_FAILED, {
+      status: response.status,
+    });
   const data = (await response.json()) as { data?: { attributes: Record<string, any> }[] };
 
   return (data.data ?? [])
@@ -159,11 +163,14 @@ export async function downloadSubtitle(
     throw new OpenSubtitlesError("errors.opensubtitles.noDownloadsLeft", 429);
   }
   if (!response.ok)
-    throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: response.status });
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", UPSTREAM_FAILED, {
+      status: response.status,
+    });
   const { link } = (await response.json()) as { link?: string };
   if (!link) throw new OpenSubtitlesError("errors.opensubtitles.badAnswer");
   const file = await call(link, {}, fetchImpl);
-  if (!file.ok) throw new OpenSubtitlesError("errors.opensubtitles.httpError", 502, { status: file.status });
+  if (!file.ok)
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", UPSTREAM_FAILED, { status: file.status });
   return file.text();
 }
 

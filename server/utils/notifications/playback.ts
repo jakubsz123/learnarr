@@ -2,10 +2,12 @@ import { and, count, eq } from "drizzle-orm";
 import { mediaTitle } from "#shared/mediaLabels";
 import { translate } from "#shared/messages";
 import { schema, type Db } from "../../db";
+import type { MediaServerKind } from "../media/types";
 import { notifyUser } from "./index";
 
 /** A play reported by the media server's webhook. */
 export interface PlayEvent {
+  server: MediaServerKind;
   /** The media server's user name for whoever pressed play. */
   account: string | null;
   itemId: string;
@@ -47,7 +49,7 @@ export async function onPlay(
 ): Promise<string[]> {
   const notified: string[] = [];
   for (const user of playersOf(db, play.account)) {
-    const key = `${user.id}:${play.itemId}`;
+    const key = `${user.id}:${play.server}:${play.itemId}`;
     const last = recent.get(key);
     if (last !== undefined && now - last < REPEAT_WINDOW_MS) continue;
 
@@ -59,6 +61,7 @@ export async function onPlay(
         and(
           eq(schema.subtitles.userId, user.id),
           eq(schema.subtitles.language, user.learningLanguage),
+          eq(schema.mediaItems.server, play.server),
           eq(schema.mediaItems.serverItemId, play.itemId),
         ),
       )
@@ -110,6 +113,7 @@ export function plexPlay(payload: Raw): PlayEvent | null {
   const itemId = text(String(meta.ratingKey ?? ""));
   if (!itemId) return null;
   return {
+    server: "plex",
     account: text(((payload.Account ?? {}) as Raw).title),
     itemId,
     kind: meta.type,
@@ -127,6 +131,7 @@ export function jellyfinPlay(payload: Raw): PlayEvent | null {
   const itemId = text(payload.ItemId);
   if (!kind || !itemId) return null;
   return {
+    server: "jellyfin",
     account: text(payload.NotificationUsername),
     itemId,
     kind,

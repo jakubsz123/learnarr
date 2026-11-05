@@ -127,7 +127,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
     }
   }
 
-  return {
+  const lemmas = {
     /** Lemmatise a subtitle soon, unless it is done or already waiting. */
     queue(subtitleId: number) {
       if (pending.has(subtitleId)) return;
@@ -137,7 +137,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
         .catch((error) => console.error("[learnarr] lemmatising failed", error))
         .finally(() => {
           pending.delete(subtitleId);
-          if (stale.delete(subtitleId)) this.queue(subtitleId);
+          if (stale.delete(subtitleId)) lemmas.queue(subtitleId);
         });
     },
 
@@ -154,7 +154,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
           ),
         )
         .all();
-      for (const row of rows) if (modelEntry(row.language)) this.queue(row.id);
+      for (const row of rows) if (modelEntry(row.language)) lemmas.queue(row.id);
       return rows.length;
     },
 
@@ -166,7 +166,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
           and(eq(schema.subtitleLemmas.subtitleId, subtitle.id), eq(schema.subtitleLemmas.state, "failed")),
         )
         .run();
-      this.resume(subtitle.language);
+      lemmas.resume(subtitle.language);
     },
 
     status(subtitle: { id: number; language: string }): LemmaStatus {
@@ -189,8 +189,8 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
 
     /** Queue a subtitle that has no lemmas yet, e.g. one saved before a restart cut its turn short. */
     ensure(subtitle: { id: number; language: string }) {
-      const state = this.status(subtitle).state;
-      if (state === "working" && !pending.has(subtitle.id)) this.queue(subtitle.id);
+      const state = lemmas.status(subtitle).state;
+      if (state === "working" && !pending.has(subtitle.id)) lemmas.queue(subtitle.id);
     },
 
     modelStatus(language: string): ModelStatus {
@@ -206,7 +206,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
       if (!modelEntry(language) || !lemmatizer()) return;
       if (failures.has(language) && !retry) return;
       model(language).then(
-        () => this.resume(language),
+        () => lemmas.resume(language),
         () => {},
       );
     },
@@ -216,6 +216,7 @@ export function createLemmas({ db, lemmatizer, modelDir, fetchFn }: Options) {
     /** Settles when everything queued so far is finished, for tests. */
     idle: () => chain,
   };
+  return lemmas;
 }
 
 export type Lemmas = ReturnType<typeof createLemmas>;
