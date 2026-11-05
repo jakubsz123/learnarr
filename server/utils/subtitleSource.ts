@@ -1,4 +1,6 @@
+import crypto from "node:crypto";
 import { and, eq } from "drizzle-orm";
+import { UPLOAD_PREFIX } from "#shared/mediaSources";
 import { parseSubtitle, toSrt, withoutSoundDescriptions } from "#shared/subtitles";
 import { schema, type Db } from "../db";
 import type { AppUser } from "./auth";
@@ -182,6 +184,36 @@ export async function uploadSubtitle(opts: {
       .where(eq(schema.subtitles.id, existing.id))
       .returning()
       .get();
+  });
+}
+
+/**
+ * Start from a subtitle file alone, for something that isn't on the media
+ * server or in the catalogue: it becomes an item of the learner's own uploads,
+ * under the title they gave it, in the language they're learning.
+ */
+export function addUpload(db: Db, user: AppUser, upload: { title: string; raw: string }) {
+  const cues = withoutSoundDescriptions(parseSubtitle(upload.raw));
+  if (!cues.length) throw new AppError(400, "errors.subtitles.unreadable");
+  return db.transaction(() => {
+    const mediaItem = db
+      .insert(schema.mediaItems)
+      .values({
+        server: "upload",
+        serverItemId: `${UPLOAD_PREFIX}${crypto.randomUUID()}`,
+        kind: "movie",
+        title: upload.title,
+      })
+      .returning()
+      .get();
+    const subtitle = saveSubtitle(db, {
+      userId: user.id,
+      mediaItemId: mediaItem.id,
+      language: user.learningLanguage,
+      source: "upload",
+      raw: upload.raw,
+    });
+    return { mediaItem, subtitle };
   });
 }
 

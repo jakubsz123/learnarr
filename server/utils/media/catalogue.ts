@@ -1,4 +1,4 @@
-import { CATALOGUE_LIBRARY } from "#shared/catalogue";
+import { CATALOGUE_LIBRARY } from "#shared/mediaSources";
 import { getFeature, searchFeatures, type Feature } from "../opensubtitles";
 import { MediaServerError, type MediaDetail, type MediaServer, type MediaSummary } from "./types";
 
@@ -8,7 +8,7 @@ import { MediaServerError, type MediaDetail, type MediaServer, type MediaSummary
  * or Jellyfin. It has no subtitle tracks of its own: getting an episode's
  * subtitle downloads one with the person's OpenSubtitles account.
  *
- * Ids carry what they point at (see shared/catalogue.ts), so an episode
+ * Ids carry what they point at (see shared/mediaSources.ts), so an episode
  * needs only its show's entry.
  */
 
@@ -48,7 +48,7 @@ function ref(id: string): Ref {
   return parsed;
 }
 
-function season(show: Feature, number: number) {
+function seasonOf(show: Feature, number: number) {
   const found = show.seasons.find((s) => s.number === number);
   if (!found) throw notFound();
   return found;
@@ -118,7 +118,7 @@ export function createCatalogue(fetchImpl: typeof fetch = fetch): MediaServer {
         }));
       }
       if (target.kind === "season") {
-        return season(show, target.season).episodes.map((e) => ({
+        return seasonOf(show, target.season).episodes.map((e) => ({
           id: episodeId(show.id, target.season, e.number),
           type: "episode" as const,
           title: e.title,
@@ -136,7 +136,7 @@ export function createCatalogue(fetchImpl: typeof fetch = fetch): MediaServer {
       const found = await feature(target.feature);
       const base = { ...summary(found), imdbId: found.imdbId, subtitleTracks: [] };
       if (target.kind === "movie" || target.kind === "show") return base;
-      const inSeason = season(found, target.season);
+      const inSeason = seasonOf(found, target.season);
       const show = { showId: showId(found.id), showTitle: found.title, hasPoster: !!found.posterUrl };
       if (target.kind === "season") {
         return {

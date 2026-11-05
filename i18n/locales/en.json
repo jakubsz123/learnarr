@@ -95,7 +95,10 @@
       "passwordTooShort": "Use at least 8 characters for the password."
     },
     "timedOut": "This is taking too long. Try again.",
-    "notFound": "There's nothing here."
+    "notFound": "There's nothing here.",
+    "uploads": {
+      "needTitle": "Give it a title, so you can find it again."
+    }
   },
   "notifications": {
     "practice": {
@@ -384,7 +387,11 @@
     "searchCatalogue": "Search films and shows",
     "catalogueHint": "Search OpenSubtitles.com for any film or show, then get its subtitle with your own account.",
     "attribution": "Subtitles provided by",
-    "ownLibrary": "Connect Plex or Jellyfin to browse your own library too."
+    "ownLibrary": "Connect Plex or Jellyfin to browse your own library too.",
+    "onServer": "On {name}",
+    "elsewhere": "Elsewhere",
+    "uploads": "Your uploads",
+    "uploadsEmpty": "Nothing uploaded yet."
   },
   "upload": {
     "button": "Upload a file",
@@ -641,5 +648,15 @@
     "uptimeMinutes": "{minutes} min",
     "languageData": "Language data",
     "credits": "Word lists from {frequency} (CC BY-SA 4.0). Lemmas by {udpipe} with the {models} models (CC BY-NC-SA 4.0). Definitions from {wiktionary} (CC BY-SA 4.0)."
+  },
+  "newUpload": {
+    "title": "Upload a subtitle",
+    "intro": "For something that isn't on your server or OpenSubtitles.com: an .srt, .vtt or .ass file, in the language you're learning.",
+    "name": "Title",
+    "namePlaceholder": "What it's from",
+    "file": "File",
+    "choose": "Choose a file",
+    "button": "Upload",
+    "busy": "Uploading…"
   }
 }

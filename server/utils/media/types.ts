@@ -2,14 +2,14 @@ import type { ErrorKey, MessageParams } from "#shared/messages";
 import { AppError, UPSTREAM_FAILED } from "../errors";
 
 export type MediaServerKind = "plex" | "jellyfin";
-/** Where a film or show comes from: the household's media server, or OpenSubtitles.com's catalogue. */
-export type MediaSourceKind = MediaServerKind | "opensubtitles";
+/** Where a film or show comes from: the household's media server, OpenSubtitles.com's catalogue, or an upload. */
+export type MediaSourceKind = MediaServerKind | "opensubtitles" | "upload";
 
 export interface Library {
   id: string;
   name: string;
-  /** A catalogue can't be listed, only searched. */
-  type: "movies" | "shows" | "catalogue";
+  /** A catalogue can't be listed, only searched; uploads are the learner's own. */
+  type: "movies" | "shows" | "catalogue" | "uploads";
 }
 
 export interface MediaSummary {

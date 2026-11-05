@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCatalogueId } from "../shared/catalogue";
+import { isCatalogueId } from "../shared/mediaSources";
 import { createCatalogue, parseCatalogueId } from "../server/utils/media/catalogue";
 import { nextEpisode } from "../server/utils/media/types";
 

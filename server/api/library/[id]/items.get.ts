@@ -12,7 +12,7 @@ const query = z.object({
 
 /** A page of a library's films or shows, optionally filtered by title. */
 export default defineEventHandler(async (event) => {
-  await requireUser(event);
+  const user = await requireUser(event);
   const { id } = validParams(event, mediaIdParam);
-  return mediaSourceFor(id).items(id, validQuery(event, query));
+  return mediaSourceFor(id, user.id).items(id, validQuery(event, query));
 });
