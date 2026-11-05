@@ -9,14 +9,14 @@
             <h2 :id="`${uid}-server`" class="source-label">
               {{ $t("library.onServer", { name: serverName }) }}
             </h2>
-            <div class="pills" role="tablist" :aria-labelledby="`${uid}-server`">
-              <LibraryPill v-for="lib in libraries" :key="lib.id" v-model="libraryId" :library="lib" />
+            <div class="source-tabs" role="tablist" :aria-labelledby="`${uid}-server`">
+              <LibraryTab v-for="lib in libraries" :key="lib.id" v-model="libraryId" :library="lib" />
             </div>
           </div>
           <div class="source">
             <h2 :id="`${uid}-elsewhere`" class="source-label">{{ $t("library.elsewhere") }}</h2>
-            <div class="pills" role="tablist" :aria-labelledby="`${uid}-elsewhere`">
-              <LibraryPill v-for="lib in elsewhere" :key="lib.id" v-model="libraryId" :library="lib" />
+            <div class="source-tabs" role="tablist" :aria-labelledby="`${uid}-elsewhere`">
+              <LibraryTab v-for="lib in elsewhere" :key="lib.id" v-model="libraryId" :library="lib" />
             </div>
           </div>
         </div>
@@ -141,16 +141,37 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* On a phone each group gets its own row and underline, so none is pushed off-screen. */
 .sources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 28px;
+  display: grid;
+  gap: 12px;
 }
 
 .source {
   display: grid;
-  gap: 6px;
+  gap: 2px;
   min-width: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.source-tabs {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+@media (min-width: 700px) {
+  /* Side by side, sharing one underline. */
+  .sources {
+    display: flex;
+    gap: 4px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .source {
+    flex: none;
+    border-bottom: 0;
+  }
 }
 
 .source-label {
