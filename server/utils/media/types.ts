@@ -1,5 +1,5 @@
 import type { ErrorKey, MessageParams } from "#shared/messages";
-import { AppError } from "../errors";
+import { AppError, UPSTREAM_FAILED } from "../errors";
 
 export type MediaServerKind = "plex" | "jellyfin";
 
@@ -64,11 +64,11 @@ export interface MediaServer {
 
 /**
  * The media server failed or refused. `server` in the message is "Plex" or
- * "Jellyfin". It answers 502 (the media server's fault) unless a status says
+ * "Jellyfin". It answers UPSTREAM_FAILED (the media server's fault) unless a status says
  * otherwise: 404 for an item it doesn't have, 400 while connecting.
  */
 export class MediaServerError extends AppError {
-  constructor(key: ErrorKey, params: MessageParams = {}, statusCode = 502) {
+  constructor(key: ErrorKey, params: MessageParams = {}, statusCode = UPSTREAM_FAILED) {
     super(statusCode, key, params);
     this.name = "MediaServerError";
   }

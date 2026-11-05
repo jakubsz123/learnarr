@@ -3,7 +3,7 @@ import { startOfDay } from "#shared/days";
 import { translate } from "#shared/messages";
 import { schema, type Db } from "../../db";
 import { studyQueue } from "../cards";
-import { notifyUser } from "./index";
+import { hasNotificationChannel, notifyUser } from "./index";
 
 /** The hour of the day (in the server's time zone, TZ) practice reminders go out. */
 export function reminderHour(env: NodeJS.ProcessEnv = process.env): number {
@@ -25,6 +25,7 @@ export async function sendPracticeReminders(
   const reminded: string[] = [];
   for (const user of db.select().from(schema.user).where(eq(schema.user.practiceReminders, true)).all()) {
     if (user.lastRemindedAt && user.lastRemindedAt >= today) continue;
+    if (!hasNotificationChannel(db, user)) continue;
     const studiedToday =
       (db
         .select({ n: count() })

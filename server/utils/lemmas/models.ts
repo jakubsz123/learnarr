@@ -4,7 +4,7 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ErrorKey, MessageParams } from "#shared/messages";
-import { AppError } from "../errors";
+import { AppError, UPSTREAM_FAILED } from "../errors";
 import { DATA_DIR } from "../dataDir";
 import pins from "./udpipe-models.json";
 
@@ -105,7 +105,7 @@ export const MODEL_DIR = path.join(DATA_DIR, "udpipe", "models");
 
 export class ModelError extends AppError {
   constructor(key: ErrorKey, params: MessageParams) {
-    super(502, key, params);
+    super(UPSTREAM_FAILED, key, params);
     this.name = "ModelError";
   }
 }

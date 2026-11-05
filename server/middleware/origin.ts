@@ -9,7 +9,11 @@ export default defineEventHandler((event) => {
   if (!path.startsWith("/api/") || path.startsWith("/api/auth/") || path.startsWith("/api/webhooks/")) return;
   const allowed = isAllowedOrigin({
     method: event.method,
-    host: getRequestHeader(event, "x-forwarded-host") ?? getRequestHeader(event, "host") ?? null,
+    // Proxies in a chain append to x-forwarded-host; the first entry is the address the browser used.
+    host:
+      getRequestHeader(event, "x-forwarded-host")?.split(",")[0]?.trim() ??
+      getRequestHeader(event, "host") ??
+      null,
     origin: getRequestHeader(event, "origin") ?? null,
     fetchSite: getRequestHeader(event, "sec-fetch-site") ?? null,
   });

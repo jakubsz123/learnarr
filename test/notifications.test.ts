@@ -43,6 +43,7 @@ describe("media server webhooks", () => {
       },
     };
     expect(plexPlay(payload)).toEqual({
+      server: "plex",
       account: "jakub",
       itemId: "42",
       kind: "episode",
@@ -58,7 +59,7 @@ describe("media server webhooks", () => {
   it("reads a Jellyfin playback start", () => {
     expect(
       jellyfinPlay({ NotificationType: "PlaybackStart", ItemType: "Movie", ItemId: "abc", Name: "Roma" }),
-    ).toMatchObject({ itemId: "abc", kind: "movie", title: "Roma", account: null });
+    ).toMatchObject({ server: "jellyfin", itemId: "abc", kind: "movie", title: "Roma", account: null });
     expect(jellyfinPlay({ NotificationType: "PlaybackStop", ItemType: "Movie", ItemId: "abc" })).toBeNull();
   });
 });
@@ -119,6 +120,7 @@ describe("notifying people", () => {
       return true;
     };
     const play = {
+      server: "plex" as const,
       account: "jakub",
       itemId: "42",
       kind: "episode" as const,
@@ -134,9 +136,47 @@ describe("notifying people", () => {
     expect(await onPlay(db, { ...play, account: "someone else", itemId: "43" }, 0, notify)).toEqual([]);
   });
 
+  it("only counts a subtitle from the media server that reported the play", async () => {
+    const user = addUser(db, { mediaServerUser: "Jakub", learningLanguage: "es" });
+    const item = db
+      .insert(schema.mediaItems)
+      .values({ server: "plex", serverItemId: "42", kind: "movie", title: "Roma" })
+      .returning()
+      .get();
+    db.insert(schema.subtitles)
+      .values({
+        userId: user.id,
+        mediaItemId: item.id,
+        language: "es",
+        source: "plex",
+        content: "",
+        cueCount: 0,
+      })
+      .run();
+    const bodies: string[] = [];
+    const notify = async (_db: Db, _userId: string, message: { body: string }) => {
+      bodies.push(message.body);
+      return true;
+    };
+    const play = {
+      account: "jakub",
+      itemId: "42",
+      kind: "movie" as const,
+      title: "Roma",
+      showTitle: null,
+      seasonNumber: null,
+      episodeNumber: null,
+    };
+    await onPlay(db, { ...play, server: "jellyfin" }, 0, notify);
+    await onPlay(db, { ...play, server: "plex" }, 0, notify);
+    expect(bodies[0]).toBe(translate("en", "notifications.beforeYouWatch.noSubtitle"));
+    expect(bodies[1]).toBe(translate("en", "notifications.beforeYouWatch.words"));
+  });
+
   it("tries again later when nothing could be sent", async () => {
     addUser(db, { mediaServerUser: "Jakub" });
     const play = {
+      server: "plex" as const,
       account: "Jakub",
       itemId: "7",
       kind: "movie" as const,
@@ -160,5 +200,25 @@ describe("practice reminders", () => {
     expect(await sendPracticeReminders(db, evening, alwaysSent)).toEqual([]);
     const morning = new Date(2026, 10, 4, 7).getTime();
     expect(await sendPracticeReminders(db, morning, alwaysSent)).toEqual([]);
+  });
+
+  it("reminds only people who set up a way to be notified", async () => {
+    const db = testDb();
+    const withTopic = addUser(db, { ntfyTopic: "t" });
+    const without = addUser(db);
+    for (const user of [withTopic, without]) {
+      db.insert(schema.cards)
+        .values({
+          userId: user.id,
+          language: "es",
+          term: "gato",
+          form: "gato",
+          translation: "cat",
+          sentence: "Un gato.",
+        })
+        .run();
+    }
+    const evening = new Date(2026, 10, 4, 20).getTime();
+    expect(await sendPracticeReminders(db, evening, alwaysSent)).toEqual([withTopic.id]);
   });
 });

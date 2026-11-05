@@ -1,4 +1,4 @@
-import { AppError } from "../errors";
+import { AppError, UPSTREAM_FAILED } from "../errors";
 import type { PushMessage } from "./push";
 
 /**
@@ -28,5 +28,6 @@ export async function sendNtfy(
     }),
     signal: AbortSignal.timeout(10_000),
   });
-  if (!response.ok) throw new AppError(502, "errors.notifications.ntfyFailed", { status: response.status });
+  if (!response.ok)
+    throw new AppError(UPSTREAM_FAILED, "errors.notifications.ntfyFailed", { status: response.status });
 }
