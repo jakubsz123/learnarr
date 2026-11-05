@@ -2,11 +2,14 @@ import type { ErrorKey, MessageParams } from "#shared/messages";
 import { AppError, UPSTREAM_FAILED } from "../errors";
 
 export type MediaServerKind = "plex" | "jellyfin";
+/** Where a film or show comes from: the household's media server, or OpenSubtitles.com's catalogue. */
+export type MediaSourceKind = MediaServerKind | "opensubtitles";
 
 export interface Library {
   id: string;
   name: string;
-  type: "movies" | "shows";
+  /** A catalogue can't be listed, only searched. */
+  type: "movies" | "shows" | "catalogue";
 }
 
 export interface MediaSummary {
@@ -43,7 +46,7 @@ export interface MediaDetail extends MediaSummary {
 }
 
 export interface MediaServer {
-  kind: MediaServerKind;
+  kind: MediaSourceKind;
   /** Server name and version, or throws a MediaServerError. */
   identify(): Promise<{ name: string; version: string }>;
   libraries(): Promise<Library[]>;

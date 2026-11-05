@@ -1,7 +1,7 @@
 import { defineEventHandler } from "h3";
 import { z } from "zod";
 import { requireUser } from "~~/server/utils/auth";
-import { useMediaServer } from "~~/server/utils/media";
+import { mediaSourceFor } from "~~/server/utils/media";
 import { mediaIdParam, validParams, validQuery } from "~~/server/utils/validate";
 
 const query = z.object({
@@ -14,5 +14,5 @@ const query = z.object({
 export default defineEventHandler(async (event) => {
   await requireUser(event);
   const { id } = validParams(event, mediaIdParam);
-  return useMediaServer().items(id, validQuery(event, query));
+  return mediaSourceFor(id).items(id, validQuery(event, query));
 });

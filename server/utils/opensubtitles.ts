@@ -85,6 +85,89 @@ export async function openSubtitlesLogin(
   };
 }
 
+/** A film or show in OpenSubtitles.com's catalogue. */
+export interface Feature {
+  id: string;
+  kind: "movie" | "show";
+  title: string;
+  year?: number;
+  imdbId?: string;
+  posterUrl?: string;
+  /** Subtitles of any language the catalogue has for it; a rough measure of how well known it is. */
+  subtitleCount: number;
+  /** A show's seasons, with each episode's own IMDb id. */
+  seasons: { number: number; episodes: { number: number; title: string; imdbId?: string }[] }[];
+}
+
+const imdbId = (n: unknown) => (Number(n) > 0 ? `tt${String(n).padStart(7, "0")}` : undefined);
+
+const FEATURE_KINDS: Record<string, Feature["kind"]> = { Movie: "movie", Tvshow: "show" };
+
+/** Search results leave out `feature_type`; the kind searched for stands in for it. */
+function toFeature(a: Record<string, any>, searched?: Feature["kind"]): Feature | null {
+  const kind = a.feature_type ? FEATURE_KINDS[a.feature_type] : searched;
+  if (!kind || !a.feature_id) return null;
+  return {
+    id: String(a.feature_id),
+    kind,
+    // `title` comes lowercased; the original title keeps its capitals and accents.
+    title: String(a.original_title || a.title || ""),
+    year: Number(a.year) || undefined,
+    imdbId: imdbId(a.imdb_id),
+    // The catalogue's placeholder image is a generic icon, not a poster.
+    posterUrl: typeof a.img_url === "string" && !a.img_url.includes("placeholder") ? a.img_url : undefined,
+    subtitleCount: Number(a.subtitles_count ?? 0),
+    seasons: (Array.isArray(a.seasons) ? a.seasons : [])
+      .map((season: Record<string, any>) => ({
+        number: Number(season.season_number),
+        episodes: (Array.isArray(season.episodes) ? season.episodes : [])
+          .map((e: Record<string, any>) => ({
+            number: Number(e.episode_number),
+            title: String(e.title ?? ""),
+            imdbId: imdbId(e.feature_imdb_id),
+          }))
+          .filter((e: { number: number }) => e.number > 0),
+      }))
+      .filter(
+        (season: { number: number; episodes: unknown[] }) => season.number > 0 && season.episodes.length,
+      ),
+  };
+}
+
+async function features(
+  params: URLSearchParams,
+  fetchImpl: typeof fetch,
+  searched?: Feature["kind"],
+): Promise<Feature[]> {
+  const response = await call(`${API}/features?${params}`, { headers: headers() }, fetchImpl);
+  if (response.status === 429) throw new OpenSubtitlesError("errors.opensubtitles.searchLimited", 429);
+  if (!response.ok)
+    throw new OpenSubtitlesError("errors.opensubtitles.httpError", UPSTREAM_FAILED, {
+      status: response.status,
+    });
+  const data = (await response.json()) as { data?: { attributes: Record<string, any> }[] };
+  return (data.data ?? [])
+    .map((f) => toFeature(f.attributes, searched))
+    .filter((f): f is Feature => f !== null);
+}
+
+/** Films or shows whose title matches, in the catalogue's own order. */
+export async function searchFeatures(
+  query: string,
+  kind: Feature["kind"],
+  fetchImpl: typeof fetch = fetch,
+): Promise<Feature[]> {
+  return features(
+    new URLSearchParams({ query, type: kind === "show" ? "tvshow" : "movie" }),
+    fetchImpl,
+    kind,
+  );
+}
+
+export async function getFeature(id: string, fetchImpl: typeof fetch = fetch): Promise<Feature | null> {
+  return (await features(new URLSearchParams({ feature_id: id }), fetchImpl))[0] ?? null;
+}
+
 export interface SubtitleSearch {
   language: string;
   /** A film's IMDb id, or an episode's own. */

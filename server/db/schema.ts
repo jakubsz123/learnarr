@@ -101,7 +101,7 @@ export const mediaItems = sqliteTable(
   "media_items",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    server: text("server", { enum: ["plex", "jellyfin"] }).notNull(),
+    server: text("server", { enum: ["plex", "jellyfin", "opensubtitles"] }).notNull(),
     serverItemId: text("server_item_id").notNull(),
     kind: text("kind", { enum: ["movie", "episode"] }).notNull(),
     title: text("title").notNull(),

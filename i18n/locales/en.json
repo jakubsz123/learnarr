@@ -53,6 +53,7 @@
       "notInLibrary": "That subtitle isn't in your library.",
       "notPlayable": "Pick a film or an episode.",
       "noneOnServer": "Your media server has no {language} subtitle for this. Connect your OpenSubtitles.com account in Settings → Account to download one, or upload a file.",
+      "needOpenSubtitles": "Connect your OpenSubtitles.com account in Settings → Account to download a {language} subtitle, or upload a file.",
       "noneAnywhere": "Neither your media server nor OpenSubtitles.com has a {language} subtitle for this. You can upload a file.",
       "wordNotFound": "That word isn't in this subtitle.",
       "unreadable": "That file has no subtitle lines Learnarr can read. Use an .srt, .vtt or .ass file.",
@@ -380,10 +381,10 @@
     "noMatch": "Nothing here matches \"{search}\".",
     "empty": "Nothing here.",
     "loadMore": "Load more",
-    "noServer": "No media server yet",
-    "noServerAdmin": "Connect Plex or Jellyfin to browse your library.",
-    "noServerMember": "Ask whoever runs this server to connect Plex or Jellyfin.",
-    "connect": "Connect a media server"
+    "searchCatalogue": "Search films and shows",
+    "catalogueHint": "Search OpenSubtitles.com for any film or show, then get its subtitle with your own account.",
+    "attribution": "Subtitles provided by",
+    "ownLibrary": "Connect Plex or Jellyfin to browse your own library too."
   },
   "upload": {
     "button": "Upload a file",
@@ -397,7 +398,9 @@
       "busy": "Getting it…",
       "onServer": "Your media server has a {language} subtitle for this.",
       "fromOpenSubtitles": "No {language} subtitle on the media server; Learnarr will download one from OpenSubtitles.com with your account.",
-      "connectOpenSubtitles": "No {language} subtitle on the media server. Connect OpenSubtitles.com in Settings → Account to download one, or upload a file."
+      "connectOpenSubtitles": "No {language} subtitle on the media server. Connect OpenSubtitles.com in Settings → Account to download one, or upload a file.",
+      "fromCatalogue": "Learnarr will download a {language} subtitle from OpenSubtitles.com with your account.",
+      "connectForCatalogue": "Connect OpenSubtitles.com in Settings → Account to download a {language} subtitle, or upload a file."
     },
     "overview": {
       "words": "Words",

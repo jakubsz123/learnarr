@@ -19,9 +19,12 @@
         </div>
         <SearchField
           v-model="search"
-          :label="$t('library.search')"
-          :placeholder="$t('library.searchPlaceholder')"
+          :label="isCatalogue ? $t('library.searchCatalogue') : $t('library.search')"
+          :placeholder="isCatalogue ? $t('library.searchCatalogue') : $t('library.searchPlaceholder')"
         />
+        <p v-if="!server && me?.isAdmin" class="hint">
+          <NuxtLink to="/settings/media-server">{{ $t("library.ownLibrary") }}</NuxtLink>
+        </p>
       </div>
 
       <div class="grid">
@@ -32,7 +35,13 @@
         </NuxtLink>
       </div>
       <p v-if="!loading && !items.length" class="muted">
-        {{ search ? $t("library.noMatch", { search }) : $t("library.empty") }}
+        {{
+          search
+            ? $t("library.noMatch", { search })
+            : isCatalogue
+              ? $t("library.catalogueHint")
+              : $t("library.empty")
+        }}
       </p>
       <button
         v-if="items.length < total"
@@ -43,15 +52,11 @@
       >
         {{ loading ? $t("common.loading") : $t("library.loadMore") }}
       </button>
+      <p v-if="isCatalogue" class="hint">
+        {{ $t("library.attribution") }}
+        <a href="https://www.opensubtitles.com" target="_blank" rel="noopener">OpenSubtitles.com</a>
+      </p>
     </template>
-
-    <div v-else-if="!loading" class="panel stack">
-      <h1 class="page-title">{{ $t("library.noServer") }}</h1>
-      <p class="muted">{{ me?.isAdmin ? $t("library.noServerAdmin") : $t("library.noServerMember") }}</p>
-      <NuxtLink v-if="me?.isAdmin" to="/settings/media-server" class="btn btn-primary">
-        {{ $t("library.connect") }}
-      </NuxtLink>
-    </div>
   </div>
 </template>
 
@@ -73,12 +78,17 @@ const route = useRoute();
 const router = useRouter();
 
 const libraries = ref<Library[]>([]);
+const server = ref<string | null>(null);
 const libraryId = ref(typeof route.query.lib === "string" ? route.query.lib : "");
 const search = ref("");
 const items = ref<Item[]>([]);
 const total = ref(0);
 const loading = ref(true);
 const error = ref("");
+
+const isCatalogue = computed(
+  () => libraries.value.find((l) => l.id === libraryId.value)?.type === "catalogue",
+);
 
 async function loadItems(reset: boolean) {
   if (!libraryId.value) return;
@@ -108,13 +118,14 @@ watch(search, () => {
 
 onMounted(async () => {
   try {
-    libraries.value = (await api<{ libraries: Library[] }>("/api/library")).libraries;
+    const answer = await api<Get<"/api/library">>("/api/library");
+    libraries.value = answer.libraries;
+    server.value = answer.server;
     if (!libraries.value.some((l) => l.id === libraryId.value))
       libraryId.value = libraries.value[0]?.id ?? "";
     else await loadItems(true);
   } catch (e) {
-    // 409 is "no media server yet", which the page explains on its own.
-    if ((e as { statusCode?: number }).statusCode !== 409) error.value = errorText(e);
+    error.value = errorText(e);
   } finally {
     if (!libraryId.value) loading.value = false;
   }
