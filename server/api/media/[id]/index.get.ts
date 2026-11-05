@@ -1,7 +1,7 @@
 import { defineEventHandler } from "h3";
 import { useDb } from "~~/server/db";
 import { requireUser } from "~~/server/utils/auth";
-import { useMediaServer } from "~~/server/utils/media";
+import { mediaSourceFor } from "~~/server/utils/media";
 import { candidateTracks } from "~~/server/utils/media/tracks";
 import { nextEpisode } from "~~/server/utils/media/types";
 import { progressOf } from "~~/server/utils/progress";
@@ -11,7 +11,7 @@ import { mediaIdParam, validParams } from "~~/server/utils/validate";
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { id } = validParams(event, mediaIdParam);
-  const server = useMediaServer();
+  const server = mediaSourceFor(id);
   const item = await server.item(id);
   const playable = item.type === "movie" || item.type === "episode";
   const [children, next] = await Promise.all([

@@ -1,5 +1,6 @@
 import { and, count, eq, inArray } from "drizzle-orm";
 import { schema, type Db } from "../db";
+import type { MediaSourceKind } from "./media/types";
 import { coverageOf } from "./subtitleWords";
 
 export interface Progress {
@@ -13,7 +14,7 @@ export interface Progress {
 export async function progressOf(
   db: Db,
   user: { id: string; level: string; learningLanguage: string },
-  server: "plex" | "jellyfin",
+  server: MediaSourceKind,
   serverItemIds: string[],
 ): Promise<Record<string, Progress>> {
   if (!serverItemIds.length) return {};

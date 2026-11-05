@@ -3,7 +3,7 @@ import { useDb } from "~~/server/db";
 import { requireUser } from "~~/server/utils/auth";
 import { AppError } from "~~/server/utils/errors";
 import { useLemmas } from "~~/server/utils/lemmas";
-import { useMediaServer } from "~~/server/utils/media";
+import { mediaSourceFor } from "~~/server/utils/media";
 import { MAX_SUBTITLE_BYTES, uploadSubtitle } from "~~/server/utils/subtitleSource";
 import { mediaIdParam, validParams } from "~~/server/utils/validate";
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   if (file.data.length > MAX_SUBTITLE_BYTES) throw new AppError(413, "errors.subtitles.tooLarge");
   const subtitle = await uploadSubtitle({
     db: useDb(),
-    server: useMediaServer(),
+    server: mediaSourceFor(id),
     user,
     serverItemId: id,
     raw: new TextDecoder("utf-8").decode(file.data),

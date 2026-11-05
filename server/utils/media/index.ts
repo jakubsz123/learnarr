@@ -1,5 +1,7 @@
 import { AppError } from "../errors";
 import { useSettings, type Settings } from "../settings";
+import { isCatalogueId } from "#shared/catalogue";
+import { useCatalogue } from "./catalogue";
 import { createJellyfin } from "./jellyfin";
 import { createPlex } from "./plex";
 import type { MediaServer, MediaServerKind } from "./types";
@@ -22,4 +24,9 @@ export function useMediaServer(): MediaServer {
   const connection = mediaServerSettings(useSettings());
   if (!connection) throw new AppError(409, "errors.media.notConnected");
   return createMediaServer(connection.kind, connection.url, connection.token);
+}
+
+/** Where a film, show or library id lives: OpenSubtitles.com's catalogue, or the household's media server. */
+export function mediaSourceFor(id: string): MediaServer {
+  return isCatalogueId(id) ? useCatalogue() : useMediaServer();
 }

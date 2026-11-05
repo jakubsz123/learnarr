@@ -13,6 +13,8 @@
 </template>
 
 <script setup lang="ts">
+import { isCatalogueId } from "#shared/catalogue";
+
 /** A film or episode without a subtitle yet: get one from the server or OpenSubtitles, or upload a file. */
 const props = defineProps<{ itemId: string; hasServerSubtitle: boolean }>();
 const emit = defineEmits<{ ready: [] }>();
@@ -26,8 +28,14 @@ const error = ref("");
 
 const hint = computed(() => {
   const language = languageName(me.value?.learningLanguage ?? "");
+  const connected = me.value?.opensubtitles.connected;
+  if (isCatalogueId(props.itemId)) {
+    return connected
+      ? t("episode.getSubtitle.fromCatalogue", { language })
+      : t("episode.getSubtitle.connectForCatalogue", { language });
+  }
   if (props.hasServerSubtitle) return t("episode.getSubtitle.onServer", { language });
-  return me.value?.opensubtitles.connected
+  return connected
     ? t("episode.getSubtitle.fromOpenSubtitles", { language })
     : t("episode.getSubtitle.connectOpenSubtitles", { language });
 });

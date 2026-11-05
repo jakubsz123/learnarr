@@ -2,7 +2,7 @@ import { defineEventHandler, setResponseHeaders } from "h3";
 import { z } from "zod";
 import { requireUser } from "~~/server/utils/auth";
 import { AppError } from "~~/server/utils/errors";
-import { useMediaServer } from "~~/server/utils/media";
+import { mediaSourceFor } from "~~/server/utils/media";
 import { mediaIdParam, validParams, validQuery } from "~~/server/utils/validate";
 
 const query = z.object({ w: z.coerce.number().int().min(80).max(800).default(300) });
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   const { id } = validParams(event, mediaIdParam);
   const { w } = validQuery(event, query);
   // Any failure means the same to the page (show the placeholder), so it is one 404.
-  const response = await useMediaServer()
+  const response = await mediaSourceFor(id)
     .poster(id, w)
     .catch(() => null);
   if (!response?.body) throw new AppError(404, "errors.media.noPoster");

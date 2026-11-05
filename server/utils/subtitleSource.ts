@@ -119,7 +119,13 @@ export async function getSubtitle(opts: {
   }
 
   if (!user.opensubtitlesUsername || !user.opensubtitlesPassword) {
-    throw new AppError(404, "errors.subtitles.noneOnServer", { language });
+    throw new AppError(
+      404,
+      server.kind === "opensubtitles"
+        ? "errors.subtitles.needOpenSubtitles"
+        : "errors.subtitles.noneOnServer",
+      { language },
+    );
   }
   const credentials = {
     username: user.opensubtitlesUsername,
