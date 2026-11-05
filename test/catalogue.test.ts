@@ -69,10 +69,10 @@ describe("catalogue ids", () => {
 });
 
 describe("OpenSubtitles.com catalogue", () => {
-  it("answers searches only, with an exact title first", async () => {
+  it("answers searches only, with an exact title first, accents or not", async () => {
     const catalogue = createCatalogue(fakeApi());
     expect(await catalogue.items("os", { start: 0, limit: 10 })).toEqual({ items: [], total: 0 });
-    const { items } = await catalogue.items("os", { start: 0, limit: 10, search: "élite" });
+    const { items } = await catalogue.items("os", { start: 0, limit: 10, search: "elite" });
     expect(items.map((i) => i.title)).toEqual(["Élite", "Élite Short Stories", "Roma"]);
     expect(items[0]).toMatchObject({ id: "os-s-658716", type: "show", year: 2018, hasPoster: true });
     expect(items[1]).toMatchObject({ id: "os-s-1", type: "show", hasPoster: false });
