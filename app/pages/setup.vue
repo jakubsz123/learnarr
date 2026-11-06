@@ -90,7 +90,7 @@
 
     <div v-else class="stack">
       <h1 id="step-title">{{ $t("setup.done.title") }}</h1>
-      <p class="muted">{{ $t("setup.done.intro") }}</p>
+      <p class="muted">{{ mediaConnected ? $t("setup.done.intro") : $t("setup.done.introNoServer") }}</p>
       <div class="row">
         <NuxtLink to="/library" class="btn btn-primary">{{ $t("setup.done.library") }}</NuxtLink>
         <NuxtLink to="/settings/users" class="btn">{{ $t("setup.done.household") }}</NuxtLink>

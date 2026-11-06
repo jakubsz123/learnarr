@@ -221,6 +221,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Eight providers in one column is a long scroll on a phone. */
+@media (max-width: 560px) {
+  .choices {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .model-row {
   display: flex;
   gap: 8px;

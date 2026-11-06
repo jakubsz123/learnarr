@@ -26,6 +26,14 @@
               </td>
               <td class="actions">
                 <button
+                  type="button"
+                  class="btn"
+                  :aria-label="$t('users.resetNamed', { name: u.name })"
+                  @click="invite(u)"
+                >
+                  {{ $t("users.reset") }}
+                </button>
+                <button
                   v-if="u.id !== me?.id"
                   type="button"
                   class="btn btn-danger"
@@ -41,50 +49,47 @@
       </div>
     </div>
 
-    <form class="section" method="post" @submit.prevent="add">
-      <h2 class="section-title">{{ $t("users.add") }}</h2>
-      <div>
-        <div class="field">
-          <label for="new-name">{{ $t("users.name") }}</label>
-          <input id="new-name" v-model.trim="draft.name" class="input" autocomplete="off" required />
-        </div>
-        <div class="field">
-          <label for="new-email">{{ $t("signIn.email") }}</label>
-          <div class="stack-tight">
-            <input
-              id="new-email"
-              v-model.trim="draft.email"
-              class="input"
-              type="email"
-              autocomplete="off"
-              required
-            />
-            <span class="hint">{{ $t("users.emailHint") }}</span>
-          </div>
-        </div>
-        <div class="field">
-          <label for="new-password">{{ $t("signIn.password") }}</label>
-          <div class="stack-tight">
-            <input
-              id="new-password"
-              v-model="draft.password"
-              class="input"
-              type="text"
-              minlength="8"
-              autocomplete="off"
-              required
-            />
-            <span class="hint">{{ $t("users.passwordHint") }}</span>
-          </div>
-        </div>
-      </div>
+    <section class="section">
+      <h2 class="section-title">{{ $t("users.invite") }}</h2>
+      <p class="muted">{{ $t("users.inviteIntro") }}</p>
       <div class="row">
-        <button type="submit" class="btn btn-primary" :disabled="feedback.busy.value">
-          {{ $t("users.addButton") }}
+        <button type="button" class="btn btn-primary" :disabled="feedback.busy.value" @click="invite()">
+          {{ $t("users.createLink") }}
         </button>
         <Feedback :text="feedback.text.value" :ok="feedback.ok.value" />
       </div>
-    </form>
+
+      <div v-if="link" class="panel stack" role="status">
+        <p>{{ link.name ? $t("users.resetLinkFor", { name: link.name }) : $t("users.newLink") }}</p>
+        <div class="row">
+          <input
+            ref="linkInput"
+            class="input"
+            readonly
+            :value="link.url"
+            :aria-label="$t('users.linkLabel')"
+            @focus="select"
+          />
+          <button type="button" class="btn" @click="copy">
+            {{ copied ? $t("users.copied") : $t("users.copy") }}
+          </button>
+        </div>
+        <p class="hint">{{ $t("users.linkHint", { date: formatDate(link.expiresAt) }) }}</p>
+      </div>
+
+      <template v-if="pending.length">
+        <h3 class="section-title">{{ $t("users.pending") }}</h3>
+        <ul class="list-box">
+          <li v-for="p in pending" :key="p.id" class="pending">
+            <span>
+              {{ p.name ? $t("users.resetFor", { name: p.name }) : $t("users.newAccount") }}
+              <span class="hint"> · {{ $t("users.expires", { date: formatDate(p.expiresAt) }) }}</span>
+            </span>
+            <button type="button" class="btn" @click="cancel(p.id)">{{ $t("users.cancel") }}</button>
+          </li>
+        </ul>
+      </template>
+    </section>
   </div>
 </template>
 
@@ -99,23 +104,57 @@ useHead({ title: () => `${t("users.title")} · ${t("nav.settings")} · Learnarr`
 
 const { me } = useMe();
 const users = ref<User[]>([]);
-const draft = reactive({ name: "", email: "", password: "" });
+const pending = ref<Get<"/api/invites">["invites"]>([]);
+const link = ref<{ url: string; name: string | null; expiresAt: string } | null>(null);
+const linkInput = ref<HTMLInputElement | null>(null);
+const copied = ref(false);
 const feedback = useFeedback();
+
+const formatDate = (date: string) =>
+  new Date(date).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 
 async function load() {
   users.value = (await api<{ users: User[] }>("/api/users")).users;
+  pending.value = (await api<Get<"/api/invites">>("/api/invites")).invites;
 }
 
-function add() {
-  const email = draft.email;
-  return feedback.run(
-    async () => {
-      await api("/api/users", { method: "POST", body: { ...draft } });
-      Object.assign(draft, { name: "", email: "", password: "" });
-      await load();
-    },
-    () => t("users.added", { email }),
-  );
+/** Make a link: for a new account, or, for someone who exists, to choose a new password. */
+function invite(user?: User) {
+  return feedback.run(async () => {
+    const made = await api<{ token: string; expiresAt: string }>("/api/invites", {
+      method: "POST",
+      body: user ? { userId: user.id } : {},
+    });
+    link.value = {
+      url: `${window.location.origin}/invite/${made.token}`,
+      name: user?.name ?? null,
+      expiresAt: made.expiresAt,
+    };
+    copied.value = false;
+    await load();
+  });
+}
+
+function select() {
+  linkInput.value?.select();
+}
+
+async function copy() {
+  if (!link.value) return;
+  try {
+    await navigator.clipboard.writeText(link.value.url);
+    copied.value = true;
+  } catch {
+    // Plain http isn't a secure page, where the clipboard is off limits; select it to copy by hand.
+    select();
+  }
+}
+
+function cancel(id: string) {
+  return feedback.run(async () => {
+    await api(`/api/invites/${encodeURIComponent(id)}`, { method: "DELETE" });
+    await load();
+  });
 }
 
 function remove(user: User) {
@@ -131,6 +170,17 @@ onMounted(() => feedback.run(load));
 
 <style scoped>
 .actions {
-  text-align: right;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pending {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
 }
 </style>
