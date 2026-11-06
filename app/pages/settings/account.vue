@@ -28,6 +28,44 @@
       </div>
     </section>
 
+    <form class="section" method="post" @submit.prevent="changePassword">
+      <h2 class="section-title">{{ $t("account.password.title") }}</h2>
+      <div>
+        <div class="field">
+          <label for="current-password">{{ $t("account.password.current") }}</label>
+          <input
+            id="current-password"
+            v-model="passwords.current"
+            class="input"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="new-password">{{ $t("account.password.new") }}</label>
+          <div class="stack-tight">
+            <input
+              id="new-password"
+              v-model="passwords.next"
+              class="input"
+              type="password"
+              minlength="8"
+              autocomplete="new-password"
+              required
+            />
+            <span class="hint">{{ $t("account.password.hint") }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <button type="submit" class="btn btn-primary" :disabled="passwordFeedback.busy.value">
+          {{ $t("account.password.change") }}
+        </button>
+        <Feedback :text="passwordFeedback.text.value" :ok="passwordFeedback.ok.value" />
+      </div>
+    </form>
+
     <section class="section">
       <h2 class="section-title">OpenSubtitles.com</h2>
       <p class="muted">{{ $t("account.opensubtitles.intro") }}</p>
@@ -144,6 +182,22 @@ async function changeLocale(event: Event) {
   const code = (event.target as HTMLSelectElement).value;
   await setLocale(code as typeof locale.value);
   await api("/api/me", { method: "PUT", body: { locale: code } }).catch(() => {});
+}
+
+const passwords = reactive({ current: "", next: "" });
+const passwordFeedback = useFeedback();
+
+function changePassword() {
+  return passwordFeedback.run(
+    async () => {
+      await api("/api/me/password", {
+        method: "POST",
+        body: { currentPassword: passwords.current, newPassword: passwords.next },
+      });
+      Object.assign(passwords, { current: "", next: "" });
+    },
+    () => t("account.password.changed"),
+  );
 }
 
 const os = reactive({ username: "", password: "" });

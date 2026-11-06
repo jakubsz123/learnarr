@@ -1,7 +1,17 @@
 # Household accounts
 
 One Learnarr server serves the whole household. The first account is the **admin**. After that, sign-up is
-closed, and the admin adds people in **Settings → Users** with a name, email and password.
+closed, and the admin invites people in **Settings → Users**.
+
+## Inviting someone
+
+Press **Create an invite link** and send the link to them however you like. They open it and choose their own
+name, email and password, and are signed in. A link works once and expires after a week; it can't be shown
+again after you leave the page, but you can cancel it under **Waiting to be used**.
+
+If someone forgets their password, press **Reset password** next to their name and send them the link it
+makes. They choose a new one and are signed out everywhere else. Anyone can change their own password under
+**Settings → Account**.
 
 What's shared and what isn't:
 

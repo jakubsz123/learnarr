@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+**New**
+
+- Invite links: the admin sends a link, and the person chooses their own name, email and password. The
+  same kind of link resets a forgotten password.
+- Change your own password under Settings → Account.
+- Browse OpenSubtitles.com's catalogue in the library without a media server, and upload a subtitle of your
+  own. The library shows which tabs are on your server and which are elsewhere.
+
+**Changed**
+
+- The admin no longer makes up passwords for other people: Settings → Users creates invite links instead.
+- Without an AI provider, an episode says so and points to Settings → AI, instead of a button that fails.
+- The AI provider choices fit two to a row on a phone.
+
 ## 0.3.0
 
 **New**

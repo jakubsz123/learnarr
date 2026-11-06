@@ -4,30 +4,39 @@
       <h2 class="panel-title">{{ $t("episode.suggest.title") }}</h2>
       <NuxtLink v-if="hasCards" to="/study" class="btn">{{ $t("nav.study") }}</NuxtLink>
     </div>
-    <p class="muted">{{ asked ? $t("episode.suggest.introMore") : $t("episode.suggest.intro") }}</p>
-    <div class="row" role="group" :aria-label="$t('episode.suggest.howMany')">
-      <button
-        v-for="n in WORD_COUNTS"
-        :key="n"
-        type="button"
-        class="pill"
-        :aria-pressed="count === n ? 'true' : 'false'"
-        @click="count = n"
-      >
-        {{ n }}
-      </button>
-      <button type="button" class="btn btn-primary" :disabled="working" @click="suggest">
-        {{
-          working
-            ? $t("episode.suggest.busy")
-            : asked
-              ? $t("episode.suggest.more")
-              : $t("episode.suggest.button")
-        }}
-      </button>
-    </div>
-    <p v-if="working" class="hint">{{ $t("episode.suggest.wait") }}</p>
-    <Feedback :text="feedback.text.value" :ok="feedback.ok.value" />
+    <template v-if="me && !me.aiConfigured">
+      <p class="muted">{{ $t("episode.suggest.noAi") }}</p>
+      <NuxtLink v-if="me.isAdmin" to="/settings/ai" class="btn btn-primary">
+        {{ $t("episode.suggest.setUpAi") }}
+      </NuxtLink>
+      <p v-else class="hint">{{ $t("episode.suggest.askAdmin") }}</p>
+    </template>
+    <template v-else>
+      <p class="muted">{{ asked ? $t("episode.suggest.introMore") : $t("episode.suggest.intro") }}</p>
+      <div class="row" role="group" :aria-label="$t('episode.suggest.howMany')">
+        <button
+          v-for="n in WORD_COUNTS"
+          :key="n"
+          type="button"
+          class="pill"
+          :aria-pressed="count === n ? 'true' : 'false'"
+          @click="count = n"
+        >
+          {{ n }}
+        </button>
+        <button type="button" class="btn btn-primary" :disabled="working" @click="suggest">
+          {{
+            working
+              ? $t("episode.suggest.busy")
+              : asked
+                ? $t("episode.suggest.more")
+                : $t("episode.suggest.button")
+          }}
+        </button>
+      </div>
+      <p v-if="working" class="hint">{{ $t("episode.suggest.wait") }}</p>
+      <Feedback :text="feedback.text.value" :ok="feedback.ok.value" />
+    </template>
   </section>
 </template>
 
@@ -39,6 +48,7 @@ const props = defineProps<{ subtitleId: number; asked: boolean; hasCards: boolea
 const emit = defineEmits<{ done: [] }>();
 
 const { t } = useI18n();
+const { me } = useMe();
 const waitFor = useJob();
 const feedback = useFeedback();
 const count = ref<(typeof WORD_COUNTS)[number]>(20);

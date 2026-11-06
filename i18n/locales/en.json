@@ -75,8 +75,7 @@
     "users": {
       "notFound": "That account doesn't exist.",
       "notYourself": "You can't delete your own account.",
-      "emailTaken": "There's already an account with that email.",
-      "couldNotAdd": "Couldn't add that account: {reason}"
+      "emailTaken": "There's already an account with that email."
     },
     "notifications": {
       "ntfyFailed": "The ntfy server answered with an error (HTTP {status})."
@@ -98,6 +97,13 @@
     "notFound": "There's nothing here.",
     "uploads": {
       "needTitle": "Give it a title, so you can find it again."
+    },
+    "invites": {
+      "invalid": "This link doesn't work any more. Ask for a new one.",
+      "needDetails": "Enter your name and email."
+    },
+    "account": {
+      "wrongPassword": "That isn't your current password."
     }
   },
   "notifications": {
@@ -214,6 +220,14 @@
       "deck": "Deck",
       "test": "Test",
       "connected": "Connected to AnkiConnect (version {version})."
+    },
+    "password": {
+      "title": "Password",
+      "current": "Current password",
+      "new": "New password",
+      "hint": "At least 8 characters. Your other sign-ins are signed out.",
+      "change": "Change password",
+      "changed": "Your password was changed."
     }
   },
   "notificationSettings": {
@@ -283,7 +297,8 @@
       "title": "You're set",
       "intro": "Pick a show from your library, see how much of it you know, and choose its words to learn.",
       "library": "Open the library",
-      "household": "Add household members"
+      "household": "Add household members",
+      "introNoServer": "Search OpenSubtitles.com for something you want to learn from, or connect Plex or Jellyfin any time in Settings."
     }
   },
   "welcome": {
@@ -295,7 +310,7 @@
   },
   "users": {
     "title": "Users",
-    "intro": "Everyone in the household gets their own account: their own words, cards and OpenSubtitles account. They share the media server and the AI provider. Sign-up is closed, so add people here.",
+    "intro": "Everyone in the household gets their own account: their own words, cards and OpenSubtitles account. They share the media server and the AI provider. Sign-up is closed, so invite people here.",
     "name": "Name",
     "actions": "Actions",
     "admin": "admin",
@@ -303,12 +318,23 @@
     "notConnected": "Not connected",
     "delete": "Delete",
     "deleteNamed": "Delete {name}",
-    "add": "Add someone",
-    "emailHint": "What they sign in with. Nothing is emailed.",
-    "passwordHint": "At least 8 characters. Tell them it; they can't change it yet.",
-    "addButton": "Add",
-    "added": "Added {email}.",
-    "confirmDelete": "Delete {name}? Their cards and progress go too."
+    "confirmDelete": "Delete {name}? Their cards and progress go too.",
+    "reset": "Reset password",
+    "resetNamed": "Reset the password of {name}",
+    "invite": "Invite someone",
+    "inviteIntro": "Make a link and send it to them. They open it and choose their own name, email and password.",
+    "createLink": "Create an invite link",
+    "newLink": "Send this link to the person you're inviting:",
+    "resetLinkFor": "Send this link to {name} to let them choose a new password:",
+    "linkLabel": "Invite link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "linkHint": "It works once, until {date}. It can't be shown again, so copy it now.",
+    "pending": "Waiting to be used",
+    "newAccount": "New account",
+    "resetFor": "Password reset for {name}",
+    "expires": "until {date}",
+    "cancel": "Cancel"
   },
   "settingsMenu": {
     "account": "Languages, OpenSubtitles, Anki",
@@ -429,7 +455,10 @@
       "busy": "Suggesting words…",
       "wait": "This can take a minute, longer with a local model. You can leave this page.",
       "added": "{count} new word to go through. | {count} new words to go through.",
-      "none": "No new words: you have them all already."
+      "none": "No new words: you have them all already.",
+      "noAi": "Suggesting words and making cards need an AI provider, and none is set up yet.",
+      "setUpAi": "Set up an AI provider",
+      "askAdmin": "Ask whoever runs this server to add one in Settings → AI."
     },
     "next": "Next: {episode} · {title}",
     "tabsLabel": "This episode",
@@ -658,5 +687,17 @@
     "choose": "Choose a file",
     "button": "Upload",
     "busy": "Uploading…"
+  },
+  "invite": {
+    "pageTitle": "Invitation",
+    "invalidTitle": "This link doesn't work",
+    "invalid": "It has been used, cancelled or has expired. Ask whoever runs this server for a new one.",
+    "newTitle": "Join Learnarr",
+    "newIntro": "Choose how you'll sign in. You'll set up your languages next.",
+    "resetTitle": "New password for {name}",
+    "resetIntro": "Choose a new password. You'll be signed out wherever you were signed in.",
+    "passwordHint": "At least 8 characters.",
+    "newButton": "Create my account",
+    "resetButton": "Set the password"
   }
 }

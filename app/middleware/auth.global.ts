@@ -12,6 +12,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     setupDone.value = Boolean(status);
   }
 
+  // An invite link is for someone who has no account (or forgot the password) yet.
+  if (to.path.startsWith("/invite/")) return;
+
   const { me } = useMe();
   if (!me.value) me.value = await requestFetch("/api/me").catch(() => null);
 

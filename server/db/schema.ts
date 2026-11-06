@@ -87,6 +87,23 @@ export const verification = sqliteTable("verification", {
   ...timestamps,
 });
 
+/**
+ * A link the admin gives someone: it lets them choose their own name, email and
+ * password (a new account), or set a new password for an account that exists
+ * (`userId` set). Only a hash of the link's token is kept, and the invite is
+ * deleted once it's used.
+ */
+export const invites = sqliteTable("invites", {
+  id: text("id").primaryKey(),
+  tokenHash: text("token_hash").notNull().unique(),
+  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamps.createdAt,
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 // ─── Learnarr ───────────────────────────────────────────────────────────────
 
 /** Instance-wide settings. Secrets are stored encrypted (see server/utils/secrets.ts). */
