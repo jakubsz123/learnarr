@@ -29,6 +29,4 @@ cd website && npm ci && npm run dev
 
 ## What's planned
 
-[docs/plan.md](https://github.com/jakubsz123/learnarr/blob/main/docs/plan.md) has what's next, and
-[docs/comparison.md](https://github.com/jakubsz123/learnarr/blob/main/docs/comparison.md) compares Learnarr with
-Sub-Optimal, the app it grew out of.
+[docs/plan.md](https://github.com/jakubsz123/learnarr/blob/main/docs/plan.md) has what's next.

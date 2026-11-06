@@ -24,8 +24,6 @@ Ships as one Docker image with a `/config` volume and runs with no environment v
 - Wiktionary definitions, subtitle upload, Anki export, streak and activity on Today.
 - A translatable interface, a first-sign-in step for household members, and a wiki on the website.
 
-See [comparison.md](comparison.md) for how this lines up with Sub-Optimal.
-
 ## Next
 
 - Follow along live: the current line on your phone while Plex or Jellyfin plays.
@@ -44,7 +42,7 @@ Bazarr/Sonarr/Radarr, subtitle folders on disk, embedded tracks through ffmpeg, 
 - The first account is the admin; sign-up is closed after that, and the admin adds household members.
 - Each user connects their own OpenSubtitles account. Learnarr's API key ships in the code.
 - No YouTube, Whisper or browser extension.
-- Ported code comes from `jakubsz123/learnarr-legacy`, the old Sub-Optimal fork, rewritten to this repo's style.
+- Ported code comes from `jakubsz123/learnarr-legacy`, the first attempt, rewritten to this repo's style.
 - Notifications need no third-party account: web push signs with keys made on the server, and ntfy can be
   self-hosted.
 - The interface is translated with @nuxtjs/i18n; the server sends message keys with its errors, so one
