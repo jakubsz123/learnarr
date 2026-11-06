@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://learnarr.rushandhurry.us">Website</a> ·
+  <a href="https://learnarr.org">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="#configuration">Configuration</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
@@ -24,7 +24,7 @@ ones you want, and study them as flashcards built around the real lines you'll h
 your phone, or send the cards to Anki.
 
 > **Status:** early (v0.3). It works end to end, and there will be rough edges.
-> The [wiki](https://learnarr.rushandhurry.us/wiki/) covers install, setup and how it all works.
+> The [wiki](https://learnarr.org/wiki/) covers install, setup and how it all works.
 
 ## Features
 
@@ -149,12 +149,12 @@ npm test
 
 Nuxt 4, SQLite with Drizzle, better-auth. [docs/architecture.md](docs/architecture.md) is the map of the
 code; [CONTRIBUTING.md](CONTRIBUTING.md) says what a pull request needs. To translate the interface, see the
-[translating guide](https://learnarr.rushandhurry.us/wiki/translating.html).
+[translating guide](https://learnarr.org/wiki/translating.html).
 
 ## Support
 
 Learnarr is free and stays that way. If it helps you learn, see
-[how to support it](https://learnarr.rushandhurry.us/wiki/support.html): a coffee, a translation, a bug report or a
+[how to support it](https://learnarr.org/wiki/support.html): a coffee, a translation, a bug report or a
 star all help.
 
 ## Credits

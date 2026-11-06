@@ -64,7 +64,7 @@ Every string a person sees is in `i18n/locales/en.json`, under a namespace per s
 interface uses `$t()`/`t()` from @nuxtjs/i18n; the server uses the same file for error messages and
 notifications (`shared/messages.ts`). Language names and number formats come from the browser's `Intl`, so
 they need no translating. `test/messages.test.ts` fails if the code uses a key the catalog doesn't have.
-See [the translating guide](https://learnarr.rushandhurry.us/wiki/translating.html).
+See [the translating guide](https://learnarr.org/wiki/translating.html).
 
 ## Background work
 
