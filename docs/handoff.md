@@ -95,6 +95,6 @@ downloads a real model.
    reach Wiktionary or LINDAT, but CI did download a real model.
 3. **Merge.** No pull request has been opened yet.
 4. **Publish the wiki.** Build it with `cd website && npm ci && npm run build` and upload `.vitepress/dist` to
-   wherever learnarr.rushandhurry.us is served from.
+   wherever learnarr.org is served from.
 5. **Known gap:** some failure details are shown in English even when the interface is in another language:
    raw UDPipe errors, zod validation details, and better-auth's own messages when adding a user.

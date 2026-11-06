@@ -113,7 +113,7 @@
 import { ANKI_DEFAULTS } from "#shared/anki";
 import type { Level } from "#shared/languages";
 
-const TRANSLATING_URL = "https://learnarr.rushandhurry.us/wiki/translating.html";
+const TRANSLATING_URL = "https://learnarr.org/wiki/translating.html";
 
 const { t, locale, locales, setLocale } = useI18n();
 useHead({ title: () => `${t("account.title")} · ${t("nav.settings")} · Learnarr` });
