@@ -1,5 +1,5 @@
 Jakub Szura
 Victor Buch
 
-Learnarr is a rewrite of Sub-Optimal, which Victor and Jakub built together.
-Parts of it are ported from Sub-Optimal's code; those commits say so.
+Victor and Jakub built the app Learnarr grew out of together. Parts of Learnarr are ported from that
+code; the commits that do say so.

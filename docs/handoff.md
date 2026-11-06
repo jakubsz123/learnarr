@@ -71,8 +71,7 @@ downloads a real model.
 
 **Documentation**
 
-- `docs/architecture.md` (map of the code), `docs/comparison.md` (feature by feature against Sub-Optimal),
-  and `CONTRIBUTING.md` (the conventions above).
+- `docs/architecture.md` (map of the code) and `CONTRIBUTING.md` (the conventions above).
 - `CHANGELOG.md`, `SECURITY.md`, pull request and issue templates, Dependabot, `.nvmrc` (Node 24) and
   `.env.example`.
 - The version is 0.3.0.

@@ -159,8 +159,7 @@ star all help.
 
 ## Credits
 
-Learnarr was written by Jakub Szura and Victor Buch; it grew out of Sub-Optimal, the language-learning app
-they built together. See [AUTHORS](AUTHORS).
+Learnarr was written by Jakub Szura and Victor Buch. See [AUTHORS](AUTHORS).
 
 - Subtitles provided by [OpenSubtitles.com](https://www.opensubtitles.com).
 - Lemmatisation by [UDPipe](https://github.com/ufal/udpipe), with models from LINDAT/CLARIAH-CZ.
