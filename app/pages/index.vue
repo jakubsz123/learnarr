@@ -15,7 +15,22 @@
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
 
     <template v-if="today">
-      <section class="panel study-panel">
+      <section v-if="!started" class="panel stack">
+        <h2 class="panel-title">{{ $t("today.firstTitle") }}</h2>
+        <ol class="steps">
+          <li>{{ $t("today.firstSteps.open") }}</li>
+          <li>
+            {{ $t("today.firstSteps.subtitle", { language: languageName(me?.learningLanguage ?? "") }) }}
+          </li>
+          <li>{{ $t("today.firstSteps.words") }}</li>
+          <li>{{ $t("today.firstSteps.study") }}</li>
+        </ol>
+        <div>
+          <NuxtLink to="/library" class="btn btn-primary">{{ $t("setup.done.library") }}</NuxtLink>
+        </div>
+      </section>
+
+      <section v-if="started" class="panel study-panel">
         <div class="stack-tight">
           <strong class="study-count">{{
             queued ? $t("today.toStudy", { count: queued }) : $t("today.caughtUp")
@@ -35,7 +50,7 @@
         </NuxtLink>
       </section>
 
-      <dl class="tiles">
+      <dl v-if="started" class="tiles">
         <div class="tile">
           <dt>{{ $t("today.streak") }}</dt>
           <dd>{{ $t("today.days", { count: today.stats.streak.current }) }}</dd>
@@ -46,6 +61,7 @@
         <div class="tile">
           <dt>{{ $t("today.wordsKnown") }}</dt>
           <dd>{{ $n(today.stats.wordsKnown) }}</dd>
+          <span class="hint">{{ $t("today.wordsKnownHint") }}</span>
         </div>
         <div class="tile">
           <dt>{{ $t("nav.cards") }}</dt>
@@ -96,21 +112,6 @@
           </li>
         </ul>
       </section>
-
-      <section v-if="!today.recent.length" class="panel stack">
-        <h2 class="panel-title">{{ $t("today.firstTitle") }}</h2>
-        <ol class="steps">
-          <li>{{ $t("today.firstSteps.open") }}</li>
-          <li>
-            {{ $t("today.firstSteps.subtitle", { language: languageName(me?.learningLanguage ?? "") }) }}
-          </li>
-          <li>{{ $t("today.firstSteps.words") }}</li>
-          <li>{{ $t("today.firstSteps.study") }}</li>
-        </ol>
-        <div>
-          <NuxtLink to="/library" class="btn btn-primary">{{ $t("setup.done.library") }}</NuxtLink>
-        </div>
-      </section>
     </template>
     <p v-else-if="!error" class="muted">{{ $t("common.loading") }}</p>
   </div>
@@ -128,6 +129,12 @@ const { errorText } = useErrorMessage();
 const today = ref<Today | null>(null);
 const upNext = ref<MediaSummary[]>([]);
 const error = ref("");
+/** Until there is a card or a review, the stats would only be zeros, so Today just says how to start. */
+const started = computed(
+  () =>
+    !!today.value &&
+    (today.value.stats.cards > 0 || today.value.stats.reviewedToday > 0 || today.value.recent.length > 0),
+);
 const queued = computed(() => (today.value ? today.value.due + today.value.fresh : 0));
 
 onMounted(async () => {

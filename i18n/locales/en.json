@@ -612,6 +612,7 @@
     "continue": "Continue",
     "upNext": "Up next",
     "start": "Start",
+    "wordsKnownHint": "Includes the common words your level assumes.",
     "firstTitle": "Start with something you watch",
     "firstSteps": {
       "open": "Open the library and pick a film or an episode.",
