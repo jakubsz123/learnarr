@@ -1,6 +1,8 @@
 <template>
   <div class="page">
+    <h1 class="page-title">{{ $t("nav.library") }}</h1>
     <p v-if="error" class="notice danger" role="alert">{{ error }}</p>
+    <p v-else-if="!all.length" class="muted">{{ $t("common.loading") }}</p>
 
     <template v-else-if="all.length">
       <div class="section">
@@ -20,9 +22,9 @@
             </div>
           </div>
         </div>
-        <p v-if="!server && me?.isAdmin" class="hint">
-          <NuxtLink to="/settings/media-server">{{ $t("library.ownLibrary") }}</NuxtLink>
-        </p>
+        <div v-if="!server && me?.isAdmin">
+          <NuxtLink to="/settings/media-server" class="btn">{{ $t("library.ownLibrary") }}</NuxtLink>
+        </div>
         <NewUpload v-if="selected?.type === 'uploads'" />
         <SearchField
           v-model="search"

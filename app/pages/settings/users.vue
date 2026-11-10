@@ -3,48 +3,38 @@
     <div class="section">
       <h1 class="page-title">{{ $t("users.title") }}</h1>
       <p class="muted">{{ $t("users.intro") }}</p>
-      <div class="table-wrap">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">{{ $t("users.name") }}</th>
-              <th scope="col">OpenSubtitles</th>
-              <th scope="col">
-                <span class="sr-only">{{ $t("users.actions") }}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="u in users" :key="u.id">
-              <td>
-                {{ u.name }}<span v-if="u.isAdmin" class="hint"> · {{ $t("users.admin") }}</span>
-              </td>
-              <td :class="u.opensubtitles ? 'ok' : 'muted'">
-                {{ u.opensubtitles ? $t("users.connected") : $t("users.notConnected") }}
-              </td>
-              <td class="actions">
-                <button
-                  type="button"
-                  class="btn"
-                  :aria-label="$t('users.resetNamed', { name: u.name })"
-                  @click="invite(u)"
-                >
-                  {{ $t("users.reset") }}
-                </button>
-                <button
-                  v-if="u.id !== me?.id"
-                  type="button"
-                  class="btn btn-danger"
-                  :aria-label="$t('users.deleteNamed', { name: u.name })"
-                  @click="remove(u)"
-                >
-                  {{ $t("users.delete") }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <ul class="list-box">
+        <li v-for="u in users" :key="u.id" class="user">
+          <span class="user-main">
+            <span class="user-name">
+              <strong>{{ u.name }}</strong>
+              <span v-if="u.isAdmin" class="badge">{{ $t("users.admin") }}</span>
+            </span>
+            <span class="hint" :class="u.opensubtitles ? 'ok' : 'muted'">
+              OpenSubtitles · {{ u.opensubtitles ? $t("users.connected") : $t("users.notConnected") }}
+            </span>
+          </span>
+          <span class="actions">
+            <button
+              type="button"
+              class="btn"
+              :aria-label="$t('users.resetNamed', { name: u.name })"
+              @click="invite(u)"
+            >
+              {{ $t("users.reset") }}
+            </button>
+            <button
+              v-if="u.id !== me?.id"
+              type="button"
+              class="btn btn-danger"
+              :aria-label="$t('users.deleteNamed', { name: u.name })"
+              @click="remove(u)"
+            >
+              {{ $t("users.delete") }}
+            </button>
+          </span>
+        </li>
+      </ul>
     </div>
 
     <section class="section">
@@ -167,10 +157,31 @@ onMounted(() => feedback.run(load));
 </script>
 
 <style scoped>
+.user {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 10px 14px;
+}
+
+.user-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 8px;
 }
 
