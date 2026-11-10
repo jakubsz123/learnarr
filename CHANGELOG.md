@@ -12,6 +12,7 @@
 - Notification reminders are greyed out until a device or an ntfy topic is set up.
 - Today shows only how to start until there is a card, instead of a row of zeros.
 - A lost session sends you to sign in and back, instead of leaving "Sign in first." on screen. The AI provider choice asks cloud, Anthropic or your own computer first. Northern Sami no longer shows as "se".
+- Users are stacked rows that fit a phone; Library has a heading; "Connect Plex or Jellyfin" is a button.
 - Previous and next buttons on an episode page, to step through a show by hand (across seasons too).
 - The FAQ and docs now say a media server is optional: OpenSubtitles.com search and uploads work without one.
 - Browse OpenSubtitles.com's catalogue in the library without a media server, and upload a subtitle of your
