@@ -8,7 +8,7 @@ export function useLanguageNames() {
   const { locale } = useI18n();
   const names = computed(() => {
     try {
-      return new Intl.DisplayNames([locale.value], { type: "language" });
+      return new Intl.DisplayNames([locale.value], { type: "language", fallback: "none" });
     } catch {
       return null;
     }

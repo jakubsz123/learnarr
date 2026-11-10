@@ -5,7 +5,20 @@
     <template v-else>
       <div class="choices" role="group" :aria-label="$t('aiSettings.title')">
         <button
-          v-for="p in AI_PRESETS"
+          v-for="g in GROUPS"
+          :key="g.id"
+          type="button"
+          class="choice"
+          :aria-pressed="groupId === g.id ? 'true' : 'false'"
+          @click="pickGroup(g.id)"
+        >
+          <span class="choice-title">{{ $t(`aiForm.groups.${g.id}.title`) }}</span>
+          <span class="choice-hint">{{ $t(`aiForm.groups.${g.id}.hint`) }}</span>
+        </button>
+      </div>
+      <div v-if="inGroup.length > 1" class="choices" role="group" :aria-label="$t('aiForm.provider')">
+        <button
+          v-for="p in inGroup"
           :key="p.id"
           type="button"
           class="choice"
@@ -13,13 +26,6 @@
           @click="pick(p.id)"
         >
           <span class="choice-title">{{ p.label }}</span>
-          <span class="choice-hint">{{
-            p.local
-              ? $t("aiForm.local")
-              : p.provider === "anthropic"
-                ? $t("aiForm.anthropic")
-                : $t("aiForm.openaiCompatible")
-          }}</span>
         </button>
       </div>
 
@@ -92,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { AI_PRESETS } from "#shared/aiProviders";
+import { AI_PRESETS, type AiPreset } from "#shared/aiProviders";
 
 import type { Get } from "~/utils/api";
 
@@ -116,6 +122,22 @@ const testing = ref(false);
 const testResult = ref<TestResult | null>(null);
 
 const preset = computed(() => AI_PRESETS.find((p) => p.id === presetId.value));
+
+/** Eight providers at once is a lot to read; first the kind (cloud, Anthropic, your own computer), then which. */
+const GROUPS = [
+  { id: "cloud", has: (p: AiPreset) => !p.local && p.provider !== "anthropic" },
+  { id: "anthropic", has: (p: AiPreset) => p.provider === "anthropic" },
+  { id: "local", has: (p: AiPreset) => p.local },
+] as const;
+const group = computed(() => GROUPS.find((g) => preset.value && g.has(preset.value)) ?? GROUPS[0]);
+const groupId = computed(() => group.value.id);
+const inGroup = computed(() => AI_PRESETS.filter(group.value.has));
+
+function pickGroup(id: (typeof GROUPS)[number]["id"]) {
+  if (groupId.value === id) return;
+  const first = AI_PRESETS.find(GROUPS.find((g) => g.id === id)!.has);
+  if (first) pick(first.id);
+}
 const sameConnection = computed(
   () => saved.value?.provider === preset.value?.provider && saved.value?.baseUrl === baseUrl.value,
 );

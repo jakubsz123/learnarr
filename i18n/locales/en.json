@@ -387,9 +387,12 @@
   },
   "aiForm": {
     "fromEnv": "This server's AI provider is set by environment variables.",
-    "local": "On your own hardware",
-    "anthropic": "Anthropic's API",
-    "openaiCompatible": "OpenAI-compatible",
+    "provider": "Provider",
+    "groups": {
+      "cloud": { "title": "Cloud service", "hint": "OpenAI, OpenRouter, Groq, Mistral, Gemini" },
+      "anthropic": { "title": "Anthropic", "hint": "Claude" },
+      "local": { "title": "On your own computer", "hint": "Ollama, LM Studio. Nothing leaves your network." }
+    },
     "address": "Address",
     "keyHint": "Stored encrypted on this server. It never comes back to the browser.",
     "model": "Model",

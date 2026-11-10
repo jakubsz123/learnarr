@@ -7,7 +7,19 @@ import type { InternalApi } from "nitropack/types";
  * TypeScript across this many routes, so every call says what it gets back.
  */
 export function api<T = void>(path: string, options?: NitroFetchOptions<string>): Promise<T> {
-  return $fetch<T>(path, options as never) as Promise<T>;
+  return $fetch<T>(path, { onResponseError: sessionEnded, ...options } as never) as Promise<T>;
+}
+
+/**
+ * A call that finds the session gone (it expired, or was cleared in another
+ * tab) sends the person to sign in and back to where they were, instead of
+ * leaving "Sign in first." on a screen with nothing to press.
+ */
+function sessionEnded({ response }: { response: { status: number } }) {
+  if (!import.meta.client || response.status !== 401) return;
+  const here = useRouter().currentRoute.value;
+  if (here.path === "/login" || here.path.startsWith("/invite/")) return;
+  navigateTo({ path: "/login", query: { redirect: here.fullPath } });
 }
 
 /**
