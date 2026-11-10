@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isCatalogueId } from "../shared/mediaSources";
 import { createCatalogue, parseCatalogueId } from "../server/utils/media/catalogue";
-import { nextEpisode } from "../server/utils/media/types";
+import { nextEpisode, previousEpisode } from "../server/utils/media/types";
 
 const elite = {
   feature_id: "658716",
@@ -96,6 +96,7 @@ describe("OpenSubtitles.com catalogue", () => {
       subtitleTracks: [],
     });
     expect((await nextEpisode(catalogue, episode))?.id).toBe("os-s-658716-2-1");
+    expect((await previousEpisode(catalogue, episode))?.id).toBe("os-s-658716-1-1");
     await expect(catalogue.item("os-s-658716-1-9")).rejects.toMatchObject({ statusCode: 404 });
   });
 

@@ -77,19 +77,28 @@ export class MediaServerError extends AppError {
   }
 }
 
-/** The episode after this one: next in its season, else the first of the next season. */
-export async function nextEpisode(server: MediaServer, item: MediaDetail): Promise<MediaSummary | null> {
+/**
+ * The episode one step from this one: the next or previous in its season, else
+ * the first of the next season or the last of the one before.
+ */
+async function neighbour(server: MediaServer, item: MediaDetail, step: 1 | -1): Promise<MediaSummary | null> {
   if (item.type !== "episode" || !item.seasonId) return null;
   const episodes = await server.children(item.seasonId);
   const at = episodes.findIndex((e) => e.id === item.id);
-  if (at !== -1 && episodes[at + 1]) return episodes[at + 1]!;
+  const adjacent = at === -1 ? undefined : episodes[at + step];
+  if (adjacent) return adjacent;
   if (!item.showId || item.seasonNumber === undefined) return null;
-  const later = (await server.children(item.showId))
-    .filter((s) => s.type === "season" && (s.seasonNumber ?? 0) > item.seasonNumber!)
-    .toSorted((a, b) => (a.seasonNumber ?? 0) - (b.seasonNumber ?? 0));
-  for (const season of later) {
-    const first = (await server.children(season.id))[0];
-    if (first) return first;
+  const here = item.seasonNumber;
+  const seasons = (await server.children(item.showId))
+    .filter((s) => s.type === "season" && ((s.seasonNumber ?? 0) - here) * step > 0)
+    .toSorted((a, b) => step * ((a.seasonNumber ?? 0) - (b.seasonNumber ?? 0)));
+  for (const season of seasons) {
+    const inSeason = await server.children(season.id);
+    const pick = step === 1 ? inSeason[0] : inSeason.at(-1);
+    if (pick) return pick;
   }
   return null;
 }
+
+export const nextEpisode = (server: MediaServer, item: MediaDetail) => neighbour(server, item, 1);
+export const previousEpisode = (server: MediaServer, item: MediaDetail) => neighbour(server, item, -1);

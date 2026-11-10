@@ -4,6 +4,7 @@ import { mapJellyfinDetail, mapJellyfinSummary } from "../server/utils/media/jel
 import { candidateTracks } from "../server/utils/media/tracks";
 import {
   nextEpisode,
+  previousEpisode,
   type MediaDetail,
   type MediaServer,
   type MediaSummary,
@@ -204,5 +205,11 @@ describe("next episode", () => {
     expect((await nextEpisode(server, episodeDetail(ep("e1", 1, 1), "s1")))?.id).toBe("e2");
     expect((await nextEpisode(server, episodeDetail(ep("e2", 1, 2), "s1")))?.id).toBe("e3");
     expect(await nextEpisode(server, episodeDetail(ep("e3", 2, 1), "s2"))).toBeNull();
+  });
+
+  it("goes back the same way: the one before in the season, else the last of the season before", async () => {
+    expect((await previousEpisode(server, episodeDetail(ep("e2", 1, 2), "s1")))?.id).toBe("e1");
+    expect((await previousEpisode(server, episodeDetail(ep("e3", 2, 1), "s2")))?.id).toBe("e2");
+    expect(await previousEpisode(server, episodeDetail(ep("e1", 1, 1), "s1"))).toBeNull();
   });
 });

@@ -7,6 +7,8 @@
 - Invite links: the admin sends a link, and the person chooses their own name, email and password. The
   same kind of link resets a forgotten password.
 - Change your own password under Settings → Account.
+- Previous and next buttons on an episode page, to step through a show by hand (across seasons too).
+- The FAQ and docs now say a media server is optional: OpenSubtitles.com search and uploads work without one.
 - Browse OpenSubtitles.com's catalogue in the library without a media server, and upload a subtitle of your
   own. The library shows which tabs are on your server and which are elsewhere.
 

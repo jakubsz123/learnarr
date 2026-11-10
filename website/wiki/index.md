@@ -1,7 +1,7 @@
 # What Learnarr is
 
 Learnarr helps you learn a language from the films and series you already have on your Plex or Jellyfin
-server. It is a self-hosted app in the spirit of Sonarr and Radarr: one container on your own machine, an
+server (or, without one, from OpenSubtitles.com). It is a self-hosted app in the spirit of Sonarr and Radarr: one container on your own machine, an
 account for everyone in the household, and nothing stored anywhere else.
 
 The idea is simple. You learn the words of what you're about to watch, so that when you watch it you can
