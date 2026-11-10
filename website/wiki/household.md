@@ -6,7 +6,7 @@ closed, and the admin invites people in **Settings → Users**.
 ## Inviting someone
 
 Press **Create an invite link** and send the link to them however you like. They open it and choose their own
-name, email and password, and are signed in. A link works once and expires after a week; it can't be shown
+username and password, and are signed in. A link works once and expires after a week; it can't be shown
 again after you leave the page, but you can cancel it under **Waiting to be used**.
 
 If someone forgets their password, press **Reset password** next to their name and send them the link it

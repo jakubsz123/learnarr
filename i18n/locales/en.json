@@ -75,7 +75,7 @@
     "users": {
       "notFound": "That account doesn't exist.",
       "notYourself": "You can't delete your own account.",
-      "emailTaken": "There's already an account with that email."
+      "nameTaken": "There's already an account with that username."
     },
     "notifications": {
       "ntfyFailed": "The ntfy server answered with an error (HTTP {status})."
@@ -90,7 +90,7 @@
       "denied": "Notifications are blocked for Learnarr in this browser's settings."
     },
     "signIn": {
-      "wrongPassword": "That email and password don't match an account.",
+      "wrongPassword": "That username and password don't match an account.",
       "passwordTooShort": "Use at least 8 characters for the password."
     },
     "timedOut": "This is taking too long. Try again.",
@@ -100,7 +100,7 @@
     },
     "invites": {
       "invalid": "This link doesn't work any more. Ask for a new one.",
-      "needDetails": "Enter your name and email."
+      "needDetails": "Choose a username."
     },
     "account": {
       "wrongPassword": "That isn't your current password."
@@ -254,7 +254,8 @@
   },
   "signIn": {
     "title": "Sign in",
-    "email": "Email",
+    "username": "Username",
+    "usernameHint": "2 to 32 letters, numbers, dots, dashes or underscores.",
     "password": "Password",
     "submit": "Sign in",
     "busy": "Signing in…",
@@ -276,7 +277,6 @@
     "account": {
       "title": "Welcome to Learnarr",
       "intro": "Create the admin account for this server. You'll add the rest of your household later.",
-      "name": "Name",
       "passwordHint": "At least 8 characters",
       "create": "Create account",
       "creating": "Creating…"
@@ -322,7 +322,7 @@
     "reset": "Reset password",
     "resetNamed": "Reset the password of {name}",
     "invite": "Invite someone",
-    "inviteIntro": "Make a link and send it to them. They open it and choose their own name, email and password.",
+    "inviteIntro": "Make a link and send it to them. They open it and choose their own username and password.",
     "createLink": "Create an invite link",
     "newLink": "Send this link to the person you're inviting:",
     "resetLinkFor": "Send this link to {name} to let them choose a new password:",
@@ -366,12 +366,14 @@
     "jellyfinHint": "Server address and an API key",
     "waitingForPlex": "Waiting for Plex…",
     "signInWithPlex": "Sign in with Plex",
+    "changePlexServer": "Choose a different Plex server",
     "approveInPlex": "Approve Learnarr in the Plex tab that opened, then come back here.",
     "shared": "Shared with you",
     "local": "Local network",
     "relay": "Plex relay",
     "remote": "Remote",
-    "pickAddress": "Pick the address this machine can reach. Local network is fastest when Learnarr runs next to Plex.",
+    "recommended": "Recommended",
+    "pickAddress": "Tap the address this machine can reach. The first is usually right when Learnarr runs next to Plex; if connecting fails, try the next.",
     "manual": "Enter the address and a token instead",
     "address": "Server address",
     "plexToken": "Plex token",

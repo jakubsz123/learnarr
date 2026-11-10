@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addUser, testDb } from "./helpers";
 import { schema } from "../server/db";
+import { loginEmail } from "../shared/username";
 import { createAuth } from "../server/utils/auth";
 import { asAdminCreatingAccount } from "../server/utils/userAccess";
 import {
@@ -24,35 +25,33 @@ describe("invites", () => {
     expect(findInvite(db, token)).toMatchObject({ userId: null });
 
     const { email } = await acceptInvite(db, auth, token, {
-      name: "Victor",
-      email: "victor@example.com",
+      username: "Victor",
       password: "correct-horse-9",
     });
-    expect(email).toBe("victor@example.com");
+    expect(email).toBe("victor@learnarr.local");
     const signedIn = await auth.api.signInEmail({ body: { email, password: "correct-horse-9" } });
     expect(signedIn.user.name).toBe("Victor");
 
     // The link is spent.
     await expect(
       acceptInvite(db, auth, token, {
-        name: "Again",
-        email: "again@example.com",
+        username: "again",
         password: "correct-horse-9",
       }),
     ).rejects.toMatchObject({ statusCode: 404 });
   });
 
-  it("keeps the link working when the email is already taken", async () => {
+  it("keeps the link working when the username is already taken", async () => {
     const { db, admin, auth } = setup();
-    const taken = addUser(db, { email: "taken@example.com" });
+    addUser(db, { email: loginEmail("taken") });
     const { token } = createInvite(db, admin.id);
     await expect(
-      acceptInvite(db, auth, token, { name: "X", email: taken.email, password: "correct-horse-9" }),
+      acceptInvite(db, auth, token, { username: "Taken", password: "correct-horse-9" }),
     ).rejects.toMatchObject({ statusCode: 400 });
     expect(findInvite(db, token)).not.toBeNull();
   });
 
-  it("needs a name and email for a new account", async () => {
+  it("needs a username for a new account", async () => {
     const { db, admin, auth } = setup();
     const { token } = createInvite(db, admin.id);
     await expect(acceptInvite(db, auth, token, { password: "correct-horse-9" })).rejects.toMatchObject({

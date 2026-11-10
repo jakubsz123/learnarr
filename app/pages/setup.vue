@@ -19,12 +19,19 @@
       <h1 id="step-title">{{ $t("setup.account.title") }}</h1>
       <p class="muted">{{ $t("setup.account.intro") }}</p>
       <label class="stack-label">
-        {{ $t("setup.account.name") }}
-        <input v-model.trim="account.name" class="input" autocomplete="name" required />
-      </label>
-      <label class="stack-label">
-        {{ $t("signIn.email") }}
-        <input v-model.trim="account.email" class="input" type="email" autocomplete="email" required />
+        {{ $t("signIn.username") }}
+        <input
+          v-model.trim="account.username"
+          class="input"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          minlength="2"
+          maxlength="32"
+          pattern="[A-Za-z0-9][A-Za-z0-9._\-]+"
+          :title="$t('signIn.usernameHint')"
+          required
+        />
       </label>
       <label class="stack-label">
         {{ $t("signIn.password") }}
@@ -100,6 +107,7 @@
 </template>
 
 <script setup lang="ts">
+import { loginEmail } from "#shared/username";
 import type { Level } from "#shared/languages";
 
 definePageMeta({ layout: "plain" });
@@ -120,12 +128,16 @@ function back() {
   step.value = Math.max(1, step.value - 1);
 }
 
-const account = reactive({ name: "", email: "", password: "" });
+const account = reactive({ username: "", password: "" });
 
 async function createAccount() {
   busy.value = true;
   error.value = "";
-  const result = await authClient.signUp.email({ ...account });
+  const result = await authClient.signUp.email({
+    name: account.username,
+    email: loginEmail(account.username),
+    password: account.password,
+  });
   busy.value = false;
   if (result.error) {
     error.value = authErrorMessage(result.error, t);
