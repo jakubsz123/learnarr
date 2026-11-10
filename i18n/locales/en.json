@@ -460,7 +460,6 @@
       "setUpAi": "Set up an AI provider",
       "askAdmin": "Ask whoever runs this server to add one in Settings → AI."
     },
-    "next": "Next: {episode} · {title}",
     "tabsLabel": "This episode",
     "tabs": {
       "words": "Words",
@@ -468,7 +467,10 @@
       "cards": "Cards ({count})"
     },
     "noCards": "No cards from this yet. Learn suggested words, or tap a word to make one.",
-    "loading": "Loading the subtitle…"
+    "loading": "Loading the subtitle…",
+    "episodes": "Other episodes",
+    "previousNamed": "Previous episode: {episode}",
+    "nextNamed": "Next episode: {episode}"
   },
   "suggestions": {
     "title": "{count} suggested word | {count} suggested words",

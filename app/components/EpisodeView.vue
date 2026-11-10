@@ -9,11 +9,29 @@
         <NuxtLink v-if="item.showId" :to="showLink" class="muted plain-link">{{ item.showTitle }}</NuxtLink>
       </template>
       <span v-if="item.year && item.type === 'movie'" class="hint">{{ item.year }}</span>
-      <NuxtLink v-if="next" :to="`/media/${next.id}`" class="next-link">
-        {{ $t("episode.next", { episode: episodeLabel(next), title: next.title }) }}
-        <AppIcon name="next" :size="16" />
-      </NuxtLink>
     </MediaHeader>
+
+    <nav v-if="previous || next" class="episode-nav" :aria-label="$t('episode.episodes')">
+      <NuxtLink
+        v-if="previous"
+        :to="`/media/${previous.id}`"
+        class="btn episode-step"
+        :aria-label="$t('episode.previousNamed', { episode: stepLabel(previous) })"
+      >
+        <AppIcon name="back" :size="18" />
+        <span class="step-text">{{ stepLabel(previous) }}</span>
+      </NuxtLink>
+      <span v-else />
+      <NuxtLink
+        v-if="next"
+        :to="`/media/${next.id}`"
+        class="btn episode-step episode-step-next"
+        :aria-label="$t('episode.nextNamed', { episode: stepLabel(next) })"
+      >
+        <span class="step-text">{{ stepLabel(next) }}</span>
+        <AppIcon name="next" :size="18" />
+      </NuxtLink>
+    </nav>
 
     <p v-if="words.error.value" class="notice danger" role="alert">{{ words.error.value }}</p>
 
@@ -137,6 +155,10 @@ const sub = words.data;
 
 const item = computed(() => props.data.item);
 const next = computed(() => props.data.next);
+const previous = computed(() => props.data.previous);
+
+/** "S1 E2 · Desire", the label on the button to a neighbouring episode. */
+const stepLabel = (e: NonNullable<typeof next.value>) => `${episodeLabel(e)} · ${e.title}`;
 const progress = computed(() => props.data.progress[item.value.id]);
 const showLink = computed(() =>
   item.value.seasonId
@@ -182,13 +204,27 @@ watch(
   text-decoration: none;
 }
 
-.next-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 32px;
-  color: var(--accent-text);
-  font-size: 14px;
-  text-decoration: none;
+.episode-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.episode-step {
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.episode-step-next {
+  grid-column: 2;
+  justify-content: flex-end;
+}
+
+.step-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

@@ -10,7 +10,9 @@ else in **Settings → Users** (see [Household accounts](./household)).
 
 ## 2. Your media server
 
-Pick Plex or Jellyfin.
+Pick Plex or Jellyfin, or press **Skip for now**: without a media server you can still search
+OpenSubtitles.com for any film or show and upload subtitle files of your own. Connecting one later is
+**Settings → Media server**.
 
 - **Plex:** choose _Sign in with Plex_ and approve Learnarr on plex.tv; Learnarr then lists your servers and
   you pick one. Or paste the server address and an
