@@ -7,6 +7,8 @@
 - Invite links: the admin sends a link, and the person chooses their own name, email and password. The
   same kind of link resets a forgotten password.
 - Change your own password under Settings → Account.
+- Sign in with a username instead of an email, as on Radarr and Sonarr (older accounts can still use their email).
+- Plex servers are listed with their addresses, the likeliest first; the Settings icon is now a gear.
 - Previous and next buttons on an episode page, to step through a show by hand (across seasons too).
 - The FAQ and docs now say a media server is optional: OpenSubtitles.com search and uploads work without one.
 - Browse OpenSubtitles.com's catalogue in the library without a media server, and upload a subtitle of your

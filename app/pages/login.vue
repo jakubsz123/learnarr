@@ -4,8 +4,15 @@
   <form class="panel login" method="post" @submit.prevent="signIn">
     <h1 class="page-title">{{ $t("signIn.title") }}</h1>
     <label class="stack-label">
-      {{ $t("signIn.email") }}
-      <input v-model.trim="email" class="input" type="email" autocomplete="email" required />
+      {{ $t("signIn.username") }}
+      <input
+        v-model.trim="username"
+        class="input"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+      />
     </label>
     <label class="stack-label">
       {{ $t("signIn.password") }}
@@ -20,12 +27,13 @@
 </template>
 
 <script setup lang="ts">
+import { signInEmail } from "#shared/username";
 definePageMeta({ layout: "plain" });
 const { t } = useI18n();
 useHead({ title: () => `${t("signIn.title")} · Learnarr` });
 
 const route = useRoute();
-const email = ref("");
+const username = ref("");
 const password = ref("");
 const busy = ref(false);
 const error = ref("");
@@ -38,7 +46,10 @@ function safeRedirect(value: unknown): string {
 async function signIn() {
   busy.value = true;
   error.value = "";
-  const result = await authClient.signIn.email({ email: email.value, password: password.value });
+  const result = await authClient.signIn.email({
+    email: signInEmail(username.value),
+    password: password.value,
+  });
   busy.value = false;
   if (result.error) {
     error.value = authErrorMessage(result.error, t);

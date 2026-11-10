@@ -8,7 +8,6 @@
           <thead>
             <tr>
               <th scope="col">{{ $t("users.name") }}</th>
-              <th scope="col">{{ $t("signIn.email") }}</th>
               <th scope="col">OpenSubtitles</th>
               <th scope="col">
                 <span class="sr-only">{{ $t("users.actions") }}</span>
@@ -20,7 +19,6 @@
               <td>
                 {{ u.name }}<span v-if="u.isAdmin" class="hint"> · {{ $t("users.admin") }}</span>
               </td>
-              <td>{{ u.email }}</td>
               <td :class="u.opensubtitles ? 'ok' : 'muted'">
                 {{ u.opensubtitles ? $t("users.connected") : $t("users.notConnected") }}
               </td>

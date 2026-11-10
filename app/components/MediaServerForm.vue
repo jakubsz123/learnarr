@@ -23,27 +23,43 @@
 
       <template v-if="kind === 'plex'">
         <div class="stack">
-          <button type="button" class="btn btn-primary" :disabled="busy" @click="signInWithPlex">
-            {{ waiting ? $t("mediaForm.waitingForPlex") : $t("mediaForm.signInWithPlex") }}
+          <button
+            type="button"
+            class="btn"
+            :class="{ 'btn-primary': !isConnected }"
+            :disabled="busy"
+            @click="signInWithPlex"
+          >
+            {{
+              waiting
+                ? $t("mediaForm.waitingForPlex")
+                : isConnected
+                  ? $t("mediaForm.changePlexServer")
+                  : $t("mediaForm.signInWithPlex")
+            }}
           </button>
           <p v-if="waiting" class="hint">{{ $t("mediaForm.approveInPlex") }}</p>
 
           <div v-for="server in servers" :key="server.name" class="panel server">
             <strong>{{ server.name }}</strong>
             <span v-if="!server.owned" class="hint">{{ $t("mediaForm.shared") }}</span>
-            <div class="row">
+            <div class="addresses">
               <button
-                v-for="c in server.connections"
+                v-for="(c, i) in server.connections"
                 :key="c.uri"
                 type="button"
-                class="btn"
+                class="address"
                 :disabled="busy"
                 :title="c.uri"
                 @click="connect(c.uri, server.token)"
               >
-                {{
-                  c.local ? $t("mediaForm.local") : c.relay ? $t("mediaForm.relay") : $t("mediaForm.remote")
-                }}
+                <span class="address-text">
+                  <strong>{{
+                    c.local ? $t("mediaForm.local") : c.relay ? $t("mediaForm.relay") : $t("mediaForm.remote")
+                  }}</strong>
+                  <code>{{ readableAddress(c.uri) }}</code>
+                </span>
+                <span v-if="i === 0" class="badge">{{ $t("mediaForm.recommended") }}</span>
               </button>
             </div>
             <span class="hint">{{ $t("mediaForm.pickAddress") }}</span>
@@ -116,6 +132,7 @@
 </template>
 
 <script setup lang="ts">
+import { readableAddress } from "#shared/plexAddress";
 import type { Get } from "~/utils/api";
 
 type Kind = "plex" | "jellyfin";
@@ -132,6 +149,7 @@ const { t } = useI18n();
 const { poll } = usePolling();
 const feedback = useFeedback();
 const current = ref<Get<"/api/settings/media-server"> | null>(null);
+const isConnected = computed(() => current.value?.kind === "plex");
 const kind = ref<Kind>("plex");
 const url = ref("");
 const token = ref("");
@@ -203,6 +221,50 @@ onMounted(() => feedback.run(load));
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.addresses {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.address {
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--surface-2, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  cursor: pointer;
+}
+
+.address:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.address:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.address-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.address-text code {
+  color: var(--muted);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
 }
 
 .manual summary {

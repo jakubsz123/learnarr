@@ -18,19 +18,22 @@
     <p class="muted">{{ kind === "reset" ? $t("invite.resetIntro") : $t("invite.newIntro") }}</p>
     <div>
       <div v-if="kind === 'new'" class="field">
-        <label for="invite-name">{{ $t("users.name") }}</label>
-        <input id="invite-name" v-model.trim="name" class="input" autocomplete="name" required />
-      </div>
-      <div v-if="kind === 'new'" class="field">
-        <label for="invite-email">{{ $t("signIn.email") }}</label>
-        <input
-          id="invite-email"
-          v-model.trim="email"
-          class="input"
-          type="email"
-          autocomplete="email"
-          required
-        />
+        <label for="invite-username">{{ $t("signIn.username") }}</label>
+        <div class="stack-tight">
+          <input
+            id="invite-username"
+            v-model.trim="username"
+            class="input"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            minlength="2"
+            maxlength="32"
+            pattern="[A-Za-z0-9][A-Za-z0-9._\-]+"
+            required
+          />
+          <span class="hint">{{ $t("signIn.usernameHint") }}</span>
+        </div>
       </div>
       <div class="field">
         <label for="invite-password">{{ $t("signIn.password") }}</label>
@@ -66,8 +69,7 @@ const token = String(useRoute().params.token);
 const state = ref<"loading" | "ready" | "invalid">("loading");
 const kind = ref<"new" | "reset">("new");
 const who = ref("");
-const name = ref("");
-const email = ref("");
+const username = ref("");
 const password = ref("");
 const feedback = useFeedback();
 
@@ -90,7 +92,7 @@ function accept() {
       method: "POST",
       body:
         kind.value === "new"
-          ? { name: name.value, email: email.value, password: password.value }
+          ? { username: username.value, password: password.value }
           : { password: password.value },
     });
     const result = await authClient.signIn.email({ email: answer.email, password: password.value });

@@ -49,8 +49,8 @@ export function errorMessage(error: unknown, t: Translate, languageName?: (code:
 const AUTH_ERRORS: Record<string, string> = {
   INVALID_EMAIL_OR_PASSWORD: "errors.signIn.wrongPassword",
   SIGN_UP_CLOSED: "errors.auth.signUpClosed",
-  USER_ALREADY_EXISTS: "errors.users.emailTaken",
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "errors.users.emailTaken",
+  USER_ALREADY_EXISTS: "errors.users.nameTaken",
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "errors.users.nameTaken",
   PASSWORD_TOO_SHORT: "errors.signIn.passwordTooShort",
 };
 

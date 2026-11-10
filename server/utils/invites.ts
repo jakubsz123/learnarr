@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { and, asc, eq, gt, lte } from "drizzle-orm";
 import { APIError } from "better-auth/api";
+import { loginEmail } from "#shared/username";
 import { schema, type Db } from "../db";
 import type { useAuth } from "./auth";
 import { AppError } from "./errors";
@@ -63,8 +64,7 @@ export function pendingInvites(db: Db, now = Date.now()) {
 }
 
 export interface InviteAnswer {
-  name?: string;
-  email?: string;
+  username?: string;
   password: string;
 }
 
@@ -88,15 +88,16 @@ export async function acceptInvite(
 
   try {
     if (row.userId) return await resetPassword(db, auth, row.userId, answer.password);
-    if (!answer.name || !answer.email) throw new AppError(400, "errors.invites.needDetails");
-    const { name, email, password } = { ...answer, name: answer.name, email: answer.email };
-    await asAdminCreatingAccount(() => auth.api.signUpEmail({ body: { name, email, password } }));
+    if (!answer.username) throw new AppError(400, "errors.invites.needDetails");
+    const { username, password } = answer;
+    const email = loginEmail(username);
+    await asAdminCreatingAccount(() => auth.api.signUpEmail({ body: { name: username, email, password } }));
     return { email };
   } catch (error) {
     db.insert(schema.invites).values(row).run();
     if (error instanceof AppError) throw error;
     if (error instanceof APIError && error.body?.code?.startsWith("USER_ALREADY_EXISTS"))
-      throw new AppError(400, "errors.users.emailTaken");
+      throw new AppError(400, "errors.users.nameTaken");
     throw error;
   }
 }
