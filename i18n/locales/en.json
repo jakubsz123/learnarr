@@ -247,6 +247,7 @@
     "ntfyIntro": "Or get them in the {app} app: subscribe to a topic there and enter the same topic here.",
     "ntfyTopic": "ntfy topic",
     "ntfyHint": "Anyone who knows the topic can read it, so pick one that's hard to guess. Server: {server}",
+    "whenLocked": "Turn on notifications on this device, or set an ntfy topic below, to choose these.",
     "ntfyGenerate": "Make up a topic",
     "test": "Send a test",
     "testSent": "Sent. It should arrive in a few seconds.",

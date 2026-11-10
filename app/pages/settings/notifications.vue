@@ -6,21 +6,24 @@
     <template v-if="settings">
       <section class="section">
         <h2 class="section-title">{{ $t("notificationSettings.when") }}</h2>
-        <label class="toggle">
-          <input v-model="form.practiceReminders" type="checkbox" @change="save" />
-          {{ $t("notificationSettings.practice", { hour: hourLabel }) }}
-        </label>
-        <label class="toggle">
-          <input v-model="form.watchReminders" type="checkbox" @change="save" />
-          {{ $t("notificationSettings.watch") }}
-        </label>
-        <div v-if="form.watchReminders" class="field">
-          <label for="media-user">{{ $t("notificationSettings.mediaUser") }}</label>
-          <div class="stack-tight">
-            <input id="media-user" v-model.trim="form.mediaServerUser" class="input" @change="save" />
-            <span class="hint">{{ $t("notificationSettings.mediaUserHint") }}</span>
+        <p v-if="!hasChannel" class="hint">{{ $t("notificationSettings.whenLocked") }}</p>
+        <fieldset class="when" :disabled="!hasChannel">
+          <label class="toggle">
+            <input v-model="form.practiceReminders" type="checkbox" @change="save" />
+            {{ $t("notificationSettings.practice", { hour: hourLabel }) }}
+          </label>
+          <label class="toggle">
+            <input v-model="form.watchReminders" type="checkbox" @change="save" />
+            {{ $t("notificationSettings.watch") }}
+          </label>
+          <div v-if="form.watchReminders" class="field">
+            <label for="media-user">{{ $t("notificationSettings.mediaUser") }}</label>
+            <div class="stack-tight">
+              <input id="media-user" v-model.trim="form.mediaServerUser" class="input" @change="save" />
+              <span class="hint">{{ $t("notificationSettings.mediaUserHint") }}</span>
+            </div>
           </div>
-        </div>
+        </fieldset>
       </section>
 
       <section class="section">
@@ -99,6 +102,9 @@ const pushFeedback = useFeedback();
 const testFeedback = useFeedback();
 const saveFeedback = useFeedback();
 
+/** Reminders have nowhere to go until a device or an ntfy topic is set up. */
+const hasChannel = computed(() => (settings.value?.pushDevices ?? 0) > 0 || !!form.ntfyTopic);
+
 const hourLabel = computed(() =>
   settings.value
     ? new Date(2000, 0, 1, settings.value.reminderHour).toLocaleTimeString(locale.value, {
@@ -157,3 +163,19 @@ function test() {
 
 onMounted(load);
 </script>
+
+<style scoped>
+.when {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.when:disabled {
+  opacity: 0.5;
+}
+</style>
