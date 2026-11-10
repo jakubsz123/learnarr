@@ -29,6 +29,8 @@
   --radius: 6px;
   --radius-lg: 12px;
   --tap: 44px;
+  /* Target-language sentences: set in a serif so the line you are learning reads as text, not as UI. */
+  --font-sentence: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --topbar-h: 56px;
   --tabbar-h: 60px;
 
