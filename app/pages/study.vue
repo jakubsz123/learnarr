@@ -190,8 +190,10 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 }
 
 .line {
-  font-size: 22px;
-  line-height: 1.45;
+  font-family: var(--font-sentence);
+  font-size: clamp(24px, 5vw, 30px);
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
 .answer {

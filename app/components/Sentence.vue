@@ -15,8 +15,12 @@ const parts = computed(() => splitAround(props.text, props.highlight));
 
 <style scoped>
 mark {
-  background: none;
-  color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: inherit;
   font-weight: 700;
+  padding: 0 0.15em;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 </style>

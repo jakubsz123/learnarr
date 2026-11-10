@@ -34,7 +34,7 @@ const props = withDefaults(
 const { t, locale } = useI18n();
 const percent = computed(() => formatCoverage(props.coverage, locale.value));
 const tier = computed(() => coverageTier(props.coverage));
-const px = computed(() => (props.size === "lg" ? 44 : 22));
+const px = computed(() => (props.size === "lg" ? 60 : 28));
 const dash = computed(() => Math.floor((props.coverage ?? 0) * 100));
 const label = computed(() =>
   tier.value ? t(`coverage.tiers.${tier.value}`) : (props.emptyLabel ?? t("coverage.notScored")),
@@ -68,7 +68,7 @@ const title = computed(() =>
 }
 
 .coverage.lg .value {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 500;
   line-height: 1.1;
 }
