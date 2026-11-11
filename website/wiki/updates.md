@@ -8,10 +8,10 @@ docker compose up -d
 ```
 
 Database changes are applied automatically when the new version starts. Read the
-[release notes](https://github.com/jakubsz123/learnarr/releases) before a big jump: while Learnarr is below
+[release notes](https://github.com/smoothless-io/learnarr/releases) before a big jump: while Learnarr is below
 1.0, a release can change how something works.
 
-To stay on a version, use its tag instead of `latest`, for example `ghcr.io/jakubsz123/learnarr:0.3.0`.
+To stay on a version, use its tag instead of `latest`, for example `ghcr.io/smoothless-io/learnarr:0.3.0`.
 
 ## Backups
 

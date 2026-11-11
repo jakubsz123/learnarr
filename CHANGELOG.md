@@ -4,6 +4,7 @@
 
 **New**
 
+- Learnarr now lives at github.com/smoothless-io/learnarr, and the image is ghcr.io/smoothless-io/learnarr. GitHub redirects the old repository address; the old image name stops getting updates.
 - Invite links: the admin sends a link, and the person chooses their own name, email and password. The
   same kind of link resets a forgotten password.
 - Change your own password under Settings → Account.

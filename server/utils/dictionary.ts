@@ -12,7 +12,7 @@ import type { DictionaryEntry } from "../db/schema";
 
 const API = "https://en.wiktionary.org/api/rest_v1/page/definition";
 // Wikimedia asks API clients to say who they are, and may block those that don't.
-const USER_AGENT = `Learnarr/${VERSION} (https://github.com/jakubsz123/learnarr)`;
+const USER_AGENT = `Learnarr/${VERSION} (https://github.com/smoothless-io/learnarr)`;
 const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 3;
 const MAX_DEFINITIONS = 4;

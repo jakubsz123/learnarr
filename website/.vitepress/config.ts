@@ -78,9 +78,9 @@ export default defineConfig({
       coffee: "",
       github: "",
     },
-    socialLinks: [{ icon: "github", link: "https://github.com/jakubsz123/learnarr" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/smoothless-io/learnarr" }],
     editLink: {
-      pattern: "https://github.com/jakubsz123/learnarr/edit/main/website/:path",
+      pattern: "https://github.com/smoothless-io/learnarr/edit/main/website/:path",
       text: "Edit this page on GitHub",
     },
     search: { provider: "local" },

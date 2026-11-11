@@ -39,5 +39,5 @@ OpenSubtitles (CC BY-SA 4.0). They're part of Learnarr itself.
 
 The models are trained on written text, so slang, dialect and very short lines trip them up. Mark a misread
 word known and it's fixed everywhere. If a language looks wrong more often than that,
-[open an issue](https://github.com/jakubsz123/learnarr/issues/new?template=language.yml) with a few examples:
+[open an issue](https://github.com/smoothless-io/learnarr/issues/new?template=language.yml) with a few examples:
 another treebank may do better.
