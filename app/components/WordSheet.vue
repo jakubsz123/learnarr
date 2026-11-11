@@ -216,7 +216,6 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
 .line {
   padding: 10px 12px;
-  border-left: 3px solid var(--accent);
   background: var(--surface-2);
   border-radius: var(--radius);
 }

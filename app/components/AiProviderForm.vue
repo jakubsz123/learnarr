@@ -3,7 +3,7 @@
     <p v-if="fromEnv" class="notice">{{ $t("aiForm.fromEnv") }}</p>
 
     <template v-else>
-      <div class="choices" role="group" :aria-label="$t('aiSettings.title')">
+      <div class="choices kinds" role="group" :aria-label="$t('aiSettings.title')">
         <button
           v-for="g in GROUPS"
           :key="g.id"
@@ -16,16 +16,16 @@
           <span class="choice-hint">{{ $t(`aiForm.groups.${g.id}.hint`) }}</span>
         </button>
       </div>
-      <div v-if="inGroup.length > 1" class="choices" role="group" :aria-label="$t('aiForm.provider')">
+      <div v-if="inGroup.length > 1" class="providers" role="group" :aria-label="$t('aiForm.provider')">
         <button
           v-for="p in inGroup"
           :key="p.id"
           type="button"
-          class="choice"
+          class="pill"
           :aria-pressed="presetId === p.id ? 'true' : 'false'"
           @click="pick(p.id)"
         >
-          <span class="choice-title">{{ p.label }}</span>
+          {{ p.label }}
         </button>
       </div>
 
@@ -243,11 +243,20 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Eight providers in one column is a long scroll on a phone. */
+.kinds {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 @media (max-width: 560px) {
-  .choices {
-    grid-template-columns: repeat(2, 1fr);
+  .kinds {
+    grid-template-columns: 1fr;
   }
+}
+
+.providers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .model-row {

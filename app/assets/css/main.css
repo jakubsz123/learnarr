@@ -115,6 +115,15 @@ a {
   outline-offset: 2px;
 }
 
+::selection {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+}
+
+input,
+textarea {
+  caret-color: var(--accent);
+}
+
 h1,
 h2,
 h3 {

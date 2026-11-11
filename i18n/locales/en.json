@@ -419,7 +419,7 @@
     "searchCatalogue": "Search films and shows",
     "catalogueHint": "Search OpenSubtitles.com for any film or show, then get its subtitle with your own account.",
     "attribution": "Subtitles provided by",
-    "ownLibrary": "Connect Plex or Jellyfin to browse your own library too.",
+    "ownLibrary": "Connect Plex or Jellyfin",
     "onServer": "On {name}",
     "elsewhere": "Elsewhere",
     "uploads": "Your uploads",

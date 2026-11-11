@@ -154,7 +154,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border-left: 4px solid var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
 }
 
 .study-count {

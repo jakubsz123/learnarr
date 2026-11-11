@@ -16,7 +16,9 @@
             </div>
           </div>
           <div class="source">
-            <h2 :id="`${uid}-elsewhere`" class="source-label">{{ $t("library.elsewhere") }}</h2>
+            <h2 :id="`${uid}-elsewhere`" class="source-label" :class="{ 'sr-only': !libraries.length }">
+              {{ $t("library.elsewhere") }}
+            </h2>
             <div class="source-tabs" role="tablist" :aria-labelledby="`${uid}-elsewhere`">
               <LibraryTab v-for="lib in elsewhere" :key="lib.id" v-model="libraryId" :library="lib" />
             </div>
