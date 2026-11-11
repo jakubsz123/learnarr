@@ -9,8 +9,11 @@
       :class="{ 'is-current': i === step, 'is-done': i < step }"
       :aria-current="i === step ? 'step' : undefined"
     >
-      <span class="step-dot" aria-hidden="true">{{ i < step ? "✓" : i + 1 }}</span>
-      {{ $t(`setup.stepNames.${name}`) }}
+      <span class="step-dot" aria-hidden="true">
+        <AppIcon v-if="i < step" name="check" :size="14" />
+        <template v-else>{{ i + 1 }}</template>
+      </span>
+      <span class="step-name">{{ $t(`setup.stepNames.${name}`) }}</span>
     </li>
   </ol>
 
@@ -29,10 +32,11 @@
           minlength="2"
           maxlength="32"
           pattern="[A-Za-z0-9][A-Za-z0-9._\-]+"
-          :title="$t('signIn.usernameHint')"
+          aria-describedby="setup-username-hint"
           required
         />
       </label>
+      <span id="setup-username-hint" class="hint username-hint">{{ $t("signIn.usernameHint") }}</span>
       <label class="stack-label">
         {{ $t("signIn.password") }}
         <input
@@ -225,6 +229,25 @@ async function saveLanguages() {
   font-size: 12px;
   font-weight: 700;
   background: var(--surface-2);
+}
+
+@media (max-width: 560px) {
+  .step:not(.is-current) {
+    padding: 0 6px;
+  }
+
+  .step:not(.is-current) .step-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.username-hint {
+  margin-top: -8px;
 }
 
 .step.is-current .step-dot,
