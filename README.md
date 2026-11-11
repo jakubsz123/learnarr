@@ -56,7 +56,7 @@ setup wizard does the rest.
 ```yaml
 services:
   learnarr:
-    image: ghcr.io/jakubsz123/learnarr:latest
+    image: ghcr.io/smoothless-io/learnarr:latest
     container_name: learnarr
     ports:
       - "7979:7979"
@@ -80,7 +80,7 @@ docker run -d --name learnarr \
   -v ./config:/config \
   -e PUID=1000 -e PGID=1000 \
   --restart unless-stopped \
-  ghcr.io/jakubsz123/learnarr:latest
+  ghcr.io/smoothless-io/learnarr:latest
 ```
 
 Then open `http://<your-server>:7979`. The wizard creates the admin account, connects Plex or Jellyfin and

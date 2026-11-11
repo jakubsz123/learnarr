@@ -5,7 +5,7 @@ programming; you need to know the language and have a GitHub account (or send us
 
 ## How it works
 
-All the text is in one file: [`i18n/locales/en.json`](https://github.com/jakubsz123/learnarr/blob/main/i18n/locales/en.json).
+All the text is in one file: [`i18n/locales/en.json`](https://github.com/smoothless-io/learnarr/blob/main/i18n/locales/en.json).
 A translation is a copy of it with every message in your language. Language names ("Spanish", "español") and
 numbers come from the browser, so they never need translating.
 

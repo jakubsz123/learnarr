@@ -10,7 +10,7 @@ Save this as `docker-compose.yml`:
 ```yaml
 services:
   learnarr:
-    image: ghcr.io/jakubsz123/learnarr:latest
+    image: ghcr.io/smoothless-io/learnarr:latest
     container_name: learnarr
     ports:
       - "7979:7979"
@@ -40,12 +40,12 @@ docker run -d --name learnarr \
   -v ./config:/config \
   -e PUID=1000 -e PGID=1000 \
   --restart unless-stopped \
-  ghcr.io/jakubsz123/learnarr:latest
+  ghcr.io/smoothless-io/learnarr:latest
 ```
 
 ## Unraid, TrueNAS and other NAS systems
 
-Use the image `ghcr.io/jakubsz123/learnarr:latest`, map container port `7979` to a free port on the host, and
+Use the image `ghcr.io/smoothless-io/learnarr:latest`, map container port `7979` to a free port on the host, and
 map `/config` to an appdata folder (for example `/mnt/user/appdata/learnarr`). Nothing else is required.
 
 ## Behind a reverse proxy
@@ -80,7 +80,7 @@ learnarr.example.com {
 For development, or to run without Docker:
 
 ```bash
-git clone https://github.com/jakubsz123/learnarr && cd learnarr
+git clone https://github.com/smoothless-io/learnarr && cd learnarr
 npm install
 scripts/fetch-udpipe.sh   # the lemmatiser, for "% you know"
 npm run build

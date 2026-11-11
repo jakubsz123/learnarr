@@ -46,6 +46,6 @@ See [Notifications](./notifications#when-they-dont-arrive).
 
 ## Reporting a bug
 
-Open an [issue](https://github.com/jakubsz123/learnarr/issues) with what you did, what you expected and what
+Open an [issue](https://github.com/smoothless-io/learnarr/issues) with what you did, what you expected and what
 happened, the Learnarr version (System → Status) and the relevant lines of `docker logs learnarr`. Remove
 anything private (tokens, addresses) first.

@@ -3,7 +3,7 @@
 # ./config: back that folder up.
 services:
   learnarr:
-    image: ghcr.io/jakubsz123/learnarr:latest
+    image: ghcr.io/smoothless-io/learnarr:latest
     # Or build from this checkout: docker compose up -d --build
     build: .
     container_name: learnarr
