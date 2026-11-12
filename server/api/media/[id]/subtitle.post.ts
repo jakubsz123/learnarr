@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const { id } = validParams(event, mediaIdParam);
   const subtitle = await getSubtitle({
     db: useDb(),
-    server: mediaSourceFor(id, user.id),
+    server: mediaSourceFor(id, user),
     user,
     serverItemId: id,
   });

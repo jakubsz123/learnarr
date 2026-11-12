@@ -1,3 +1,4 @@
+import type { AppUser } from "../auth";
 import { AppError } from "../errors";
 import { useSettings, type Settings } from "../settings";
 import { useDb } from "../../db";
@@ -32,8 +33,8 @@ export function useMediaServer(): MediaServer {
  * Where a film, show or library id lives: OpenSubtitles.com's catalogue, the
  * learner's own uploads, or the household's media server.
  */
-export function mediaSourceFor(id: string, userId: string): MediaServer {
-  if (isCatalogueId(id)) return requireCatalogue();
-  if (isUploadId(id)) return createUploads(useDb(), userId);
+export function mediaSourceFor(id: string, user: AppUser): MediaServer {
+  if (isCatalogueId(id)) return requireCatalogue(user);
+  if (isUploadId(id)) return createUploads(useDb(), user.id);
   return useMediaServer();
 }

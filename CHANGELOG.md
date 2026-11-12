@@ -4,10 +4,10 @@
 
 **Changed**
 
-- Learnarr no longer ships an OpenSubtitles.com API key. Each server adds its own free key in
-  Settings → Media server or the setup wizard (or sets `OPENSUBTITLES_API_KEY`), which searching
-  OpenSubtitles.com needs. Downloads still use each person's own account. **After updating, add a key**,
-  or OpenSubtitles.com search and downloads stop working.
+- Learnarr no longer ships an OpenSubtitles.com API key. Each person connects their own free account **and API
+  key** in Settings → Account; searching and downloading use only theirs. An admin can still share one key
+  with everyone through `OPENSUBTITLES_API_KEY`. **After updating, connect OpenSubtitles.com again** with a
+  key, or search and downloads there stop working.
 
 ## 0.4.0 (2026-11-12)
 

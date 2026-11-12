@@ -14,9 +14,8 @@ Pick Plex or Jellyfin, or press **Skip for now**: without a media server you can
 OpenSubtitles.com for any film or show and upload subtitle files of your own. Connecting one later is
 **Settings → Media server**.
 
-The same step asks for an OpenSubtitles.com API key, which searching OpenSubtitles.com needs. It's free; see
-[The OpenSubtitles.com API key](subtitles.html#the-opensubtitles-com-api-key). You can add it later in
-**Settings → Media server**.
+To search OpenSubtitles.com, each person connects their own free account and API key in
+**Settings → Account**; see [The OpenSubtitles.com API key](subtitles.html#the-opensubtitles-com-api-key).
 
 - **Plex:** choose _Sign in with Plex_ and approve Learnarr on plex.tv; Learnarr then lists your servers and
   you pick one. Or paste the server address and an

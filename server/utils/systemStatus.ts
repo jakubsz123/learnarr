@@ -77,10 +77,7 @@ async function aiCheck(settings: Settings): Promise<Check> {
   }
 }
 
-function openSubtitlesCheck(db: Db, settings: Settings): Check {
-  if (!settings.get("opensubtitles.apiKey")) {
-    return { id: "opensubtitles", state: "error", params: {}, fix: "/settings/media-server" };
-  }
+function openSubtitlesCheck(db: Db): Check {
   const without =
     db.select({ n: count() }).from(schema.user).where(isNull(schema.user.opensubtitlesPassword)).get()?.n ??
     0;
@@ -132,7 +129,7 @@ export async function systemStatus(
   }
 
   return {
-    checks: [media, ai, openSubtitlesCheck(db, settings), engineCheck(lemmas)],
+    checks: [media, ai, openSubtitlesCheck(db), engineCheck(lemmas)],
     languages: await languages(db, lemmas),
     about: {
       version: VERSION,

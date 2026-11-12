@@ -14,5 +14,5 @@ const query = z.object({
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const { id } = validParams(event, mediaIdParam);
-  return mediaSourceFor(id, user.id).items(id, validQuery(event, query));
+  return mediaSourceFor(id, user).items(id, validQuery(event, query));
 });

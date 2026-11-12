@@ -26,6 +26,8 @@ export const user = sqliteTable("user", {
     .default("intermediate"),
   opensubtitlesUsername: text("opensubtitles_username"),
   opensubtitlesPassword: text("opensubtitles_password"),
+  /** The person's own OpenSubtitles.com API key, encrypted; searching and downloading there need it. */
+  opensubtitlesApiKey: text("opensubtitles_api_key"),
   ankiUrl: text("anki_url"),
   ankiDeck: text("anki_deck"),
   /** When the person answered the first-sign-in questions (languages, level); null until then. */

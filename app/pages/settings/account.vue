@@ -79,13 +79,6 @@
           {{ $t("account.opensubtitles.disconnect") }}
         </button>
       </div>
-      <p v-else-if="!me?.opensubtitles.available" class="notice">
-        <template v-if="me?.isAdmin">
-          {{ $t("account.opensubtitles.needKeyAdmin") }}
-          <NuxtLink to="/settings/media-server">{{ $t("nav.mediaServer") }}</NuxtLink>
-        </template>
-        <template v-else>{{ $t("errors.opensubtitles.noApiKey") }}</template>
-      </p>
       <form v-else class="stack" method="post" @submit.prevent="connect">
         <div>
           <div class="field">
@@ -102,6 +95,27 @@
               autocomplete="current-password"
               required
             />
+          </div>
+          <div v-if="!me?.opensubtitles.sharedKey" class="field">
+            <label for="os-key">{{ $t("account.opensubtitles.apiKey") }}</label>
+            <div class="stack-tight">
+              <input
+                id="os-key"
+                v-model.trim="os.apiKey"
+                class="input"
+                type="password"
+                autocomplete="off"
+                minlength="8"
+                required
+              />
+              <i18n-t keypath="account.opensubtitles.apiKeyHint" tag="span" class="hint">
+                <template #link>
+                  <a href="https://www.opensubtitles.com/en/consumers" target="_blank" rel="noopener"
+                    >opensubtitles.com/consumers</a
+                  >
+                </template>
+              </i18n-t>
+            </div>
           </div>
         </div>
         <div class="row">
@@ -207,7 +221,7 @@ function changePassword() {
   );
 }
 
-const os = reactive({ username: "", password: "" });
+const os = reactive({ username: me.value?.opensubtitles.username ?? "", password: "", apiKey: "" });
 const osFeedback = useFeedback();
 
 function connect() {
@@ -215,9 +229,9 @@ function connect() {
     async () => {
       const result = await api<OpenSubtitlesAccount>("/api/me/opensubtitles", {
         method: "PUT",
-        body: { ...os },
+        body: { username: os.username, password: os.password, ...(os.apiKey ? { apiKey: os.apiKey } : {}) },
       });
-      os.password = "";
+      Object.assign(os, { password: "", apiKey: "" });
       await refresh();
       return result;
     },

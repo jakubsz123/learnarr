@@ -13,14 +13,14 @@ language's model, and links to the screen that fixes each problem. `docker logs 
 ## "Your media server has no subtitle for this"
 
 The episode has no text subtitle track in your language. Image-based tracks (PGS, VobSub, common on Blu-ray
-rips) can't be read. Connect your OpenSubtitles.com account in **Settings → Account** to download one, upload
+rips) can't be read. Connect OpenSubtitles.com in **Settings → Account** to download one, upload
 a file, or have Bazarr fetch one.
 
-## "OpenSubtitles.com needs an API key first"
+## "Connect OpenSubtitles.com … to search it"
 
-This server has no OpenSubtitles.com API key yet. The admin adds one in **Settings → Media server**; see
-[The OpenSubtitles.com API key](subtitles.html#the-opensubtitles-com-api-key). If it says the key wasn't
-accepted, the consumer may have been deleted on opensubtitles.com: make a new one and paste its key.
+Searching OpenSubtitles.com needs your own account and API key, in **Settings → Account**; see
+[The OpenSubtitles.com API key](subtitles.html#the-opensubtitles-com-api-key). If it says your key wasn't
+accepted, the consumer may have been deleted on opensubtitles.com: make a new one and connect again.
 
 ## OpenSubtitles says the download limit is reached
 

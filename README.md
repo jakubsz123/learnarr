@@ -31,7 +31,7 @@ your phone, or send the cards to Anki.
 - **Your library, your subtitles.** Browse Plex or Jellyfin and use the subtitle tracks you already have.
   When there are none, Learnarr downloads one from OpenSubtitles.com with each person's own free account.
   No media server? Search OpenSubtitles.com for any film or show, or upload a subtitle file of your own.
-  OpenSubtitles.com needs a free API key, which the admin adds in Settings → Media server.
+  OpenSubtitles.com needs each person's own free account and API key, added in Settings → Account.
 - **"% you know" for every episode.** Learnarr finds each word's dictionary form and counts how much of the
   dialogue you already know, so you can pick shows at your level.
 - **Words worth learning, not every word.** Your AI provider suggests words for your level. Learn them, mark
@@ -115,7 +115,7 @@ Everything can be set in the app. These environment variables are optional:
 | `AUTH_SECRET`, `ENCRYPTION_KEY`                          | Use your own keys instead of the ones generated in `/config` on first start.                                    |
 | `PORT`                                                   | The port inside the container. Default `7979`.                                                                  |
 | `TRUSTED_ORIGINS`                                        | Extra addresses Learnarr is reached at, comma-separated, if sign-in fails with an origin error.                 |
-| `OPENSUBTITLES_API_KEY`                                  | This server's OpenSubtitles.com API key, instead of adding it in the app.                                       |
+| `OPENSUBTITLES_API_KEY`                                  | An OpenSubtitles.com API key shared with everyone here who hasn't added their own.                              |
 | `UDPIPE_BIN`                                             | Where the lemmatiser binary is. Default `/opt/udpipe/udpipe` in the image.                                      |
 | `TZ`                                                     | Your time zone, for "today" in study limits, streaks and reminders. Default UTC.                                |
 | `NTFY_URL`, `NTFY_TOKEN`                                 | A self-hosted ntfy server (default `https://ntfy.sh`) and its access token.                                     |
