@@ -1,16 +1,17 @@
 import type { ErrorKey, MessageParams } from "#shared/messages";
 import { VERSION } from "#shared/version";
 import { AppError, UPSTREAM_FAILED } from "./errors";
+import { useSettings, type Settings } from "./settings";
 
 /**
- * OpenSubtitles.com, used only when the media server has no subtitle in the
- * language. Learnarr identifies itself with its own API key, as the API's terms
- * ask of an application, and every download is made with the person's own
- * account, on their own daily quota.
+ * OpenSubtitles.com: its catalogue of films and shows, and subtitles when the
+ * media server has none in the language. Each Learnarr server identifies itself
+ * with an API key its admin registers with OpenSubtitles.com, as the API's
+ * terms ask of an application, and every download is made with the person's
+ * own account, on their own daily quota.
  */
 
 const API = "https://api.opensubtitles.com/api/v1";
-const LEARNARR_API_KEY = "hxBVpTnU6WpxQlqhkqMIQxmjj2eV3Hss";
 const USER_AGENT = `Learnarr v${VERSION}`;
 // Tokens last a day; renew a little early rather than fail a download.
 const SESSION_TTL_MS = 23 * 60 * 60 * 1000;
@@ -22,9 +23,21 @@ export class OpenSubtitlesError extends AppError {
   }
 }
 
-function headers(token?: string): Record<string, string> {
+/** This server's OpenSubtitles.com API key, or null until the admin adds one. */
+export function openSubtitlesApiKey(settings: Settings = useSettings()): string | null {
+  return settings.get("opensubtitles.apiKey");
+}
+
+/** This server's OpenSubtitles.com API key, or a 409 saying the admin needs to add one. */
+export function requireOpenSubtitlesApiKey(settings?: Settings): string {
+  const key = openSubtitlesApiKey(settings);
+  if (!key) throw new OpenSubtitlesError("errors.opensubtitles.noApiKey", 409);
+  return key;
+}
+
+function headers(apiKey: string, token?: string): Record<string, string> {
   return {
-    "Api-Key": process.env.OPENSUBTITLES_API_KEY || LEARNARR_API_KEY,
+    "Api-Key": apiKey,
     "User-Agent": USER_AGENT,
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -41,6 +54,8 @@ async function call(url: string, init: RequestInit, fetchImpl: typeof fetch): Pr
 }
 
 export interface OpenSubtitlesSession {
+  /** The API key the session was opened with: a new key needs a new session. */
+  apiKey: string;
   token: string;
   apiBase: string;
   expiresAt: number;
@@ -52,16 +67,18 @@ export interface OpenSubtitlesAccount {
 }
 
 export async function openSubtitlesLogin(
+  apiKey: string,
   username: string,
   password: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<{ session: OpenSubtitlesSession; account: OpenSubtitlesAccount }> {
   const response = await call(
     `${API}/login`,
-    { method: "POST", headers: headers(), body: JSON.stringify({ username, password }) },
+    { method: "POST", headers: headers(apiKey), body: JSON.stringify({ username, password }) },
     fetchImpl,
   );
-  if (response.status === 400 || response.status === 401 || response.status === 403) {
+  if (response.status === 403) throw new OpenSubtitlesError("errors.opensubtitles.badApiKey", 400);
+  if (response.status === 400 || response.status === 401) {
     throw new OpenSubtitlesError("errors.opensubtitles.badLogin", 400);
   }
   if (response.status === 429) {
@@ -80,7 +97,7 @@ export async function openSubtitlesLogin(
   // The login answer names the host this account's further calls should use.
   const apiBase = data.base_url ? `https://${data.base_url.replace(/^https?:\/\//, "")}/api/v1` : API;
   return {
-    session: { token: data.token, apiBase, expiresAt: Date.now() + SESSION_TTL_MS },
+    session: { apiKey, token: data.token, apiBase, expiresAt: Date.now() + SESSION_TTL_MS },
     account: { allowedDownloads: data.user?.allowed_downloads ?? null, vip: Boolean(data.user?.vip) },
   };
 }
@@ -134,12 +151,17 @@ function toFeature(a: Record<string, any>, searched?: Feature["kind"]): Feature 
   };
 }
 
+/** A key OpenSubtitles.com doesn't know answers 401 or 403 to a search. */
+const refusesKey = (response: Response) => response.status === 401 || response.status === 403;
+
 async function features(
+  apiKey: string,
   params: URLSearchParams,
   fetchImpl: typeof fetch,
   searched?: Feature["kind"],
 ): Promise<Feature[]> {
-  const response = await call(`${API}/features?${params}`, { headers: headers() }, fetchImpl);
+  const response = await call(`${API}/features?${params}`, { headers: headers(apiKey) }, fetchImpl);
+  if (refusesKey(response)) throw new OpenSubtitlesError("errors.opensubtitles.badApiKey");
   if (response.status === 429) throw new OpenSubtitlesError("errors.opensubtitles.searchLimited", 429);
   if (!response.ok)
     throw new OpenSubtitlesError("errors.opensubtitles.httpError", UPSTREAM_FAILED, {
@@ -153,19 +175,38 @@ async function features(
 
 /** Films or shows whose title matches, in the catalogue's own order. */
 export async function searchFeatures(
+  apiKey: string,
   query: string,
   kind: Feature["kind"],
   fetchImpl: typeof fetch = fetch,
 ): Promise<Feature[]> {
   return features(
+    apiKey,
     new URLSearchParams({ query, type: kind === "show" ? "tvshow" : "movie" }),
     fetchImpl,
     kind,
   );
 }
 
-export async function getFeature(id: string, fetchImpl: typeof fetch = fetch): Promise<Feature | null> {
-  return (await features(new URLSearchParams({ feature_id: id }), fetchImpl))[0] ?? null;
+export async function getFeature(
+  apiKey: string,
+  id: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<Feature | null> {
+  return (await features(apiKey, new URLSearchParams({ feature_id: id }), fetchImpl))[0] ?? null;
+}
+
+/** Whether OpenSubtitles.com accepts an API key, by searching with it. */
+export async function checkApiKey(apiKey: string, fetchImpl: typeof fetch = fetch): Promise<void> {
+  try {
+    await searchFeatures(apiKey, "the", "movie", fetchImpl);
+  } catch (error) {
+    // While saving, a refused key is a problem with what was typed.
+    if (error instanceof OpenSubtitlesError && error.data?.key === "errors.opensubtitles.badApiKey") {
+      throw new OpenSubtitlesError("errors.opensubtitles.keyRefused", 400);
+    }
+    throw error;
+  }
 }
 
 export interface SubtitleSearch {
@@ -190,6 +231,7 @@ export interface SubtitleFile {
 const imdbNumber = (id: string) => String(Number(id.replace(/^tt/, "")));
 
 export async function searchSubtitles(
+  apiKey: string,
   search: SubtitleSearch,
   fetchImpl: typeof fetch = fetch,
 ): Promise<SubtitleFile[]> {
@@ -208,7 +250,8 @@ export async function searchSubtitles(
     return [];
   }
 
-  const response = await call(`${API}/subtitles?${params}`, { headers: headers() }, fetchImpl);
+  const response = await call(`${API}/subtitles?${params}`, { headers: headers(apiKey) }, fetchImpl);
+  if (refusesKey(response)) throw new OpenSubtitlesError("errors.opensubtitles.badApiKey");
   if (response.status === 429) {
     throw new OpenSubtitlesError("errors.opensubtitles.searchLimited", 429);
   }
@@ -238,7 +281,11 @@ export async function downloadSubtitle(
 ): Promise<string> {
   const response = await call(
     `${session.apiBase}/download`,
-    { method: "POST", headers: headers(session.token), body: JSON.stringify({ file_id: fileId }) },
+    {
+      method: "POST",
+      headers: headers(session.apiKey, session.token),
+      body: JSON.stringify({ file_id: fileId }),
+    },
     fetchImpl,
   );
   if (response.status === 401) throw new OpenSubtitlesError("errors.opensubtitles.sessionExpired", 401);
@@ -257,17 +304,27 @@ export async function downloadSubtitle(
   return file.text();
 }
 
-/** One cached session per user, renewed on expiry or when OpenSubtitles says it's gone. */
+export interface OpenSubtitlesCredentials {
+  apiKey: string;
+  username: string;
+  password: string;
+}
+
+/**
+ * One cached session per user, renewed on expiry, when the server's API key
+ * changes, or when OpenSubtitles says it's gone.
+ */
 export function createSessionCache(
-  doLogin: (username: string, password: string) => Promise<OpenSubtitlesSession>,
+  doLogin: (credentials: OpenSubtitlesCredentials) => Promise<OpenSubtitlesSession>,
   now: () => number = Date.now,
 ) {
   const sessions = new Map<string, OpenSubtitlesSession>();
   return {
-    async get(userId: string, credentials: { username: string; password: string }, renew = false) {
+    async get(userId: string, credentials: OpenSubtitlesCredentials, renew = false) {
       const cached = sessions.get(userId);
-      if (cached && !renew && cached.expiresAt > now()) return cached;
-      const session = await doLogin(credentials.username, credentials.password);
+      const current = cached && cached.apiKey === credentials.apiKey && cached.expiresAt > now();
+      if (current && !renew) return cached;
+      const session = await doLogin(credentials);
       sessions.set(userId, session);
       return session;
     },
@@ -278,5 +335,5 @@ export function createSessionCache(
 }
 
 export const openSubtitlesSessions = createSessionCache(
-  async (u, p) => (await openSubtitlesLogin(u, p)).session,
+  async ({ apiKey, username, password }) => (await openSubtitlesLogin(apiKey, username, password)).session,
 );

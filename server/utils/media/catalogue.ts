@@ -1,12 +1,19 @@
 import { CATALOGUE_LIBRARY } from "#shared/mediaSources";
-import { getFeature, searchFeatures, type Feature } from "../opensubtitles";
+import {
+  getFeature,
+  openSubtitlesApiKey,
+  OpenSubtitlesError,
+  searchFeatures,
+  type Feature,
+} from "../opensubtitles";
 import { MediaServerError, type MediaDetail, type MediaServer, type MediaSummary } from "./types";
 
 /**
  * OpenSubtitles.com's catalogue of films and shows, browsed like a media
  * server so the library, show and episode pages work for people without Plex
  * or Jellyfin. It has no subtitle tracks of its own: getting an episode's
- * subtitle downloads one with the person's OpenSubtitles account.
+ * subtitle downloads one with the person's OpenSubtitles account. Searching it
+ * needs the server's OpenSubtitles.com API key.
  *
  * Ids carry what they point at (see shared/mediaSources.ts), so an episode
  * needs only its show's entry.
@@ -64,13 +71,13 @@ function summary(feature: Feature): MediaSummary {
   };
 }
 
-export function createCatalogue(fetchImpl: typeof fetch = fetch): MediaServer {
+export function createCatalogue(apiKey: string, fetchImpl: typeof fetch = fetch): MediaServer {
   const cache = new Map<string, { feature: Feature; at: number }>();
 
   async function feature(id: string): Promise<Feature> {
     const hit = cache.get(id);
     if (hit && Date.now() - hit.at < CACHE_MS) return hit.feature;
-    const found = await getFeature(id, fetchImpl);
+    const found = await getFeature(apiKey, id, fetchImpl);
     if (!found) throw notFound();
     cache.set(id, { feature: found, at: Date.now() });
     return found;
@@ -91,8 +98,8 @@ export function createCatalogue(fetchImpl: typeof fetch = fetch): MediaServer {
     async items(_libraryId, { start, limit, search }) {
       if (!search) return { items: [], total: 0 };
       const [films, shows] = await Promise.all([
-        searchFeatures(search, "movie", fetchImpl),
-        searchFeatures(search, "show", fetchImpl),
+        searchFeatures(apiKey, search, "movie", fetchImpl),
+        searchFeatures(apiKey, search, "show", fetchImpl),
       ]);
       // The catalogue puts loose matches first: an exact title comes first here, then the better known.
       const wanted = plain(search);
@@ -176,10 +183,22 @@ export function createCatalogue(fetchImpl: typeof fetch = fetch): MediaServer {
   };
 }
 
-let shared: MediaServer | undefined;
+let shared: { apiKey: string; catalogue: MediaServer } | undefined;
 
-/** The one catalogue the server uses, so its cache is shared between requests. */
-export function useCatalogue(): MediaServer {
-  shared ??= createCatalogue();
-  return shared;
+/**
+ * The one catalogue the server uses, so its cache is shared between requests;
+ * null until the admin adds an OpenSubtitles.com API key.
+ */
+export function useCatalogue(): MediaServer | null {
+  const apiKey = openSubtitlesApiKey();
+  if (!apiKey) return null;
+  if (shared?.apiKey !== apiKey) shared = { apiKey, catalogue: createCatalogue(apiKey) };
+  return shared.catalogue;
+}
+
+/** The catalogue, or a 409 saying the admin needs to add an API key. */
+export function requireCatalogue(): MediaServer {
+  const catalogue = useCatalogue();
+  if (!catalogue) throw new OpenSubtitlesError("errors.opensubtitles.noApiKey", 409);
+  return catalogue;
 }

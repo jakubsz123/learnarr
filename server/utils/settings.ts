@@ -16,6 +16,8 @@ export const SETTINGS = {
   "ai.baseUrl": { env: "AI_BASE_URL", secret: false },
   "ai.apiKey": { env: "AI_API_KEY", secret: true },
   "ai.model": { env: "AI_MODEL", secret: false },
+  /** Identifies this server to OpenSubtitles.com, for searching its catalogue and subtitles. */
+  "opensubtitles.apiKey": { env: "OPENSUBTITLES_API_KEY", secret: true },
   /** The secret part of the webhook addresses media servers post plays to. */
   "webhook.secret": { env: undefined, secret: false },
 } as const;
@@ -26,6 +28,7 @@ export type SettingKey = keyof typeof SETTINGS;
 export const SETTING_GROUPS = {
   media: ["media.kind", "media.url", "media.token", "media.name"],
   ai: ["ai.provider", "ai.baseUrl", "ai.apiKey", "ai.model"],
+  opensubtitles: ["opensubtitles.apiKey"],
 } as const satisfies Record<string, readonly SettingKey[]>;
 
 export interface Settings {

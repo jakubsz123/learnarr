@@ -62,6 +62,11 @@
       <h1 id="step-title">{{ $t("setup.media.title") }}</h1>
       <p class="muted">{{ $t("setup.media.intro") }}</p>
       <MediaServerForm @connected="mediaConnected = true" />
+      <section class="stack">
+        <h2 class="section-title">{{ $t("setup.media.openSubtitlesTitle") }}</h2>
+        <p class="muted">{{ $t("openSubtitlesKey.intro") }}</p>
+        <OpenSubtitlesKeyForm @saved="catalogueReady = true" />
+      </section>
       <div class="nav">
         <span />
         <button type="button" class="btn" :class="{ 'btn-primary': mediaConnected }" @click="step = 2">
@@ -101,7 +106,15 @@
 
     <div v-else class="stack">
       <h1 id="step-title">{{ $t("setup.done.title") }}</h1>
-      <p class="muted">{{ mediaConnected ? $t("setup.done.intro") : $t("setup.done.introNoServer") }}</p>
+      <p class="muted">
+        {{
+          mediaConnected
+            ? $t("setup.done.intro")
+            : catalogueReady
+              ? $t("setup.done.introNoServer")
+              : $t("setup.done.introUploads")
+        }}
+      </p>
       <div class="row">
         <NuxtLink to="/library" class="btn btn-primary">{{ $t("setup.done.library") }}</NuxtLink>
         <NuxtLink to="/settings/users" class="btn">{{ $t("setup.done.household") }}</NuxtLink>
@@ -126,6 +139,7 @@ const step = ref(me.value ? 1 : 0);
 const busy = ref(false);
 const error = ref("");
 const mediaConnected = ref(false);
+const catalogueReady = ref(false);
 
 function back() {
   error.value = "";

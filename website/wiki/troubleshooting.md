@@ -16,6 +16,12 @@ The episode has no text subtitle track in your language. Image-based tracks (PGS
 rips) can't be read. Connect your OpenSubtitles.com account in **Settings → Account** to download one, upload
 a file, or have Bazarr fetch one.
 
+## "OpenSubtitles.com needs an API key first"
+
+This server has no OpenSubtitles.com API key yet. The admin adds one in **Settings → Media server**; see
+[The OpenSubtitles.com API key](subtitles.html#the-opensubtitles-com-api-key). If it says the key wasn't
+accepted, the consumer may have been deleted on opensubtitles.com: make a new one and paste its key.
+
 ## OpenSubtitles says the download limit is reached
 
 Free OpenSubtitles.com accounts have a daily download limit. It resets every 24 hours. Episodes you already

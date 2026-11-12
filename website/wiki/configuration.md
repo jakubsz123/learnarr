@@ -15,7 +15,7 @@ can't be changed in the app.
 | `MEDIA_SERVER_URL`, `MEDIA_SERVER_TOKEN` |                      | The media server's address and token or API key.                                                |
 | `AI_PROVIDER`                            |                      | `openai-compatible` or `anthropic`.                                                             |
 | `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`  |                      | The AI provider's address, key and model.                                                       |
-| `OPENSUBTITLES_API_KEY`                  | built in             | Use your own OpenSubtitles.com API key instead of Learnarr's.                                   |
+| `OPENSUBTITLES_API_KEY`                  | unset                | This server's OpenSubtitles.com API key, instead of adding it in the app.                       |
 | `AUTH_SECRET`                            | generated            | The secret that signs sessions. Generated into `/config/auth.key` if unset.                     |
 | `ENCRYPTION_KEY`                         | generated            | The key secrets are encrypted with. Generated into `/config/encryption.key` if unset.           |
 | `UDPIPE_BIN`                             | `/opt/udpipe/udpipe` | Where the lemmatiser binary is.                                                                 |
