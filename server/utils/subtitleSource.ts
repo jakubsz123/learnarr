@@ -11,6 +11,7 @@ import {
   downloadSubtitle,
   OpenSubtitlesError,
   openSubtitlesSessions,
+  requireOpenSubtitlesApiKey,
   searchSubtitles,
   type OpenSubtitlesSession,
   type SubtitleFile,
@@ -33,8 +34,9 @@ export interface CatalogueDeps {
 }
 
 const liveCatalogue: CatalogueDeps = {
-  search: (search) => searchSubtitles(search),
-  async download(fileId, userId, credentials) {
+  search: (search) => searchSubtitles(requireOpenSubtitlesApiKey(), search),
+  async download(fileId, userId, account) {
+    const credentials = { ...account, apiKey: requireOpenSubtitlesApiKey() };
     const attempt = (session: OpenSubtitlesSession) => downloadSubtitle(fileId, session);
     try {
       return await attempt(await openSubtitlesSessions.get(userId, credentials));

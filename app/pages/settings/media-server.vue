@@ -5,6 +5,11 @@
       <p class="muted">{{ $t("mediaSettings.intro") }}</p>
     </div>
     <MediaServerForm />
+    <section class="section">
+      <h2 class="section-title">OpenSubtitles.com</h2>
+      <p class="muted">{{ $t("openSubtitlesKey.intro") }}</p>
+      <OpenSubtitlesKeyForm />
+    </section>
     <WebhookSetup />
   </div>
 </template>

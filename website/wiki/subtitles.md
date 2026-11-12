@@ -18,6 +18,17 @@ episode and press **Get subtitle**, Learnarr looks in three places, in order:
 A subtitle belongs to the person who fetched it. If two people in the household learn from the same episode,
 each gets their own copy, because a file downloaded with one person's OpenSubtitles account is theirs.
 
+## The OpenSubtitles.com API key
+
+OpenSubtitles.com asks every app that uses it to identify itself with an API key, so each Learnarr server has
+its own. It's free: log in at [opensubtitles.com/consumers](https://www.opensubtitles.com/en/consumers), add
+a new consumer (name it Learnarr), and paste its API key in **Settings → Media server** (or in the setup
+wizard). Without it, Learnarr can't search OpenSubtitles.com for films, shows or subtitles; your media server
+and uploaded files still work.
+
+The key only identifies the server. Downloads are always made with each person's own OpenSubtitles.com
+account, on their own daily allowance.
+
 ## Getting better subtitles
 
 Subtitles that match the audio closely make better cards. If you use **Bazarr**, set it to fetch subtitles

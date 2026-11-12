@@ -70,7 +70,7 @@ describe("catalogue ids", () => {
 
 describe("OpenSubtitles.com catalogue", () => {
   it("answers searches only, with an exact title first, accents or not", async () => {
-    const catalogue = createCatalogue(fakeApi());
+    const catalogue = createCatalogue("test-api-key", fakeApi());
     expect(await catalogue.items("os", { start: 0, limit: 10 })).toEqual({ items: [], total: 0 });
     const { items } = await catalogue.items("os", { start: 0, limit: 10, search: "elite" });
     expect(items.map((i) => i.title)).toEqual(["Élite", "Élite Short Stories", "Roma"]);
@@ -79,7 +79,7 @@ describe("OpenSubtitles.com catalogue", () => {
   });
 
   it("walks a show's seasons and episodes, with the ids subtitles are found by", async () => {
-    const catalogue = createCatalogue(fakeApi());
+    const catalogue = createCatalogue("test-api-key", fakeApi());
     const seasons = await catalogue.children("os-s-658716");
     expect(seasons.map((s) => s.id)).toEqual(["os-s-658716-1", "os-s-658716-2"]);
     const episode = await catalogue.item("os-s-658716-1-2");
@@ -101,7 +101,7 @@ describe("OpenSubtitles.com catalogue", () => {
   });
 
   it("finds a film by its id", async () => {
-    const catalogue = createCatalogue(fakeApi());
+    const catalogue = createCatalogue("test-api-key", fakeApi());
     expect(await catalogue.item("os-m-9")).toMatchObject({
       type: "movie",
       title: "Roma",

@@ -79,6 +79,13 @@
           {{ $t("account.opensubtitles.disconnect") }}
         </button>
       </div>
+      <p v-else-if="!me?.opensubtitles.available" class="notice">
+        <template v-if="me?.isAdmin">
+          {{ $t("account.opensubtitles.needKeyAdmin") }}
+          <NuxtLink to="/settings/media-server">{{ $t("nav.mediaServer") }}</NuxtLink>
+        </template>
+        <template v-else>{{ $t("errors.opensubtitles.noApiKey") }}</template>
+      </p>
       <form v-else class="stack" method="post" @submit.prevent="connect">
         <div>
           <div class="field">

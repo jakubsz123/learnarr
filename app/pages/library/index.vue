@@ -24,9 +24,15 @@
             </div>
           </div>
         </div>
-        <div v-if="!server && me?.isAdmin">
-          <NuxtLink to="/settings/media-server" class="btn">{{ $t("library.ownLibrary") }}</NuxtLink>
+        <div v-if="me?.isAdmin && (!server || !openSubtitles)" class="row">
+          <NuxtLink v-if="!server" to="/settings/media-server" class="btn">{{
+            $t("library.ownLibrary")
+          }}</NuxtLink>
+          <NuxtLink v-if="!openSubtitles" to="/settings/media-server" class="btn">{{
+            $t("library.catalogueNeedsKey")
+          }}</NuxtLink>
         </div>
+        <p v-else-if="!openSubtitles" class="hint">{{ $t("library.catalogueAskAdmin") }}</p>
         <NewUpload v-if="selected?.type === 'uploads'" />
         <SearchField
           v-model="search"
@@ -81,6 +87,7 @@ const router = useRouter();
 const uid = useId();
 const libraries = ref<Library[]>([]);
 const elsewhere = ref<Library[]>([]);
+const openSubtitles = ref(true);
 const server = ref<Sources["server"]>(null);
 const all = computed(() => [...libraries.value, ...elsewhere.value]);
 const selected = computed(() => all.value.find((l) => l.id === libraryId.value));
@@ -133,6 +140,7 @@ onMounted(async () => {
     const answer = await api<Sources>("/api/library");
     libraries.value = answer.libraries;
     elsewhere.value = answer.elsewhere;
+    openSubtitles.value = answer.openSubtitles;
     server.value = answer.server;
     if (!all.value.some((l) => l.id === libraryId.value)) libraryId.value = all.value[0]?.id ?? "";
     else await loadItems(true);

@@ -2,7 +2,7 @@ import { AppError } from "../errors";
 import { useSettings, type Settings } from "../settings";
 import { useDb } from "../../db";
 import { isCatalogueId, isUploadId } from "#shared/mediaSources";
-import { useCatalogue } from "./catalogue";
+import { requireCatalogue } from "./catalogue";
 import { createUploads } from "./uploads";
 import { createJellyfin } from "./jellyfin";
 import { createPlex } from "./plex";
@@ -33,7 +33,7 @@ export function useMediaServer(): MediaServer {
  * learner's own uploads, or the household's media server.
  */
 export function mediaSourceFor(id: string, userId: string): MediaServer {
-  if (isCatalogueId(id)) return useCatalogue();
+  if (isCatalogueId(id)) return requireCatalogue();
   if (isUploadId(id)) return createUploads(useDb(), userId);
   return useMediaServer();
 }
