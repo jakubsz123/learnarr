@@ -24,15 +24,14 @@
             </div>
           </div>
         </div>
-        <div v-if="me?.isAdmin && (!server || !openSubtitles)" class="row">
-          <NuxtLink v-if="!server" to="/settings/media-server" class="btn">{{
+        <div v-if="(!server && me?.isAdmin) || !openSubtitles" class="row">
+          <NuxtLink v-if="!server && me?.isAdmin" to="/settings/media-server" class="btn">{{
             $t("library.ownLibrary")
           }}</NuxtLink>
-          <NuxtLink v-if="!openSubtitles" to="/settings/media-server" class="btn">{{
-            $t("library.catalogueNeedsKey")
+          <NuxtLink v-if="!openSubtitles" to="/settings/account" class="btn">{{
+            $t("library.connectOpenSubtitles")
           }}</NuxtLink>
         </div>
-        <p v-else-if="!openSubtitles" class="hint">{{ $t("library.catalogueAskAdmin") }}</p>
         <NewUpload v-if="selected?.type === 'uploads'" />
         <SearchField
           v-model="search"

@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   const { id } = validParams(event, mediaIdParam);
   const { w } = validQuery(event, query);
   // Any failure means the same to the page (show the placeholder), so it is one 404.
-  const response = await mediaSourceFor(id, user.id)
+  const response = await mediaSourceFor(id, user)
     .poster(id, w)
     .catch(() => null);
   if (!response?.body) throw new AppError(404, "errors.media.noPoster");

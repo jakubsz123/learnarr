@@ -2,7 +2,7 @@ import { defineEventHandler } from "h3";
 import { ANKI_DEFAULTS } from "#shared/anki";
 import { resolveAiConfig } from "~~/server/utils/ai/config";
 import { requireUser } from "~~/server/utils/auth";
-import { openSubtitlesApiKey } from "~~/server/utils/opensubtitles";
+import { openSubtitlesApiKey, sharedApiKey } from "~~/server/utils/opensubtitles";
 import { useSettings } from "~~/server/utils/settings";
 
 /** The signed-in person: who they are, what they learn, and their connections. */
@@ -20,10 +20,11 @@ export default defineEventHandler(async (event) => {
     /** Whether an AI provider is set up, since suggesting words needs one. */
     aiConfigured: resolveAiConfig(useSettings()) !== null,
     opensubtitles: {
-      connected: Boolean(user.opensubtitlesPassword),
+      /** Connected with both an account and an API key: what searching and downloading need. */
+      connected: Boolean(user.opensubtitlesPassword) && openSubtitlesApiKey(user) !== null,
       username: user.opensubtitlesUsername,
-      /** Whether the server has the OpenSubtitles.com API key that connecting an account needs. */
-      available: openSubtitlesApiKey() !== null,
+      /** Whether the admin shares an API key, so the person needn't bring one. */
+      sharedKey: sharedApiKey() !== null,
     },
     anki: { url: user.ankiUrl ?? ANKI_DEFAULTS.url, deck: user.ankiDeck ?? ANKI_DEFAULTS.deck },
   };

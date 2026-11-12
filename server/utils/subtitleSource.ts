@@ -10,9 +10,10 @@ import type { MediaDetail, MediaServer } from "./media/types";
 import {
   downloadSubtitle,
   OpenSubtitlesError,
+  openSubtitlesApiKey,
   openSubtitlesSessions,
-  requireOpenSubtitlesApiKey,
   searchSubtitles,
+  type OpenSubtitlesCredentials,
   type OpenSubtitlesSession,
   type SubtitleFile,
   type SubtitleSearch,
@@ -25,18 +26,13 @@ const MIN_CUES = 20;
 const usable = (raw: string | null): raw is string => !!raw && parseSubtitle(raw).length >= MIN_CUES;
 
 export interface CatalogueDeps {
-  search(search: SubtitleSearch): Promise<SubtitleFile[]>;
-  download(
-    fileId: number,
-    userId: string,
-    credentials: { username: string; password: string },
-  ): Promise<string>;
+  search(search: SubtitleSearch, apiKey: string): Promise<SubtitleFile[]>;
+  download(fileId: number, userId: string, credentials: OpenSubtitlesCredentials): Promise<string>;
 }
 
 const liveCatalogue: CatalogueDeps = {
-  search: (search) => searchSubtitles(requireOpenSubtitlesApiKey(), search),
-  async download(fileId, userId, account) {
-    const credentials = { ...account, apiKey: requireOpenSubtitlesApiKey() };
+  search: (search, apiKey) => searchSubtitles(apiKey, search),
+  async download(fileId, userId, credentials) {
     const attempt = (session: OpenSubtitlesSession) => downloadSubtitle(fileId, session);
     try {
       return await attempt(await openSubtitlesSessions.get(userId, credentials));
@@ -122,7 +118,8 @@ export async function getSubtitle(opts: {
     if (usable(raw)) return save(raw, server.kind);
   }
 
-  if (!user.opensubtitlesUsername || !user.opensubtitlesPassword) {
+  const apiKey = openSubtitlesApiKey(user);
+  if (!user.opensubtitlesUsername || !user.opensubtitlesPassword || !apiKey) {
     throw new AppError(
       404,
       server.kind === "opensubtitles"
@@ -132,11 +129,12 @@ export async function getSubtitle(opts: {
     );
   }
   const credentials = {
+    apiKey,
     username: user.opensubtitlesUsername,
     password: decryptSecret(user.opensubtitlesPassword),
   };
 
-  const files = await catalogue.search(catalogueSearch(item, language));
+  const files = await catalogue.search(catalogueSearch(item, language), apiKey);
   // Each download spends the person's daily quota, so stop at the first usable file.
   for (const file of files.slice(0, 3)) {
     const raw = await catalogue.download(file.fileId, user.id, credentials);

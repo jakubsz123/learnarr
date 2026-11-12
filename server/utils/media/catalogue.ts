@@ -1,4 +1,5 @@
 import { CATALOGUE_LIBRARY } from "#shared/mediaSources";
+import type { AppUser } from "../auth";
 import {
   getFeature,
   openSubtitlesApiKey,
@@ -13,7 +14,7 @@ import { MediaServerError, type MediaDetail, type MediaServer, type MediaSummary
  * server so the library, show and episode pages work for people without Plex
  * or Jellyfin. It has no subtitle tracks of its own: getting an episode's
  * subtitle downloads one with the person's OpenSubtitles account. Searching it
- * needs the server's OpenSubtitles.com API key.
+ * needs their OpenSubtitles.com API key.
  *
  * Ids carry what they point at (see shared/mediaSources.ts), so an episode
  * needs only its show's entry.
@@ -183,22 +184,24 @@ export function createCatalogue(apiKey: string, fetchImpl: typeof fetch = fetch)
   };
 }
 
-let shared: { apiKey: string; catalogue: MediaServer } | undefined;
+/** One catalogue per API key, so its cache lasts between requests. */
+const catalogues = new Map<string, MediaServer>();
 
-/**
- * The one catalogue the server uses, so its cache is shared between requests;
- * null until the admin adds an OpenSubtitles.com API key.
- */
-export function useCatalogue(): MediaServer | null {
-  const apiKey = openSubtitlesApiKey();
+/** The catalogue as this person searches it, with their key; null until they connect OpenSubtitles.com. */
+export function useCatalogue(user: AppUser): MediaServer | null {
+  const apiKey = openSubtitlesApiKey(user);
   if (!apiKey) return null;
-  if (shared?.apiKey !== apiKey) shared = { apiKey, catalogue: createCatalogue(apiKey) };
-  return shared.catalogue;
+  let catalogue = catalogues.get(apiKey);
+  if (!catalogue) {
+    catalogue = createCatalogue(apiKey);
+    catalogues.set(apiKey, catalogue);
+  }
+  return catalogue;
 }
 
-/** The catalogue, or a 409 saying the admin needs to add an API key. */
-export function requireCatalogue(): MediaServer {
-  const catalogue = useCatalogue();
+/** The catalogue, or a 409 asking the person to connect OpenSubtitles.com. */
+export function requireCatalogue(user: AppUser): MediaServer {
+  const catalogue = useCatalogue(user);
   if (!catalogue) throw new OpenSubtitlesError("errors.opensubtitles.noApiKey", 409);
   return catalogue;
 }

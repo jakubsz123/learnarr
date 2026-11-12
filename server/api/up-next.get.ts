@@ -18,7 +18,7 @@ const SHOWS = 4;
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
   const db = useDb();
-  const catalogue = useCatalogue();
+  const catalogue = useCatalogue(user);
   const sources: MediaServer[] = [
     ...(mediaServerSettings(useSettings()) ? [useMediaServer()] : []),
     ...(catalogue ? [catalogue] : []),

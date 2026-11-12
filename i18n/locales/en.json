@@ -48,16 +48,16 @@
       "noDownloadsLeft": "Your OpenSubtitles.com account has no downloads left today.",
       "httpError": "OpenSubtitles.com answered with an error (HTTP {status}).",
       "badAnswer": "OpenSubtitles.com gave an answer Learnarr couldn't use. Try again later.",
-      "noApiKey": "OpenSubtitles.com needs an API key first. Whoever runs this server adds one in Settings → Media server.",
-      "badApiKey": "OpenSubtitles.com didn't accept this server's API key. Check it in Settings → Media server.",
+      "noApiKey": "Connect OpenSubtitles.com in Settings → Account, with your own free API key, to search it.",
+      "badApiKey": "OpenSubtitles.com didn't accept your API key. Connect again in Settings → Account.",
       "keyRefused": "OpenSubtitles.com didn't accept that API key.",
-      "keyFromEnv": "This server's OpenSubtitles.com API key is set by an environment variable."
+      "needApiKey": "Paste your OpenSubtitles.com API key."
     },
     "subtitles": {
       "notInLibrary": "That subtitle isn't in your library.",
       "notPlayable": "Pick a film or an episode.",
-      "noneOnServer": "Your media server has no {language} subtitle for this. Connect your OpenSubtitles.com account in Settings → Account to download one, or upload a file.",
-      "needOpenSubtitles": "Connect your OpenSubtitles.com account in Settings → Account to download a {language} subtitle, or upload a file.",
+      "noneOnServer": "Your media server has no {language} subtitle for this. Connect OpenSubtitles.com in Settings → Account to download one, or upload a file.",
+      "needOpenSubtitles": "Connect OpenSubtitles.com in Settings → Account to download a {language} subtitle, or upload a file.",
       "noneAnywhere": "Neither your media server nor OpenSubtitles.com has a {language} subtitle for this. You can upload a file.",
       "wordNotFound": "That word isn't in this subtitle.",
       "unreadable": "That file has no subtitle lines Learnarr can read. Use an .srt, .vtt or .ass file.",
@@ -206,7 +206,7 @@
     "title": "Account",
     "languages": "Languages",
     "opensubtitles": {
-      "intro": "When your media server has no subtitle in your language, Learnarr downloads one with your own free OpenSubtitles.com account, on its daily allowance.",
+      "intro": "Search OpenSubtitles.com for any film or show, and get subtitles your media server doesn't have, with your own free account and API key. Downloads count against your account's daily allowance.",
       "signedInAs": "Signed in as {name}",
       "disconnect": "Disconnect",
       "username": "Username",
@@ -217,7 +217,8 @@
       "connected": "Connected.",
       "connectedWithAllowance": "Connected · {count} download a day. | Connected · {count} downloads a day.",
       "credit": "Subtitles provided by {site}.",
-      "needKeyAdmin": "First add this server's OpenSubtitles.com API key, in Settings →"
+      "apiKey": "API key",
+      "apiKeyHint": "Log in at {link}, add a consumer (name it Learnarr), and paste its API key. It stays encrypted on this server and only you use it."
     },
     "anki": {
       "intro": "Send your cards to Anki on your computer with the AnkiConnect add-on. Add {origin} to its {setting} (Anki → Tools → Add-ons → AnkiConnect → Config).",
@@ -289,8 +290,7 @@
     },
     "media": {
       "title": "Connect your media server",
-      "intro": "Learnarr reads your library and the subtitles that come with it. Everyone here shares it.",
-      "openSubtitlesTitle": "No Plex or Jellyfin?"
+      "intro": "Learnarr reads your library and the subtitles that come with it. Everyone here shares it."
     },
     "ai": {
       "title": "Pick an AI provider",
@@ -305,8 +305,7 @@
       "intro": "Pick a show from your library, see how much of it you know, and choose its words to learn.",
       "library": "Open the library",
       "household": "Add household members",
-      "introNoServer": "Search OpenSubtitles.com for something you want to learn from, or connect Plex or Jellyfin any time in Settings.",
-      "introUploads": "Upload a subtitle file of your own to start. You can add an OpenSubtitles.com API key or connect Plex or Jellyfin any time in Settings → Media server."
+      "introNoServer": "Upload a subtitle file to start, or search OpenSubtitles.com once you connect it in Settings → Account. You can connect Plex or Jellyfin any time in Settings."
     }
   },
   "welcome": {
@@ -357,17 +356,6 @@
     "title": "AI provider",
     "intro": "Suggests the words worth learning and translates them. Subtitle text is sent to this provider for that and nothing else."
   },
-  "openSubtitlesKey": {
-    "intro": "Search OpenSubtitles.com for any film or show, and get subtitles your media server doesn't have. This server needs its own free API key; each person downloads with their own OpenSubtitles.com account.",
-    "hint": "Log in at {link}, add Learnarr as a new consumer, and paste its API key here.",
-    "linkText": "opensubtitles.com/consumers",
-    "save": "Save key",
-    "checking": "Checking…",
-    "saved": "API key saved.",
-    "savedNow": "Saved. OpenSubtitles.com accepted the key.",
-    "remove": "Remove",
-    "fromEnv": "This server's OpenSubtitles.com API key is set by an environment variable."
-  },
   "mediaSettings": {
     "intro": "The household's Plex or Jellyfin. Everyone on this Learnarr browses it and gets subtitles from it."
   },
@@ -407,9 +395,18 @@
     "fromEnv": "This server's AI provider is set by environment variables.",
     "provider": "Provider",
     "groups": {
-      "cloud": { "title": "Cloud service", "hint": "OpenAI, OpenRouter, Groq, Mistral, Gemini" },
-      "anthropic": { "title": "Anthropic", "hint": "Claude" },
-      "local": { "title": "On your own computer", "hint": "Ollama, LM Studio. Nothing leaves your network." }
+      "cloud": {
+        "title": "Cloud service",
+        "hint": "OpenAI, OpenRouter, Groq, Mistral, Gemini"
+      },
+      "anthropic": {
+        "title": "Anthropic",
+        "hint": "Claude"
+      },
+      "local": {
+        "title": "On your own computer",
+        "hint": "Ollama, LM Studio. Nothing leaves your network."
+      }
     },
     "address": "Address",
     "keyHint": "Stored encrypted on this server. It never comes back to the browser.",
@@ -436,14 +433,13 @@
     "loadMore": "Load more",
     "searchCatalogue": "Search films and shows",
     "catalogueHint": "Search OpenSubtitles.com for any film or show, then get its subtitle with your own account.",
-    "catalogueNeedsKey": "Set up OpenSubtitles.com",
-    "catalogueAskAdmin": "To search OpenSubtitles.com for films and shows, whoever runs this server adds an API key in Settings → Media server.",
     "attribution": "Subtitles provided by",
     "ownLibrary": "Connect Plex or Jellyfin",
     "onServer": "On {name}",
     "elsewhere": "Elsewhere",
     "uploads": "Your uploads",
-    "uploadsEmpty": "Nothing uploaded yet."
+    "uploadsEmpty": "Nothing uploaded yet.",
+    "connectOpenSubtitles": "Connect OpenSubtitles.com"
   },
   "upload": {
     "button": "Upload a file",
@@ -673,8 +669,7 @@
       },
       "opensubtitles": {
         "name": "OpenSubtitles.com",
-        "ok": "API key added, and everyone has connected an account.",
-        "error": "No API key yet, so nobody can search OpenSubtitles.com or get subtitles from it.",
+        "ok": "Everyone has connected an account.",
         "warning": "{count} person hasn't connected an account, so they only get subtitles the media server has. | {count} people haven't connected an account, so they only get subtitles the media server has."
       },
       "lemmatiser": {

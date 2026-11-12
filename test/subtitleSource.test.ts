@@ -52,6 +52,13 @@ function fakeCatalogue(
   };
 }
 
+/** A user who connected OpenSubtitles.com with an account and their own API key. */
+const connected = (username: string) => ({
+  opensubtitlesUsername: username,
+  opensubtitlesPassword: encryptSecret("pw"),
+  opensubtitlesApiKey: encryptSecret(`key-of-${username}`),
+});
+
 let db: Db;
 beforeEach(() => {
   db = testDb();
@@ -84,7 +91,7 @@ describe("getSubtitle", () => {
   });
 
   it("falls back to OpenSubtitles with the user's own account, searching the episode by show id", async () => {
-    const user = addUser(db, { opensubtitlesUsername: "me", opensubtitlesPassword: encryptSecret("pw") });
+    const user = addUser(db, connected("me"));
     const catalogue = fakeCatalogue(srtWith(40));
     const sub = await getSubtitle({
       db,
@@ -96,8 +103,33 @@ describe("getSubtitle", () => {
     expect(sub.source).toBe("opensubtitles");
     expect(catalogue.search).toHaveBeenCalledWith(
       expect.objectContaining({ showImdbId: "tt7134908", season: 1, episode: 1, language: "es" }),
+      "key-of-me",
     );
-    expect(catalogue.download).toHaveBeenCalledWith(9, user.id, { username: "me", password: "pw" });
+    expect(catalogue.download).toHaveBeenCalledWith(9, user.id, {
+      apiKey: "key-of-me",
+      username: "me",
+      password: "pw",
+    });
+  });
+
+  it("needs the person's own API key, not just their account, unless the admin shares one", async () => {
+    const user = addUser(db, { ...connected("me"), opensubtitlesApiKey: null });
+    const attempt = () =>
+      getSubtitle({
+        db,
+        server: fakeServer(episode, {}),
+        user,
+        serverItemId: "ep1",
+        catalogue: fakeCatalogue(srtWith(40)),
+      });
+    await expect(attempt()).rejects.toMatchObject({ statusCode: 404 });
+
+    process.env.OPENSUBTITLES_API_KEY = "shared-key";
+    try {
+      expect((await attempt()).source).toBe("opensubtitles");
+    } finally {
+      delete process.env.OPENSUBTITLES_API_KEY;
+    }
   });
 
   it("asks the user to connect OpenSubtitles when the server has nothing", async () => {
@@ -112,12 +144,12 @@ describe("getSubtitle", () => {
       }),
     ).rejects.toMatchObject({
       statusCode: 404,
-      statusMessage: expect.stringMatching(/Connect your OpenSubtitles/),
+      statusMessage: expect.stringMatching(/Connect OpenSubtitles/),
     });
   });
 
   it("keeps one user's download away from another user", async () => {
-    const a = addUser(db, { opensubtitlesUsername: "a", opensubtitlesPassword: encryptSecret("pw") });
+    const a = addUser(db, connected("a"));
     const b = addUser(db);
     await getSubtitle({
       db,

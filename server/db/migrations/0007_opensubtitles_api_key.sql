@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `opensubtitles_api_key` text;

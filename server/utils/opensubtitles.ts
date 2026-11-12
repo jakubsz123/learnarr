@@ -1,14 +1,13 @@
 import type { ErrorKey, MessageParams } from "#shared/messages";
 import { VERSION } from "#shared/version";
 import { AppError, UPSTREAM_FAILED } from "./errors";
-import { useSettings, type Settings } from "./settings";
+import { decryptSecret } from "./secrets";
 
 /**
  * OpenSubtitles.com: its catalogue of films and shows, and subtitles when the
- * media server has none in the language. Each Learnarr server identifies itself
- * with an API key its admin registers with OpenSubtitles.com, as the API's
- * terms ask of an application, and every download is made with the person's
- * own account, on their own daily quota.
+ * media server has none in the language. Learnarr ships no API key: each person
+ * connects their own OpenSubtitles.com account with their own API key, and
+ * searches and downloads with them, on their own allowance.
  */
 
 const API = "https://api.opensubtitles.com/api/v1";
@@ -23,16 +22,12 @@ export class OpenSubtitlesError extends AppError {
   }
 }
 
-/** This server's OpenSubtitles.com API key, or null until the admin adds one. */
-export function openSubtitlesApiKey(settings: Settings = useSettings()): string | null {
-  return settings.get("opensubtitles.apiKey");
-}
+/** A key the admin chose to share with everyone on the server, through the environment. */
+export const sharedApiKey = () => process.env.OPENSUBTITLES_API_KEY || null;
 
-/** This server's OpenSubtitles.com API key, or a 409 saying the admin needs to add one. */
-export function requireOpenSubtitlesApiKey(settings?: Settings): string {
-  const key = openSubtitlesApiKey(settings);
-  if (!key) throw new OpenSubtitlesError("errors.opensubtitles.noApiKey", 409);
-  return key;
+/** The API key a person searches and downloads with: their own, or one the admin shares. */
+export function openSubtitlesApiKey(user: { opensubtitlesApiKey: string | null }): string | null {
+  return user.opensubtitlesApiKey ? decryptSecret(user.opensubtitlesApiKey) : sharedApiKey();
 }
 
 function headers(apiKey: string, token?: string): Record<string, string> {

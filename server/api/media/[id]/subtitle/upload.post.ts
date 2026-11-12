@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const { raw } = await readSubtitleForm(event);
   const subtitle = await uploadSubtitle({
     db: useDb(),
-    server: mediaSourceFor(id, user.id),
+    server: mediaSourceFor(id, user),
     user,
     serverItemId: id,
     raw,
