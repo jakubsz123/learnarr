@@ -4,15 +4,26 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # All action updates arrive together, in one pull request a month.
+    groups:
+      actions:
+        patterns: ["*"]
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    # Small updates arrive together, once a month; a major version gets its own pull request.
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
     ignore:
       # The image runs Node 24; its types move with the Node version, not on their own.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
       # A new TypeScript major is its own piece of work, not a monthly bump.
       - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # web-push 4 fails our checks; moving to it is its own piece of work.
+      - dependency-name: web-push
         update-types: ["version-update:semver-major"]
