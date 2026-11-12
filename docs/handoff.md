@@ -74,7 +74,7 @@ downloads a real model.
 - `docs/architecture.md` (map of the code) and `CONTRIBUTING.md` (the conventions above).
 - `CHANGELOG.md`, `SECURITY.md`, pull request and issue templates, Dependabot, `.nvmrc` (Node 24) and
   `.env.example`.
-- The version is 0.3.0.
+- The version is 0.4.0.
 
 ## Decisions made without asking
 
