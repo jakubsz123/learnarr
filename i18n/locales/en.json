@@ -436,7 +436,7 @@
     "loadMore": "Load more",
     "searchCatalogue": "Search films and shows",
     "catalogueHint": "Search OpenSubtitles.com for any film or show, then get its subtitle with your own account.",
-    "catalogueNeedsKey": "Add an OpenSubtitles.com API key to search for films and shows",
+    "catalogueNeedsKey": "Set up OpenSubtitles.com",
     "catalogueAskAdmin": "To search OpenSubtitles.com for films and shows, whoever runs this server adds an API key in Settings → Media server.",
     "attribution": "Subtitles provided by",
     "ownLibrary": "Connect Plex or Jellyfin",
