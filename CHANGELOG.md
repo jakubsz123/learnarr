@@ -1,31 +1,35 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 (2026-11-12)
 
 **New**
 
-- Learnarr now lives at github.com/smoothless-io/learnarr, and the image is ghcr.io/smoothless-io/learnarr. GitHub redirects the old repository address; the old image name stops getting updates.
-- Invite links: the admin sends a link, and the person chooses their own name, email and password. The
-  same kind of link resets a forgotten password.
-- Change your own password under Settings → Account.
-- Sign in with a username instead of an email, as on Radarr and Sonarr (older accounts can still use their email).
-- Plex servers are listed with their addresses, the likeliest first; the Settings icon is now a gear.
-- Notification reminders are greyed out until a device or an ntfy topic is set up.
-- Today shows only how to start until there is a card, instead of a row of zeros.
-- A lost session sends you to sign in and back, instead of leaving "Sign in first." on screen. The AI provider choice asks cloud, Anthropic or your own computer first. Northern Sami no longer shows as "se".
-- Users are stacked rows that fit a phone; Library has a heading; "Connect Plex or Jellyfin" is a button.
-- The flashcard sentence is set larger in a serif, the word being learned has a tinted highlight, and the "% you know" rings are bigger.
-- Polish: the wizard steps fit one row on a phone, the AI provider list is a row of chips under three kinds, the username hint is shown, and selected text uses the accent colour.
-- Previous and next buttons on an episode page, to step through a show by hand (across seasons too).
-- The FAQ and docs now say a media server is optional: OpenSubtitles.com search and uploads work without one.
-- Browse OpenSubtitles.com's catalogue in the library without a media server, and upload a subtitle of your
-  own. The library shows which tabs are on your server and which are elsewhere.
+- Use Learnarr without a media server: search OpenSubtitles.com's catalogue from the library, or upload a
+  subtitle file of your own. The library shows which tabs are on your server and which are elsewhere.
+- Invite links: the admin sends a link, and the person chooses their own username and password. The same kind
+  of link resets a forgotten password. Change your own password under Settings → Account.
+- Previous and next buttons on an episode page, to step through a show by hand, across seasons too.
 
 **Changed**
 
+- Learnarr now lives at github.com/smoothless-io/learnarr, and the image is ghcr.io/smoothless-io/learnarr.
+  GitHub redirects the old repository address; the old image name gets no more updates.
+- Sign in with a username, as on Radarr and Sonarr. Accounts made with an email can still sign in with it.
 - The admin no longer makes up passwords for other people: Settings → Users creates invite links instead.
-- Without an AI provider, an episode says so and points to Settings → AI, instead of a button that fails.
-- The AI provider choices fit two to a row on a phone.
+- Today shows only how to start until there is a card, instead of a row of zeros.
+- The AI provider choice asks for the kind first (a cloud service, Anthropic, or your own computer), then the
+  provider. Without a provider, an episode says so and points to Settings → AI.
+- Plex servers are listed with their addresses, the likeliest first.
+- Notification reminders are greyed out until a device or an ntfy topic is set up.
+- The flashcard sentence is set larger in a serif, the word being learned has a tinted highlight, and the
+  "% you know" rings are bigger.
+- Users and Library fit a phone; the setup wizard's steps fit one row; the Settings icon is a gear.
+
+**Fixed**
+
+- A lost session sends you to sign in and back, instead of leaving "Sign in first." on screen.
+- Northern Sami no longer shows as "se".
+- The FAQ and docs said a media server was required.
 
 ## 0.3.0
 
