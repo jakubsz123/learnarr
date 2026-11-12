@@ -9,3 +9,10 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
+    ignore:
+      # The image runs Node 24; its types move with the Node version, not on their own.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # A new TypeScript major is its own piece of work, not a monthly bump.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
